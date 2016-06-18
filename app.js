@@ -4,7 +4,7 @@ const fsp = require('fs-promise');
 const less = require('less');
 const app = require('express')();
 
-var reposDir = './repos';
+var reposDir = 'repos';
 var repos = ['coda','stock'];
 
 app.get('/manifest.json', (req, res) => {
@@ -54,12 +54,12 @@ app.listen(8000, () => { console.log('port 8000: HTTP'); });
 // WebSocket
 var wsPort = 8080;
 var wsServer = new require('ws').Server({port: wsPort});
-console.log('port 8080: WebSocket');
 
 wsServer.on('connection', function connection(ws) {
-  console.log('connect');
+  let sock = ws._socket;
+  console.log('connect', sock.remoteAddress + ':' + sock.remotePort); 
 });
-
+console.log('port 8080: WebSocket');
 
 var chokidar = require('chokidar');
 // ignores .dotfiles and libraries
@@ -68,11 +68,8 @@ var watcher = chokidar.watch(reposDir,{
 });
 
 watcher.on('all', (event, path) => {
-
-  console.log(/\.(css|less)$/.test(path), path);
-
   if (event == 'add')
-    console.log('watching: ', path);
+    console.log('watching: ', path.match(RegExp(reposDir + '/(.*)'))[1]);
   else if (event == 'change' && /\.(css|less)$/.test(path)) {
     console.log('update: ', getUrl(path));
     wsServer.clients.forEach(function each(client) {
@@ -89,7 +86,8 @@ function getFilename(url) {
 }
 
 function getUrl(filename) {
-  let re = new RegExp('/(.*)/index.less');
+  let re = new RegExp('repos/(.*)/index.less');
   return filename.match(re)[1] + '.css';
 }
+
 
