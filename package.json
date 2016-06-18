@@ -4,9 +4,14 @@
   "description": "",
   "main": "app.js",
   "scripts": {
-    "watch-child": "watchify repos/app/child.es6 -d -t [ babelify ] -o repos/app/child.js",
-    "watch-parent": "watchify repos/app/parent.es6 -d -t [ babelify ] -o repos/app/parent.js"
+    "start": "node app.js"
   },
   "author": "",
-  "license": "MIT"
+  "license": "MIT",
+  "dependencies": {
+    "body-parser": "^1.15.1",
+    "chokidar": "^1.5.2",
+    "express": "^4.14.0",
+    "ws": "^1.1.0"
+  }
 }
