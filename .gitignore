@@ -2,3 +2,5 @@
 node_modules
 repos/*
 
+npm-debug
+

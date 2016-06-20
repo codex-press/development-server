@@ -7,7 +7,7 @@ const app = require('express')();
 var reposDir = 'repos';
 var repos = ['coda','stock'];
 
-app.get('/manifest.json', (req, res) => {
+app.get('/repos.json', (req, res) => {
   console.log('serving manifest', repos);
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET');
@@ -27,6 +27,8 @@ app.get(/\.(less|js|ttf|woff)$/, (req, res) => {
 // compile LESS.js
 app.get(/\.css$/, (req, res) => {
   res.setHeader('content-type', 'text/css');
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET');
 
   let filename = getFilename(req.url);
   console.log('serving: ', filename);
