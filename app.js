@@ -55,7 +55,10 @@ app.get(/\.(css|less|js|ttf|woff)$/, (req, res) => {
         return less.render(out, {paths: [reposDir], filename: filename})
       })
       .then(out => res.send(out.css))
-      .catch(err => res.status(500).send('help!'));
+      .catch(err => {
+        console.log(err);
+        res.status(500).send('help!')
+      });
     }
     else if (filename)
       res.sendFile(__dirname + '/' + filename);
