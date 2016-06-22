@@ -3,10 +3,12 @@
 var reposDir = 'repos';
 
 const fs = require('fs');
+const url = require('url');
 const fsp = require('fs-promise');
 const less = require('less');
 const https = require('https');
-const app = require('express')();
+const express = require('express');
+const app = express();
 
 var repos;
 
@@ -16,11 +18,13 @@ fsp.readdir(reposDir)
 
 // server on port 8000
 let options = {
-  key: fs.readFileSync('./key.pem'),
-  cert: fs.readFileSync('./cert.pem'),
+  key: fs.readFileSync('./ssl/key.pem'),
+  cert: fs.readFileSync('./ssl/cert.pem'),
 };
-https.createServer(options, app).listen(8000);
-console.log('port 8000: HTTPS'); 
+let server = https.createServer(options);
+server.on('request', app);
+server.listen(8000);
+console.log('listening on port 8000'); 
 
 app.use((req, res, next) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -36,12 +40,14 @@ app.get('/repos.json', (req, res) => {
 
 // serve assets
 app.get(/\.(css|less|js|ttf|woff)$/, (req, res) => {
-  getFilename(req.url)
+  let pathname = url.parse(req.url).pathname;
+
+  getFilename(pathname)
   .then(filename => {
     console.log('serving: ' + filename);
 
     // compile .less to .css (if requested that way)
-    if (/\.css$/.test(req.url) && /\.less$/.test(filename)) {
+    if (/\.css$/.test(pathname) && /\.less$/.test(filename)) {
       res.setHeader('content-type', 'text/css');
 
       fsp.readFile(filename, {encoding:'utf8'})
@@ -56,23 +62,17 @@ app.get(/\.(css|less|js|ttf|woff)$/, (req, res) => {
     else
       res.status(404).send('404: ' + filename);
   })
-  .catch(err => res.status(404).send('404: ' + req.url));
+  .catch(err => res.status(404).send('404: ' + pathname));
 });
 
 
 // WebSocket sends update when files change
-var wsPort = 8080;
-var wsServer = new require('ws').Server({
-  port: wsPort,
-  cert: fs.readFileSync('./cert.pem'),
-  key: fs.readFileSync('./key.pem'),
-});
+var wsServer = new require('ws').Server({server});
 
 wsServer.on('connection', function connection(ws) {
   let sock = ws._socket;
   console.log('connect', sock.remoteAddress + ':' + sock.remotePort); 
 });
-console.log('port 8080: WebSocket');
 
 var chokidar = require('chokidar');
 // ignores .dotfiles and libraries
@@ -91,9 +91,9 @@ watcher.on('all', (event, path) => {
   }
 });
 
-function getFilename(url) {
+function getFilename(pathname) {
   return new Promise(function(resolve, reject) {
-    let basename = reposDir + url.match(/(.*)\..*/)[1];
+    let basename = reposDir + pathname.match(/(.*)\..*/)[1];
 
     let recurse = exts => {
       return fsp.stat(basename + exts[0])
@@ -102,18 +102,17 @@ function getFilename(url) {
       .catch(e => console.log(e));
     };
 
-    if (/\.js$/.test(url))
+    if (/\.js$/.test(pathname))
       recurse('.js .dev.js /index.dev.js /index.js'.split(' '));
-    else if (/\.css$/.test(url))
+    else if (/\.css$/.test(pathname))
       recurse('.less .css /index.less /index.css'.split(' '));
     else
-      return fsp.stat(reposDir + url).then(s => resolve(reposDir + url))
+      return fsp.stat(reposDir + pathname).then(s => resolve(reposDir + pathname));
   });
 }
 
 function getUrl(filename) {
-  return filename;
-  // let re = new RegExp('repos/(.*)/index.less');
-  // return filename.match(re)[1] + '.css';
+  let re = new RegExp('repos/(.*)\.(less|css|/index.less|index.css)');
+  return filename.match(re)[1] + '.css';
 }
 

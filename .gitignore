@@ -1,6 +1,7 @@
 
 node_modules
 repos/*
+ssl/*
 
 npm-debug
 
