@@ -2,37 +2,43 @@
 
 var reposDir = 'repos';
 
+const fs = require('fs');
 const fsp = require('fs-promise');
 const less = require('less');
+const https = require('https');
 const app = require('express')();
 
+var repos;
+
+fsp.readdir(reposDir)
+.then(listing => repos = listing.filter(d => d != '.keep'))
+.catch(err => console.log(err));
+
 // server on port 8000
-app.listen(8000, () => { console.log('port 8000: HTTP'); });
+let options = {
+  key: fs.readFileSync('./key.pem'),
+  cert: fs.readFileSync('./cert.pem'),
+};
+https.createServer(options, app).listen(8000);
+console.log('port 8000: HTTPS'); 
+
+app.use((req, res, next) => {
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET');
+  next();
+});
 
 // serve repository list
 app.get('/repos.json', (req, res) => {
-  var repos = ['coda','stock'];
-
-  fsp.readdir(reposDir)
-  .then(repos => {
-    repos = repos.filter(d => d != '.keep')
-    res.setHeader('Access-Control-Allow-Origin', '*');
-    res.setHeader('Access-Control-Allow-Methods', 'GET');
-    res.json({repos});
-    console.log('serving repositories: ', repos.join(', '));
-  })
-  .catch(err => console.log(err));
-
+  console.log('serving: repos.json');
+  res.json({repos})
 });
 
 // serve assets
 app.get(/\.(css|less|js|ttf|woff)$/, (req, res) => {
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET');
-
   getFilename(req.url)
   .then(filename => {
-    console.log('serving ' + filename);
+    console.log('serving: ' + filename);
 
     // compile .less to .css (if requested that way)
     if (/\.css$/.test(req.url) && /\.less$/.test(filename)) {
@@ -49,17 +55,18 @@ app.get(/\.(css|less|js|ttf|woff)$/, (req, res) => {
       res.sendFile(__dirname + '/' + filename);
     else
       res.status(404).send('404: ' + filename);
-
   })
-  .catch(err => console.log(err));
-
-
+  .catch(err => res.status(404).send('404: ' + req.url));
 });
 
 
 // WebSocket sends update when files change
 var wsPort = 8080;
-var wsServer = new require('ws').Server({port: wsPort});
+var wsServer = new require('ws').Server({
+  port: wsPort,
+  cert: fs.readFileSync('./cert.pem'),
+  key: fs.readFileSync('./key.pem'),
+});
 
 wsServer.on('connection', function connection(ws) {
   let sock = ws._socket;
@@ -91,12 +98,12 @@ function getFilename(url) {
     let recurse = exts => {
       return fsp.stat(basename + exts[0])
       .then(s => resolve(basename + exts[0]))
-      .catch(e => exts.length ? recurse(exts.slice(1)) : reject(e))
+      .catch(e => exts.length > 1 ? recurse(exts.slice(1)) : reject(e))
       .catch(e => console.log(e));
     };
 
     if (/\.js$/.test(url))
-      recurse('.js /index.js'.split(' '));
+      recurse('.js .dev.js /index.dev.js /index.js'.split(' '));
     else if (/\.css$/.test(url))
       recurse('.less .css /index.less /index.css'.split(' '));
     else
@@ -105,7 +112,8 @@ function getFilename(url) {
 }
 
 function getUrl(filename) {
-  let re = new RegExp('repos/(.*)/index.less');
-  return filename.match(re)[1] + '.css';
+  return filename;
+  // let re = new RegExp('repos/(.*)/index.less');
+  // return filename.match(re)[1] + '.css';
 }
 
