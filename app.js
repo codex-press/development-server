@@ -52,7 +52,11 @@ app.get(/\.(css|less|js|ttf|woff)$/, (req, res) => {
 
       fsp.readFile(filename, {encoding:'utf8'})
       .then(out => {
-        return less.render(out, {paths: [reposDir], filename: filename})
+        return less.render(out, {
+          paths: [reposDir],
+          filename: filename,
+          strictMath: true,
+        })
       })
       .then(out => res.send(out.css))
       .catch(err => {
