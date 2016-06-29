@@ -1,6 +1,6 @@
 # Development Server
 
-View your [Codex Press](://codex.press/) stories with assets served from localhost.
+View your [Codex Press](https://codex.press/) stories with assets served from localhost.
 
 Install:
 ```
