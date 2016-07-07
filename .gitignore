@@ -5,3 +5,5 @@ ssl/*
 
 npm-debug
 
+.DS_Store
+
