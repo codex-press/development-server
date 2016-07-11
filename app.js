@@ -44,7 +44,10 @@ app.get(/\.(css|less|js|ttf|woff)$/, (req, res) => {
 
   getFilename(pathname)
   .then(filename => {
-    console.log('serving: ' + filename);
+
+    // don't bother logging fonts
+    if (/\.(js|css)$/.test(filename))
+      console.log('serving: ' + filename);
 
     // compile .less to .css (if requested that way)
     if (/\.css$/.test(pathname) && /\.less$/.test(filename)) {
@@ -69,7 +72,16 @@ app.get(/\.(css|less|js|ttf|woff)$/, (req, res) => {
     else
       res.status(404).send('404: ' + filename);
   })
-  .catch(err => res.status(404).send('404: ' + pathname));
+  .catch(err => {
+    if (err && err.code == 'ENOENT') {
+      console.log('can\'t find:', pathname);
+      res.status(404).send('404: ' + pathname);
+    }
+    else if (err) {
+      console.error(err);
+      res.status(500).send('500: ' + err.message);
+    }
+  });
 });
 
 
@@ -119,7 +131,7 @@ function getFilename(pathname) {
 }
 
 function getUrl(filename) {
-  let re = new RegExp('repos/(.*)\.(less|css|/index.less|index.css)');
+  let re = RegExp('repos/(.*?)(\.less|\.css|/index\.less|/index\.css)');
   return filename.match(re)[1] + '.css';
 }
 
