@@ -5,7 +5,11 @@ var reposDir = 'repos';
 const fs = require('fs');
 const url = require('url');
 const fsp = require('fs-promise');
+
 const less = require('less');
+const postcss = require('postcss');
+const autoprefixer = require('autoprefixer');
+
 const https = require('https');
 const express = require('express');
 const app = express();
@@ -39,28 +43,23 @@ app.get('/repos.json', (req, res) => {
 });
 
 // serve assets
-app.get(/\.(css|less|js|ttf|woff)$/, (req, res) => {
+app.get(/\.(css|js|ttf|woff)$/, (req, res) => {
   let pathname = url.parse(req.url).pathname;
 
   getFilename(pathname)
   .then(filename => {
 
-    // don't bother logging fonts
-    if (/\.(js|css)$/.test(filename))
+    // only log js/css (not fonts)
+    if (/\.(js|less|css)$/.test(filename))
       console.log('serving: ' + filename);
 
-    // compile .less to .css (if requested that way)
-    if (/\.css$/.test(pathname) && /\.less$/.test(filename)) {
+    // compile .less to .css
+    if (/\.less$/.test(filename)) {
       res.setHeader('content-type', 'text/css');
 
       fsp.readFile(filename, {encoding:'utf8'})
-      .then(out => {
-        return less.render(out, {
-          paths: [reposDir],
-          filename: filename,
-          strictMath: true,
-        })
-      })
+      .then(out => less.render(out, {filename, strictMath: true}))
+      .then(out => postcss([autoprefixer]).process(out.css))
       .then(out => res.send(out.css))
       .catch(err => {
         console.log(err);
@@ -102,7 +101,7 @@ var watcher = chokidar.watch(reposDir,{
 watcher.on('all', (event, path) => {
   if (event == 'add')
     console.log('watching: ', path.match(RegExp(reposDir + '/(.*)'))[1]);
-  else if (event == 'change' && /\.(css|less)$/.test(path)) {
+  else if (event == 'change' && /\.(js|css|less)$/.test(path)) {
     console.log('update: ', getUrl(path));
     wsServer.clients.forEach(function each(client) {
       client.send(JSON.stringify({path: getUrl(path)}));
@@ -122,7 +121,7 @@ function getFilename(pathname) {
     };
 
     if (/\.js$/.test(pathname))
-      recurse('.js .dev.js /index.dev.js /index.js'.split(' '));
+      recurse('.dev.js .js /index.dev.js /index.js'.split(' '));
     else if (/\.css$/.test(pathname))
       recurse('.less .css /index.less /index.css'.split(' '));
     else
@@ -131,7 +130,12 @@ function getFilename(pathname) {
 }
 
 function getUrl(filename) {
-  let re = RegExp('repos/(.*?)(\.less|\.css|/index\.less|/index\.css)');
-  return filename.match(re)[1] + '.css';
+  let cssRegEx = /repos\/(.*?)(\.less|\.css|\/index\.less|\/index\.css)/;
+  let jsRegEx = /repos\/(.*?)(\.js|\/index\.dev\.js|\/index\.js)/;
+
+  if (filename.match(cssRegEx))
+    return filename.match(cssRegEx)[1] + '.css';
+  else if (filename.match(jsRegEx))
+    return filename.match(jsRegEx)[1] + '.js';
 }
 

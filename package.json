@@ -9,12 +9,14 @@
   "author": "",
   "license": "MIT",
   "dependencies": {
+    "autoprefixer": "^6.3.7",
     "body-parser": "^1.15.1",
     "chokidar": "^1.5.2",
     "express": "^4.14.0",
     "fs-promise": "^0.5.0",
     "less": "^2.7.1",
     "nodemon": "^1.9.2",
+    "postcss": "^5.1.1",
     "ws": "^1.1.0"
   }
 }
