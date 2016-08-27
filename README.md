@@ -29,3 +29,5 @@ Start:
   npm start
 ```
 
+Not compatible with Internet Explorer.
+

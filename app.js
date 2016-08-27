@@ -33,6 +33,9 @@ console.log('listening on port 8000');
 app.use((req, res, next) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET');
+  res.setHeader('Cache-Control', 'private, no-cache, no-store, max-age=0, must-revalidate');
+  res.setHeader('Expires', 'Fri, 01 Jan 1990 00:00:00 GMT');
+  res.setHeader('Pragma', 'no-cache');
   next();
 });
 
@@ -57,8 +60,17 @@ app.get(/\.(css|js|ttf|woff)$/, (req, res) => {
     if (/\.less$/.test(filename)) {
       res.setHeader('content-type', 'text/css');
 
+      let opts = {
+        filename,
+        strictMath: true,
+        sourceMap: {
+          outputSourceFiles: true,
+          sourceMapFileInline: true,
+        },
+      };
+
       fsp.readFile(filename, {encoding:'utf8'})
-      .then(out => less.render(out, {filename, strictMath: true}))
+      .then(out => less.render(out, opts))
       .then(out => postcss([autoprefixer]).process(out.css))
       .then(out => res.send(out.css))
       .catch(err => {
