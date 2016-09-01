@@ -10,6 +10,8 @@ const less = require('less');
 const postcss = require('postcss');
 const autoprefixer = require('autoprefixer');
 
+const browserify = require('browserify-incremental');
+
 const https = require('https');
 const express = require('express');
 const app = express();
@@ -45,6 +47,8 @@ app.get('/repos.json', (req, res) => {
   res.json({repos})
 });
 
+let browserifiers = {};
+
 // serve assets
 app.get(/\.(css|js|ttf|woff)$/, (req, res) => {
   let pathname = url.parse(req.url).pathname;
@@ -78,10 +82,31 @@ app.get(/\.(css|js|ttf|woff)$/, (req, res) => {
         res.status(500).send('help!')
       });
     }
+    // compile .es6 to .js
+    else if (/\.es6/.test(filename)) {
+      res.setHeader('content-type', 'application/javascript');
+      // not sure why but chunked encoding fails (shruggie)
+      res.setHeader('transfer-encoding', '');
+
+      let external = 'app article plugin touch animate collection dom events\
+                      log utility'.split(' ');
+
+      if (!browserifiers[filename]) {
+        browserifiers[filename] = browserify(filename, {
+          debug: true,
+          extensions: ['.es6']
+        })
+        .transform('babelify', {'presets': ['es2015-loose']})
+        .external(external)
+      }
+
+      browserifiers[filename].bundle().pipe(res);
+    }
     else if (filename)
       res.sendFile(__dirname + '/' + filename);
     else
       res.status(404).send('404: ' + filename);
+
   })
   .catch(err => {
     if (err && err.code == 'ENOENT') {
@@ -133,17 +158,17 @@ function getFilename(pathname) {
     };
 
     if (/\.js$/.test(pathname))
-      recurse('.dev.js .js /index.dev.js /index.js'.split(' '));
+      recurse('.dev.js /index.dev.js .js /index.js .es6 /index.es6'.split(' '));
     else if (/\.css$/.test(pathname))
-      recurse('.less .css /index.less /index.css'.split(' '));
+      recurse('.css .less /index.css /index.less'.split(' '));
     else
       return fsp.stat(reposDir + pathname).then(s => resolve(reposDir + pathname));
   });
 }
 
 function getUrl(filename) {
-  let cssRegEx = /repos\/(.*?)(\.less|\.css|\/index\.less|\/index\.css)/;
-  let jsRegEx = /repos\/(.*?)(\.js|\/index\.dev\.js|\/index\.js)/;
+  let cssRegEx = /repos\/(.*?)(\.css|\.less|\/index\.css|\/index\.less)/;
+  let jsRegEx = /repos\/(.*?)(\.js|\/index\.dev\.js|\/index\.js|\.es6|\/index\.es6)/;
 
   if (filename.match(cssRegEx))
     return filename.match(cssRegEx)[1] + '.css';
