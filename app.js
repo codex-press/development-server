@@ -85,8 +85,6 @@ app.get(/\.(css|js|ttf|woff)$/, (req, res) => {
     // compile .es6 to .js
     else if (/\.es6/.test(filename)) {
       res.setHeader('content-type', 'application/javascript');
-      // not sure why but chunked encoding fails (shruggie)
-      res.setHeader('transfer-encoding', '');
 
       let external = 'app article plugin touch animate collection dom events\
                       log utility'.split(' ');
