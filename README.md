@@ -16,7 +16,7 @@ Since Codex uses https to serve pages, this development server must also use an 
 
 Then you will need to add the resulting certificate, in `ssl/cert.pem`, as a trusted root certificate in your operating system or browser. The instructions for how to do this vary and your best bet is to Google a tutorial for your setup. On OS X this is done with the Keychain application. On Linux, it varies by distribution. On Firefox on Linux it needs to be added apart from the operating system. On Chrome OS it's in Advanced Settings > HTTPS/SSL > Authorities.
 
-You'll know you've suceeded when you can load [https://localhost:8000/repos.json](https://localhost:8000/repos.json) without any scary security warnings (the server must be running or you'll get a warning that you can't connect).
+You'll know you've suceeded when you can load [https://localhost:8000/](https://localhost:8000/) without any scary security warnings (the server must be running or you'll get a warning that you can't connect).
 
 You can add your repositories to the server by symlinking them inside the directory repos/ like this:
 ```
