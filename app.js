@@ -13,6 +13,8 @@ const hbs = require('hbs');
 const https = require('https');
 const express = require('express');
 const less = require('less');
+const postcss = require('postcss');
+const autoprefixer = require('autoprefixer');
 const browserify = require('browserify-incremental');
 
 // servers on port 8000
@@ -102,6 +104,11 @@ app.get(/\.(css|js|ttf|svg|hbs|es6|woff)$/, (req, res) => {
       return compileLess(filename, res);
     else if (/\.es6$/.test(filename) && /\.js$/.test(req.path))
       return compileJavascript(filename, assetPath, res);
+    else if (/\.css/.test(filename)) {
+      return fsp.readFile(__dirname + '/' + filename, {encoding:'utf8'})
+      .then(css => postcss([autoprefixer]).process(css))
+      .then(out => res.send(out.css));
+    }
     else if (filename)
       res.sendFile(__dirname + '/' + filename);
 
@@ -163,7 +170,7 @@ function compileJavascript(filename, assetPath, res) {
     res.send(`console.error("${error.message}");`);
     if (error._babel) {
       throw {
-        type: 'Babel',
+        type: 'JavaScript',
         message: error.message,
         line: error.loc.line, 
         column: error.loc.column,
@@ -199,8 +206,9 @@ function compileLess(filename, res) {
   .then(out => less.render(out, opts))
   .then(out => {
     dependencyTree[filename] = out.imports;
-    res.send(out.css);
+    return postcss([autoprefixer]).process(out.css);
   })
+  .then(out => res.send(out.css))
   .catch(error => {
     throw {
       type: error.type,
@@ -253,6 +261,7 @@ function getUrl(filename) {
 
 
 function fileRemove(filename) {
+  console.log('removed: ', filename);
   let repo = filename.match(RegExp(`^${reposDir}${path.sep}(.*?)${path.sep}`))[1];
   let url = getUrl(filename);
   if (url) {
@@ -275,6 +284,7 @@ function fileRemove(filename) {
 
 
 function fileAdd(filename) {
+  console.log('watching: ', filename);
   let repo = filename.match(RegExp(`^${reposDir}${path.sep}(.*?)${path.sep}`))[1];
   let url = getUrl(filename);
   if (url) {
