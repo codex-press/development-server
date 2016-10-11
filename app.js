@@ -107,7 +107,10 @@ app.get(/\.(css|js|ttf|svg|hbs|es6|woff)$/, (req, res) => {
     else if (/\.css/.test(filename)) {
       return fsp.readFile(__dirname + '/' + filename, {encoding:'utf8'})
       .then(css => postcss([autoprefixer]).process(css))
-      .then(out => res.send(out.css));
+      .then(out => { 
+        res.setHeader('content-type', 'text/css');
+        res.send(out.css);
+      });
     }
     else if (filename)
       res.sendFile(__dirname + '/' + filename);
@@ -195,7 +198,6 @@ function compileLess(filename, res) {
     filename,
     strictMath: true,
     strictUnits: true,
-    color: false,
     sourceMap: {
       outputSourceFiles: true,
       sourceMapFileInline: true,
@@ -285,19 +287,20 @@ function fileRemove(filename) {
 
 function fileAdd(filename) {
   console.log('watching: ', filename);
-  let repo = filename.match(RegExp(`^${reposDir}${path.sep}(.*?)${path.sep}`))[1];
+  let regex = RegExp(`^${reposDir}${path.sep}(.*?)${path.sep}`);
+  let repo = filename.match(regex)[1];
+  fileList[repo] = fileList[repo] || [];
   let url = getUrl(filename);
   if (url) {
-    fileList[repo] = fileList[repo] || [];
     if (!fileList[repo].find(u => u == url)) {
       fileList[repo].push(url);
       broadcast({fileList});
     }
   }
   // since getUrl for es6 file retuns .js this needs to be separate
-  let inlineRegEx = RegExp(`${reposDir}${path.sep}(.*?\.(svg|es6|hbs))`);
-  if (inlineRegEx.test(filename)) {
-    let assetPath = filename.match(inlineRegEx)[1];
+  let inlineRegex = RegExp(`${reposDir}${path.sep}(.*?\.(svg|es6|hbs))`);
+  if (inlineRegex.test(filename)) {
+    let assetPath = filename.match(inlineRegex)[1];
     fileList[repo].push(assetPath);
     broadcast({fileList});
   }
