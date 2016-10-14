@@ -252,8 +252,8 @@ function getFilename(assetPath) {
 
 
 function getUrl(filename) {
-  let cssRegEx = RegExp(`${reposDir}${path.sep}(.*?)(\.css|\.less|${path.sep}index\.css|${path.sep}index\.less)`);
-  let jsRegEx = RegExp(`${reposDir}${path.sep}(.*?)(\.js|\.es6|${path.sep}index\.dev\.js|${path.sep}index\.js|${path.sep}index\.es6)`);
+  let cssRegEx = RegExp(`${reposDir}${path.sep}(.*?)(\\.css|\\.less|${path.sep}index\\.css|${path.sep}index\\.less)$`);
+  let jsRegEx = RegExp(`${reposDir}${path.sep}(.*?)(\\.js|\\.es6|${path.sep}index\\.dev\\.js|${path.sep}index\\.js|${path.sep}index\\.es6)$`);
 
   if (filename.match(cssRegEx))
     return filename.match(cssRegEx)[1] + '.css';
@@ -275,7 +275,7 @@ function fileRemove(filename) {
   }
 
   // since getUrl for es6 file retuns .js this needs to be separate
-  let inlineRegEx = RegExp(`${reposDir}${path.sep}(.*?\.(svg|es6|hbs))`);
+  let inlineRegEx = RegExp(`${reposDir}${path.sep}(.*?\\.(svg|es6|hbs))`);
   if (inlineRegEx.test(filename)) { 
     let assetPath = filename.match(inlineRegEx)[1];
     let i = fileList[repo].findIndex(u => u == url);
@@ -298,7 +298,7 @@ function fileAdd(filename) {
     }
   }
   // since getUrl for es6 file retuns .js this needs to be separate
-  let inlineRegex = RegExp(`${reposDir}${path.sep}(.*?\.(svg|es6|hbs))`);
+  let inlineRegex = RegExp(`${reposDir}${path.sep}(.*?\\.(svg|es6|hbs))`);
   if (inlineRegex.test(filename)) {
     let assetPath = filename.match(inlineRegex)[1];
     fileList[repo].push(assetPath);
