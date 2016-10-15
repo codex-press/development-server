@@ -217,7 +217,7 @@ function compileLess(filename, res) {
       message: error.message,
       line: error.line, 
       column: error.index,
-      extract: error.extract.join('\n'),
+      extract: error.extract ? error.extract.join('\n') : '',
     }
   })
 };
