@@ -237,12 +237,13 @@ function getFilename(assetPath) {
       recurse(`.dev.js ${path.sep}index.dev.js .js ${path.sep}index.js .es6 ${path.sep}index.es6`.split(' '));
     else if (/\.css$/.test(assetPath))
       recurse(`.css .less ${path.sep}index.css ${path.sep}index.less`.split(' '));
-    else
+    else {
       return fsp.stat(reposDir + assetPath)
-      .then(s => resolve(reposDir + assetPath));
+      .then(s => resolve(reposDir + assetPath))
+      .catch(e => reject(e));
+    }
   })
   .catch(error => {
-    console.log('here in getFilename', error);
     throw {
       type: 'Not Found',
       message: 'Asset not found: ' + assetPath,
