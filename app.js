@@ -174,6 +174,7 @@ function compileJavascript(filename, assetPath, res) {
     if (error._babel) {
       throw {
         type: 'JavaScript',
+        filename,
         message: error.message,
         line: error.loc.line, 
         column: error.loc.column,
@@ -184,6 +185,7 @@ function compileJavascript(filename, assetPath, res) {
     else {
       throw {
         type: 'Syntax',
+        filename,
         message: error.message,
       };
     }
@@ -213,6 +215,7 @@ function compileLess(filename, res) {
   .then(out => res.send(out.css))
   .catch(error => {
     throw {
+      filename,
       type: error.type,
       message: error.message,
       line: error.line, 
