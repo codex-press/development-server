@@ -268,7 +268,7 @@ function getUrl(filename) {
     urlPath = filename.match(jsRegEx)[1] + '.js';
 
   // Windows backslash nightmare
-  return urlPath.replace('\\\\','/');
+  return urlPath.replace(RegExp(sep, 'g'), '/');
 };
 
 
