@@ -24,6 +24,8 @@ let options = {
 };
 let server = https.createServer(options);
 
+// windows backsalsh nightmare
+let sep = path.sep === '\\' ? '\\\\' : '/';
 
 // WebSocket
 // ---------
@@ -237,9 +239,9 @@ function getFilename(assetPath) {
     };
 
     if (/\.js$/.test(assetPath))
-      recurse(`.dev.js ${path.sep}index.dev.js .js ${path.sep}index.js .es6 ${path.sep}index.es6`.split(' '));
+      recurse(`.dev.js ${sep}index.dev.js .js ${sep}index.js .es6 ${sep}index.es6`.split(' '));
     else if (/\.css$/.test(assetPath))
-      recurse(`.css .less ${path.sep}index.css ${path.sep}index.less`.split(' '));
+      recurse(`.css .less ${sep}index.css ${sep}index.less`.split(' '));
     else {
       return fsp.stat(reposDir + assetPath)
       .then(s => resolve(reposDir + assetPath))
@@ -256,8 +258,8 @@ function getFilename(assetPath) {
 
 
 function getUrl(filename) {
-  let cssRegEx = RegExp(`${reposDir}${path.sep}(.*?)(\\.css|\\.less|${path.sep}index\\.css|${path.sep}index\\.less)$`);
-  let jsRegEx = RegExp(`${reposDir}${path.sep}(.*?)(\\.js|\\.es6|${path.sep}index\\.dev\\.js|${path.sep}index\\.js|${path.sep}index\\.es6)$`);
+  let cssRegEx = RegExp(`${reposDir}${sep}(.*?)(\\.css|\\.less|${sep}index\\.css|${sep}index\\.less)$`);
+  let jsRegEx = RegExp(`${reposDir}${sep}(.*?)(\\.js|\\.es6|${sep}index\\.dev\\.js|${sep}index\\.js|${sep}index\\.es6)$`);
 
   if (filename.match(cssRegEx))
     return filename.match(cssRegEx)[1] + '.css';
@@ -268,7 +270,7 @@ function getUrl(filename) {
 
 function fileRemove(filename) {
   console.log('removed: ', filename);
-  let repo = filename.match(RegExp(`^${reposDir}${path.sep}(.*?)${path.sep}`))[1];
+  let repo = filename.match(RegExp(`^${reposDir}${sep}(.*?)${sep}`))[1];
   let url = getUrl(filename);
   if (url) {
     let i = fileList[repo].findIndex(u => u == url);
@@ -279,7 +281,7 @@ function fileRemove(filename) {
   }
 
   // since getUrl for es6 file retuns .js this needs to be separate
-  let inlineRegEx = RegExp(`${reposDir}${path.sep}(.*?\\.(svg|es6|hbs))`);
+  let inlineRegEx = RegExp(`${reposDir}${sep}(.*?\\.(svg|es6|hbs))`);
   if (inlineRegEx.test(filename)) { 
     let assetPath = filename.match(inlineRegEx)[1];
     let i = fileList[repo].findIndex(u => u == url);
@@ -291,7 +293,7 @@ function fileRemove(filename) {
 
 function fileAdd(filename) {
   console.log('watching: ', filename);
-  let regex = RegExp(`^${reposDir}${path.sep}(.*?)${path.sep}`);
+  let regex = RegExp(`^${reposDir}${sep}(.*?)${sep}`);
   let repo = filename.match(regex)[1];
   fileList[repo] = fileList[repo] || [];
   let url = getUrl(filename);
@@ -302,7 +304,7 @@ function fileAdd(filename) {
     }
   }
   // since getUrl for es6 file retuns .js this needs to be separate
-  let inlineRegex = RegExp(`${reposDir}${path.sep}(.*?\\.(svg|es6|hbs))`);
+  let inlineRegex = RegExp(`${reposDir}${sep}(.*?\\.(svg|es6|hbs))`);
   if (inlineRegex.test(filename)) {
     let assetPath = filename.match(inlineRegex)[1];
     fileList[repo].push(assetPath);
