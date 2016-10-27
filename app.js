@@ -261,10 +261,14 @@ function getUrl(filename) {
   let cssRegEx = RegExp(`${reposDir}${sep}(.*?)(\\.css|\\.less|${sep}index\\.css|${sep}index\\.less)$`);
   let jsRegEx = RegExp(`${reposDir}${sep}(.*?)(\\.js|\\.es6|${sep}index\\.dev\\.js|${sep}index\\.js|${sep}index\\.es6)$`);
 
+  let urlPath = '';
   if (filename.match(cssRegEx))
-    return filename.match(cssRegEx)[1] + '.css';
+    urlPath = filename.match(cssRegEx)[1] + '.css';
   else if (filename.match(jsRegEx))
-    return filename.match(jsRegEx)[1] + '.js';
+    urlPath = filename.match(jsRegEx)[1] + '.js';
+
+  // Windows backslash nightmare
+  return urlPath.replace('\\\\','/');
 };
 
 
