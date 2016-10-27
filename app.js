@@ -100,7 +100,7 @@ app.get(/\.(css|js|ttf|svg|hbs|es6|woff)$/, (req, res) => {
   getFilename('/' + assetPath)
   .then(result => {
     filename = result;
-    console.log('serving: ' + filename);
+    console.log('serving: ' + filename.replace(RegExp(sep,'g'), '/'));
 
     if (/\.less$/.test(filename))
       return compileLess(filename, res);
