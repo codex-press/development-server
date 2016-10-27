@@ -288,6 +288,7 @@ function fileRemove(filename) {
   let inlineRegEx = RegExp(`${reposDir}${sep}(.*?\\.(svg|es6|hbs))`);
   if (inlineRegEx.test(filename)) { 
     let assetPath = filename.match(inlineRegEx)[1];
+    assetPath = assetPath.replace(RegExp(sep, 'g'), '/');
     let i = fileList[repo].findIndex(u => u == url);
     fileList[repo].splice(i,1);
     broadcast({fileList});
@@ -307,10 +308,12 @@ function fileAdd(filename) {
       broadcast({fileList});
     }
   }
+
   // since getUrl for es6 file retuns .js this needs to be separate
   let inlineRegex = RegExp(`${reposDir}${sep}(.*?\\.(svg|es6|hbs))`);
   if (inlineRegex.test(filename)) {
     let assetPath = filename.match(inlineRegex)[1];
+    assetPath = assetPath.replace(RegExp(sep, 'g'), '/');
     fileList[repo].push(assetPath);
     broadcast({fileList});
   }
@@ -329,6 +332,7 @@ function fileChange(filename) {
   // send self if it's an inline asset
   if (/\.(svg|hbs|es6)$/.test(filename)) {
     let assetPath = filename.slice(reposDir.length + 1);
+    assetPath = assetPath.replace(RegExp(sep, 'g'), '/');
     broadcast({fileList, assetPath});
   }
 
