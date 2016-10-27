@@ -11,10 +11,12 @@ Install:
 
 Since Codex uses the encrypted https to serve pages, this development server must also use an encrypted connection because modern browsers will not load so-called mixed content. You'll need to generate an encryption key and a self-signed certificate to it.
 
-On MacOS or Linux you can use the following command:
+On MacOS or Linux you can use this command to generate the certificate:
 ```
   openssl req -x509 -newkey rsa:2048 -nodes -keyout ssl/key.pem -out ssl/cert.pem -days 3650
 ```
+At the prompts, make sure to add all the fields and use `localhost` as the domain name.
+
 On Windows, it's probably easiest to use an [online tool](http://www.selfsignedcertificate.com/). Save the files inside the ssl repo as `key.pem` and `cert.pem`.
 
 You will also need to add the certificate, `ssl/cert.pem`, as a trusted root certificate in your operating system or browser. The instructions for how to do this vary and your best bet is to search the web for a tutorial specific to your setup. On OS X, this is done with the Keychain application. On Linux, it varies by distribution. On Firefox, it needs to be added apart from the operating system. On Chrome OS, it's in Advanced Settings > HTTPS/SSL > Authorities.
@@ -39,7 +41,7 @@ Start on Mac or Linux:
 
 Start on Windows:
 ```
-  ./start.sh
+  start.bat
 ```
 
 Not compatible with Internet Explorer.
