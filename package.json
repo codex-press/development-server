@@ -1,12 +1,14 @@
 {
-  "name": "codex-press-developer",
+  "name": "codex-dev-server",
   "version": "0.0.1",
-  "description": "",
+  "description": "Serve JS/CSS from localhost against stories on the Codex Press publishing platform.",
+  "homepage": "https://codex.press/docs/advanced",
+  "repository": "codex-press/development-server",
   "main": "app.js",
   "scripts": {
     "start": "nodemon -i repos app.js"
   },
-  "author": "",
+  "author": "Codex Press <developers@codex.press>",
   "license": "MIT",
   "dependencies": {
     "autoprefixer": "^6.5.0",

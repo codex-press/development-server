@@ -142,7 +142,7 @@ function compileJavascript(filename, assetPath, res) {
   let realRepoPath = fs.realpathSync(repoPath);
 
   let external = 'app article plugin touch animate collection dom events\
-                  log utility handlebars'.split(' ');
+                  log utility env'.split(' ');
 
   if (!browserifiers[filename]) {
     browserifiers[filename] = browserify(filename, {
