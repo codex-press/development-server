@@ -1,17 +1,24 @@
 {
-  "name": "codex-dev-server",
+  "name": "codex",
   "version": "0.0.1",
   "description": "Serve JS/CSS from localhost against stories on the Codex Press publishing platform.",
   "homepage": "https://codex.press/docs/advanced",
   "repository": "codex-press/development-server",
   "main": "app.js",
   "scripts": {
-    "start": "nodemon -i repos app.js"
+    "start": "gulp serve"
+  },
+  "babel": {
+    "presets": [
+      "react",
+      "es2015"
+    ]
   },
   "author": "Codex Press <developers@codex.press>",
   "license": "MIT",
   "dependencies": {
     "autoprefixer": "^6.5.0",
+    "babel-cli": "^6.24.0",
     "babel-preset-es2015": "^6.14.0",
     "babel-preset-es2015-loose": "^7.0.0",
     "babelify": "^7.3.0",
@@ -24,7 +31,25 @@
     "hbs": "^4.0.1",
     "less": "^2.7.1",
     "nodemon": "^1.9.2",
+    "opn": "^4.0.2",
     "postcss": "^5.2.4",
     "ws": "^1.1.0"
+  },
+  "devDependencies": {
+    "babel-preset-react": "^6.23.0",
+    "browser-sync": "^2.18.8",
+    "gulp": "^3.9.1",
+    "gulp-autoprefixer": "^3.1.1",
+    "gulp-babel": "^6.1.2",
+    "gulp-cached": "^1.1.1",
+    "gulp-less": "^3.3.0",
+    "gulp-nodemon": "^2.2.1",
+    "immutable": "^3.8.1",
+    "react": "^15.4.2",
+    "react-dom": "^15.4.2",
+    "react-redux": "^5.0.3",
+    "redux": "^3.6.0",
+    "redux-devtools": "^3.3.2",
+    "vinyl-source-stream": "^1.1.0"
   }
 }

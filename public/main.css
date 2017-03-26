@@ -1,0 +1,21 @@
+.Config {
+  all: initial;
+  position: fixed;
+  width: 500px;
+  height: 500px;
+  left: calc(50% - 250px);
+  top: calc(50% - 250px);
+  background: #111;
+  color: white;
+  border-radius: 6px;
+  font-family: Avenir, "Helvetica Neue", Helvetica, Arial, sans-serif;
+  padding: 1em;
+}
+.ConfigModal label {
+  display: block;
+  margin: 1em 0;
+}
+.ConfigModal input {
+  outline-color: white;
+  margin-left: 1em;
+}
