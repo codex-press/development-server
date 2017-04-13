@@ -11,6 +11,7 @@ var babel = require('gulp-babel');
 var cache = require('gulp-cached');
 var nodemon = require('gulp-nodemon');
 
+
 gulp.task('app', () => {
   return gulp.src('src/*')
   .pipe(cache('app'))
@@ -21,7 +22,7 @@ gulp.task('app', () => {
 
 
 var js = (
-  browserify({entries: ['./js/main.js'], debug: true})
+  browserify({entries: ['./js/main.js'], debug: true, ignoreMissing: true})
   .transform(babelify, {presets: ['es2015', 'react'], sourceMaps: true})
 );
 
@@ -55,7 +56,12 @@ gulp.task('serve', ['app', 'js', 'css'], () => {
   gulp.watch('./css/**/*.less', ['css']);
   gulp.watch('./js/**/*.js', ['js']);
   gulp.watch('./src/**/*.js', ['app']);
-  nodemon({script: 'build/app.js', watch: 'build'})
+
+  nodemon({
+    script: 'build/app.js',
+    watch: 'build',
+    env: { 'NODE_PATH': './node_modules' }
+  })
 });
 
 

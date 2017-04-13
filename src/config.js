@@ -32,4 +32,3 @@ config = Object.assign({
 // will need to somehow set in GULP ?
 config.development = true;
 
-

@@ -2,16 +2,20 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import { createStore } from 'redux'
 import { Provider } from 'react-redux'
-
-import Config from './config';
-
 import { Map } from 'immutable';
 
+import { rootReducer } from './reducers';
+
+import Config from './componenents/Config';
+
 import Socket from './socket';
+import Cable from './cable';
 
-
-// websocket to server
+// websocket to development server
 new Socket();
+
+// ActionCable for server API
+// new Cable();
 
 
 let initialState = Map({
@@ -19,37 +23,11 @@ let initialState = Map({
   repo_path: 'meh',
 });
 
-function reducer(state = initialState, action) {
-  switch (action.type) {
-    case 'SET_TOKEN':
-      return state.set('token', action.value);
-    case 'SET_REPO_PATH':
-      return state.set('repo_path', action.value);
-    case 'SYNC':
-      sync();
-      return state;
-    default:
-      return state;
-  }
-}
 
-let store = createStore(reducer)
+let store = createStore(rootReducer)
 
 store.subscribe(() => console.log(store.getState().toJSON()))
 
-
-function sync() {
-  console.log(JSON.stringify(store.getState()));
-  fetch('/api/config', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify(store.getState()),
-  })
-  .then(response => response.json())
-  .then(data => console.log(data))
-}
 
 
 
@@ -62,16 +40,37 @@ function start() {
     el = el.attachShadow({mode: 'open'})
 
   ReactDOM.render(
-    <Provider store={store}>
+    <Provider store={ store }>
       <Config />
     </Provider>,
     el
   );
+
 }
 
 if (document.readyState === 'loading')
   window.addEventListener('DOMContentLoaded', start);
 else
   start();
+
+
+if (document.readyState === 'complete')
+  window.addEventListener('load', loadStory);
+else
+  loadStory();
+
+
+function loadStory() {
+  let url = '/alice/chapter-1';
+
+  fetch(`https://codex.press${url}.json?full`)
+  .then(response => response.json())
+  .then(data => {
+    let article = require('article').default;
+    article.set(data);
+    //article.addState
+  });
+
+}
 
 
