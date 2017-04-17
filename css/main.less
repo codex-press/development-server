@@ -1,5 +1,23 @@
 
-@editor-font: Avenir, "Helvetica Neue", Helvetica, Arial, sans-serif;
+@editorFont: Avenir, "Helvetica Neue", Helvetica, Arial, sans-serif;
+@maxZIndex: 2147483647;
 
+[data-reactroot] {
+  all: initial;
+  font-family: @editorFont;
+}
+
+.modal {
+  color: white;
+  border-radius: 4px;
+  box-shadow: inset 0 0 1px #555, 0 0 2px #000;
+  background: linear-gradient(rgba(30,30,30,0.95), rgba(0,0,0,0.9));
+  z-index: @maxZIndex;
+}
+
+@import "./App.less";
+@import "./Info.less";
 @import "./Config.less";
+@import "./Article.less";
+@import "./Search.less";
 

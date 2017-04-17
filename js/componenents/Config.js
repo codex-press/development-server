@@ -1,38 +1,50 @@
 import React, {Component} from 'react';
 import { connect } from 'react-redux'
 
-import ConfigModal from './ConfigModal';
-
-import { styleLoaded } from './actions';
+import { setToken, saveConfig } from '../actions'
 
 const mapStateToProps = state => {
   return {
+    open: state.getIn(['ui','modal']) == 'config',
+    token: state.getIn(['config','token']) || '',
   }
 }
 
 const mapDispatchToProps = {
-  styleLoaded,
+  setToken,
+  saveConfig,
 }
 
 
-function Config(props) {
+function ConfigModal(props) {
+
+  if (!props.open)
+    return null;
 
   return (
     <div className="Config">
 
-      <link onLoad={ props.styleLoaded } rel="stylesheet" href="/main.css" />
+      <h2>Codex Develepment Server</h2>
 
-      <div className="dimmer"></div>
+      <label className={ /[a-f0-9]{64}/.test(props.token) ? '' : 'invalid' }>
+        API Token
+        <input
+          name="token"
+          value={ props.token }
+          onChange={ e => props.setToken(e.target.value) } />
+      </label>
 
-      <ConfigModal />
+      <button onClick={ props.saveConfig }>Save</button>
 
     </div>
   );
 
 }
 
+
 export default connect(
   mapStateToProps,
   mapDispatchToProps
-)(Config);
+)(ConfigModal);
+
 

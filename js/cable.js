@@ -9,4 +9,6 @@
 //   id: "46663104-df9a-4365-b45d-2c913878836c"
 // });
 
+export default function() {
 
+}

@@ -1,26 +1,24 @@
 
+let origin = 'http://localhost';
 
-// Use like api('/articles', {post: data})
-export function api(route, data) {
+export function api(route) {
 
-  let request = {credentials: 'same-origin'}
+  let request = {}
+  
+  let key = "43a938d5b538acedc6d3c3a0ed42f5fb6e3f616bb60625c406ed98e323902cb3"
 
-  if (typeof data === 'string') {
-    request.method = data.toUpperCase();
-  }
-  else if (data) {
-    request.method = Object.keys(data)[0].toUpperCase();
-    request.body = JSON.stringify(data[Object.keys(data)[0]])
-    request.headers = {'Content-Type': 'application/json'}
+  request.headers = {
+    Authorization: `Token token="${key}"`,
   }
 
-  return fetch(`/api${route}`, request)
+  return fetch(`${origin}/api${route}`, request)
   .then(response => {
     if (response.ok)
       return response.json()
     else
       throw response
   });
+
 }
 
 

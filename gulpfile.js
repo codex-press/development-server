@@ -23,7 +23,10 @@ gulp.task('app', () => {
 
 var js = (
   browserify({entries: ['./js/main.js'], debug: true, ignoreMissing: true})
-  .transform(babelify, {presets: ['es2015', 'react'], sourceMaps: true})
+  .transform(babelify, {
+    presets: ['es2015', 'stage-3','react'],
+    sourceMaps: true
+  })
 );
 
 gulp.task('js', () => {

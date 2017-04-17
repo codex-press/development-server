@@ -1,32 +1,42 @@
 
 .Config {
-  all: initial;
   position: fixed;
   width: 500px;
   height: 500px;
   left: calc(50% - 250px);
   top: calc(50% - 250px);
-  background: #111;
-  color: white;
-  border-radius: 6px;
-  font-family: @editor-font;
   padding: 1em;
+
+  &:extend(.modal);
+
+  label {
+    display: block;
+    margin: 1em 0;
+  }
+
+
+  input {
+    outline-color: white;
+    margin-left: 1em;
+  }
+
+
+  button {
+    font-size: 1.3rem;
+    background-color: hsl(206, 83%, 42%);
+    color: white;
+    float: right;
+    border: 0;
+    border-radius: 0.1em;
+    padding: 0.3em 0.8em;
+    user-select: none;
+    cursor: pointer;
+  }
+
+
+  button {
+    outline-color: hsl(206, 83%, 42%);
+  }
+
 }
-
-.Config.open {
-
-}
-
-
-.ConfigModal label {
-  display: block;
-  margin: 1em 0;
-}
-
-
-.ConfigModal input {
-  outline-color: white;
-  margin-left: 1em;
-}
-
 

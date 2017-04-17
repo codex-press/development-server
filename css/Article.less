@@ -1,0 +1,36 @@
+
+.Article {
+  display: flex;
+  flex-flow: row nowrap;
+  cursor: pointer;
+  padding: 0.5rem 0;
+  margin-bottom: 0.75rem;
+
+  &.selected {
+    background-color: hsla(0, 100%, 100%, 0.3);
+  }
+
+  h2 {
+    margin: 0;
+    line-height: 1;
+  }
+
+  .cover {
+    flex: 0 0 140px;
+    padding: 0 0.5em;
+  }
+
+  .url {
+    color: #999;
+    font-size: 0.9em;
+  }
+
+  .description {
+    margin: 0;
+  }
+
+  img {
+    width: 100%;
+  }
+
+}
