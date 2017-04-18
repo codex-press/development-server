@@ -10,7 +10,7 @@ var autoprefixer = require('gulp-autoprefixer');
 var babel = require('gulp-babel');
 var cache = require('gulp-cached');
 var nodemon = require('gulp-nodemon');
-
+var rename = require("gulp-rename");
 
 gulp.task('app', () => {
   return gulp.src('src/*')
@@ -22,7 +22,7 @@ gulp.task('app', () => {
 
 
 var js = (
-  browserify({entries: ['./js/main.js'], debug: true, ignoreMissing: true})
+  browserify({entries: ['./js/index.js'], debug: true, ignoreMissing: true})
   .transform(babelify, {
     presets: ['es2015', 'stage-3','react'],
     sourceMaps: true
@@ -38,13 +38,14 @@ gulp.task('js', () => {
 
 
 gulp.task('css', () => {
-  return gulp.src('./css/main.less')
+  return gulp.src('./css/index.less')
   .pipe(less({strictMath: true, paths: [ './css' ]}))
   .on('error', onError)
   .pipe(autoprefixer({
     browsers: ['last 2 versions'],
     cascade: false
   }))
+  .pipe(rename('main.css'))
   .pipe(gulp.dest('public'));
 });
 
@@ -56,9 +57,9 @@ function onError(err) {
 
 
 gulp.task('serve', ['app', 'js', 'css'], () => {
-  gulp.watch('./css/**/*.less', ['css']);
-  gulp.watch('./js/**/*.js', ['js']);
-  gulp.watch('./src/**/*.js', ['app']);
+  gulp.watch('css/**/*.less',{cwd:'./'}, ['css']);
+  gulp.watch('js/**/*.js',{cwd:'./'}, ['js']);
+  gulp.watch('src/**/*.js',{cwd:'./'}, ['app']);
 
   nodemon({
     script: 'build/app.js',

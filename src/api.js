@@ -1,21 +1,18 @@
 import express from 'express';
 import bodyParser from 'body-parser';
+import config, { writeConfig } from './config';
 
-import config from './config';
+var router = express.Router();
+export {router as default};
 
+router.use(bodyParser.json());
 
-var api = express();
-export {api as default};
-
-
-api.use(bodyParser.json());
-
-api.post('/config', (req, res) => {
-  console.log(req.body);
+router.post('/config', (req, res) => {
+  writeConfig(req.body);
   res.json(config);
 });
 
-api.get('/config', (req, res) => {
+router.get('/config', (req, res) => {
   res.json(config);
 });
 

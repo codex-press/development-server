@@ -1,34 +1,45 @@
 import fs from 'fs';
 import os from 'os';
+import path from 'path';
+import mkdirp from 'mkdirp';
 
-var config = {}
+var config = readConfig() || {};
 
 export {config as default};
 
-let appName = 'codex';
-let appDataPath = '.';
-let system = os.type();
+export const version = require('../package.json').version;
 
-if (system === 'Darwin')
-  appDataPath = `~/Library/Application Support/${appName}/`;
-else if (system === 'Windows_NT')
-  appDataPath = `C:\\Users\\${ process.env.USER }\\AppData\\Local\\${appName}/`;
-else if (system === 'Windows_NT')
-  appDataPath = `~/.config/${appName}/`;
+export function writeConfig(newConfig) {
+  config = newConfig;
+  mkdirp.sync(path.dirname(configPath()));
+  fs.writeFileSync(configPath(), JSON.stringify(config), "utf8");
+}
 
-// // And then, to read it...
-// myJson = require("./filename.json");
-
-// fs.writeFile( "filename.json", JSON.stringify( myJson ), "utf8", yourCallback );
-
+function readConfig() {
+  try {
+    return JSON.parse(fs.readFileSync(configPath()));
+  }
+  catch (e) {
+    return {};
+  }
+}
 
 // https://medium.com/@ccnokes/how-to-store-user-data-in-electron-3ba6bf66bc1e#.x725pogpf
+function configPath() {
+  switch (os.type()) {
+    case 'Darwin':
+      return (
+        os.homedir() +
+        '/Library/Application Support/Codex Press/development_server.json'
+      );
+    case 'Windows_NT':
+      return (
+        os.homedir() +
+        '\\AppData\\Local\\Codex Press\\development_server.json'
+      );
+    case 'Linux':
+      return os.homedir() + '/.config/codex/development_server.json';
+  }
+}
 
-
-config = Object.assign({
-  port        : 8000,
-}, config);
-
-// will need to somehow set in GULP ?
-config.development = true;
 

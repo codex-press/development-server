@@ -2,13 +2,38 @@
 .Info {
   position: fixed;
   left: 50vw;
-  top: 20vh;
-  width: 100%;
+  top: 18vh;
+  width: calc(100% - 3rem);
   max-width: 700px;
+  max-height: 70vh;
+  overflow: auto;
   transform: translateX(-50%);
   padding: 1em;
+  color: #eee;
 
   &:extend(.modal);
+
+  h2 {
+    margin-top: 0;
+    margin-bottom: 0.5rem;
+  }
+  
+  a {
+    color: #777;
+    text-decoration-style: ink;
+  }
+
+  h3 {
+    margin: 0.3em 0;
+  }
+
+  .asset-name {
+    margin-left: 0.5rem;
+  }
+
+  .asset {
+    margin-left: 1.5rem;
+  }
 
 }
 

@@ -1,5 +1,9 @@
 'use strict';
 
+var _portfinder = require('portfinder');
+
+var _portfinder2 = _interopRequireDefault(_portfinder);
+
 var _express = require('express');
 
 var _express2 = _interopRequireDefault(_express);
@@ -12,9 +16,13 @@ var _path = require('path');
 
 var _path2 = _interopRequireDefault(_path);
 
-var _opn = require('opn');
+var _open = require('open');
 
-var _opn2 = _interopRequireDefault(_opn);
+var _open2 = _interopRequireDefault(_open);
+
+var _morgan = require('morgan');
+
+var _morgan2 = _interopRequireDefault(_morgan);
 
 var _api = require('./api');
 
@@ -24,25 +32,15 @@ var _config = require('./config');
 
 var _config2 = _interopRequireDefault(_config);
 
+var _repository_list = require('./repository_list');
+
+var _repository_list2 = _interopRequireDefault(_repository_list);
+
 var _socket = require('./socket');
 
 var _socket2 = _interopRequireDefault(_socket);
 
-var _css = require('./css');
-
-var _css2 = _interopRequireDefault(_css);
-
-var _html = require('./html');
-
-var _html2 = _interopRequireDefault(_html);
-
-var _javascript = require('./javascript');
-
-var _javascript2 = _interopRequireDefault(_javascript);
-
-var _inline = require('./inline');
-
-var _inline2 = _interopRequireDefault(_inline);
+var _routes = require('./routes');
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -50,23 +48,23 @@ var app = (0, _express2.default)();
 var server = _http2.default.createServer(app);
 
 (0, _socket2.default)(server);
-
 app.set('view engine', 'pug');
 
+app.use((0, _morgan2.default)('tiny'));
 app.use(_express2.default.static('public'));
-
 app.use('/api', _api2.default);
 
-app.get(/^[^.]*$/, _html2.default);
+app.get('inline', _routes.sendInline);
+app.get('*.(js|css)', _routes.sendAsset);
+app.get(/^[^.]*$/, _routes.sendHTML);
 
-app.get(/\.css$/, _css2.default);
-app.get(/\.js$/, _javascript2.default);
-app.get(/\.(html|svg|ttf|woff)$/, _inline2.default);
+// find an open port
+_portfinder2.default.getPort(function (err, port) {
+  var hostname = '127.0.0.1';
+  server.listen(port, hostname, function () {
+    return console.log('listening ' + port);
+  });
 
-server.listen(_config2.default.port, function () {
-  return console.log('listening ' + _config2.default.port);
+  // this when run from command line as NPM package
+  if (/bin\/main\.js$/.test(require.main.filename)) (0, _open2.default)('http://localhost:' + port + '/');
 });
-
-// this when run from command line as NPM package
-
-if (!_config2.default.development) (0, _opn2.default)('http://localhost:' + _config2.default.port + '/');

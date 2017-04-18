@@ -1,7 +1,7 @@
 import React from 'react';
 import { connect } from 'react-redux'
 
-import { codexOrigin } from '../env';
+import { contentOrigin } from '../env';
 
 import {
   styleLoadComplete,
@@ -55,7 +55,7 @@ class App extends React.Component {
     props.loadConfig();
 
     // load the article
-    fetch(`${codexOrigin}${location.pathname}.json?full`)
+    fetch(`${contentOrigin}${location.pathname}.json?full`)
     .then(response => response.json())
     .then(data => {
       let article = require('article').default;

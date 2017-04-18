@@ -58,8 +58,8 @@ export function rootReducer(state = initialState, action) {
     case actions.RECEIVE_ARTICLES:
       return state.set('articles', List(action.data));
 
-    case actions.SET_TOKEN:
-      return state.setIn(['config','token'], action.token);
+    case actions.SET_CONFIG:
+      return state.setIn(['config', action.prop], action.value);
 
     case actions.RECEIVE_CONFIG:
       return state.set('config', Map(action.data));

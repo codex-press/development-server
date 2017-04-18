@@ -19,17 +19,17 @@ var _config2 = _interopRequireDefault(_config);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-var api = (0, _express2.default)();
-exports.default = api;
+var router = _express2.default.Router();
+exports.default = router;
 
 
-api.use(_bodyParser2.default.json());
+router.use(_bodyParser2.default.json());
 
-api.post('/config', function (req, res) {
-  console.log(req.body);
+router.post('/config', function (req, res) {
+  (0, _config.writeConfig)(req.body);
   res.json(_config2.default);
 });
 
-api.get('/config', function (req, res) {
+router.get('/config', function (req, res) {
   res.json(_config2.default);
 });

@@ -9,17 +9,30 @@
 
   &:extend(.modal);
 
+
   label {
     display: block;
     margin: 1em 0;
   }
 
-
-  input {
-    outline-color: white;
-    margin-left: 1em;
+  label.invalid {
+    color: red;
   }
 
+  label.invalid input:not(:focus) {
+    outline: red solid 1px;
+  }
+
+  label.invalid input {
+    outline-color: red;
+  }
+
+  input[type=text] {
+    width: 100%;
+    font-size: 20px;
+    outline-color: white;
+    text-overflow: ellipsis;
+  }
 
   button {
     font-size: 1.3rem;

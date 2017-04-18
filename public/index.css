@@ -20,7 +20,7 @@
   bottom: 0;
   left: 0;
   background-color: rgba(255, 255, 255, 0.5);
-  z-index: 2147483645;
+  z-index: 2147483646;
   -webkit-backdrop-filter: blur(10px);
   backdrop-filter: blur(10px);
 }
@@ -57,32 +57,11 @@
 .Info {
   position: fixed;
   left: 50vw;
-  top: 18vh;
-  width: calc(100% - 3rem);
+  top: 20vh;
+  width: 100%;
   max-width: 700px;
-  max-height: 70vh;
-  overflow: auto;
   transform: translateX(-50%);
   padding: 1em;
-  color: #eee;
-}
-.Info h2 {
-  margin-top: 0;
-  margin-bottom: 0.5rem;
-}
-.Info a {
-  color: #777;
-  -webkit-text-decoration-style: ink;
-  text-decoration-style: ink;
-}
-.Info h3 {
-  margin: 0.3em 0;
-}
-.Info .asset-name {
-  margin-left: 0.5rem;
-}
-.Info .asset {
-  margin-left: 1.5rem;
 }
 .Config {
   position: fixed;
@@ -96,20 +75,9 @@
   display: block;
   margin: 1em 0;
 }
-.Config label.invalid {
-  color: red;
-}
-.Config label.invalid input:not(:focus) {
-  outline: red solid 1px;
-}
-.Config label.invalid input {
-  outline-color: red;
-}
-.Config input[type=text] {
-  width: 100%;
-  font-size: 20px;
+.Config input {
   outline-color: white;
-  text-overflow: ellipsis;
+  margin-left: 1em;
 }
 .Config button {
   font-size: 1.3rem;
@@ -182,46 +150,4 @@
   padding-bottom: 1em;
   max-height: 60vh;
   overflow: auto;
-}
-.AlertContainer {
-  position: fixed;
-  top: 3em;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 90%;
-  max-width: 600px;
-  z-index: 100000;
-  line-height: 1.2;
-  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
-  color: #333;
-  z-index: 2147483646;
-}
-.Alert {
-  cursor: pointer;
-  padding: 1em;
-  margin: 1rem;
-  border: 1px solid;
-  border-radius: 0.2em;
-  animation: 300ms cp-fade-in linear;
-  overflow: hidden;
-  box-shadow: 3px 3px 24px 0px rgba(0, 0, 0, 0.2);
-  font-weight: 400;
-}
-.Alert.info {
-  background: #b3e5ff;
-  border-color: #00aaff;
-}
-.Alert.error {
-  background: #ffb3b3;
-  border-color: #ff0000;
-}
-.Alert h2 {
-  margin-bottom: 0.8em;
-  font-size: 1.4em;
-  font-weight: 700;
-}
-.Alert pre {
-  border-radius: 0.2em;
-  background: #eee;
-  padding: 1em;
 }

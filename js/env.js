@@ -1,3 +1,3 @@
 
-export const codexOrigin = 'https://codex.press';
+export const contentOrigin = 'https://usercontent.codex.press';
 

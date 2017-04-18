@@ -110,13 +110,14 @@ export function navigate(url) {
 
 
 
-export const SET_TOKEN = 'SET_TOKEN';
+export const SET_CONFIG = 'SET_CONFIG';
 export const RECEIVE_CONFIG = 'RECEIVE_CONFIG';
 
-export function setToken(token) {
+export function setConfig(prop, value) {
   return {
-    type: SET_TOKEN,
-    token,
+    type: SET_CONFIG,
+    prop,
+    value,
   }
 }
 

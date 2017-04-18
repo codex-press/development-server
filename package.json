@@ -4,20 +4,20 @@
   "description": "Serve JS/CSS from localhost against stories on the Codex Press publishing platform.",
   "homepage": "https://codex.press/docs",
   "repository": "codex-press/development-server",
-  "main": "app.js",
+  "main": "./bin/main.js",
   "scripts": {
-    "start": "gulp serve"
+    "start": "gulp serve",
+    "clean": "rm -rf build/*",
+    "test": "mocha --watch --recursive test/src test/js"
   },
   "bin": {
-    "codex": "./bin/main.js"
+    "codex": "node ./bin/main.js"
   },
   "author": "Codex Press <developers@codex.press>",
   "license": "MIT",
   "dependencies": {
-    "actioncable": "^5.0.2",
     "autoprefixer": "^6.5.0",
     "babel-preset-es2015": "^6.14.0",
-    "babel-preset-stage-3": "^6.24.1",
     "babelify": "^7.3.0",
     "body-parser": "^1.15.1",
     "browserify": "^13.1.0",
@@ -25,16 +25,24 @@
     "chokidar": "^1.5.2",
     "express": "^4.14.0",
     "fs-promise": "^0.5.0",
+    "gulp-rename": "^1.2.2",
     "less": "^2.7.1",
+    "mkdirp": "^0.5.1",
+    "morgan": "^1.8.1",
     "nodemon": "^1.9.2",
-    "opn": "^4.0.2",
+    "open": "0.0.5",
+    "portfinder": "^1.0.13",
     "postcss": "^5.2.4",
     "pug": "^2.0.0-beta11",
     "ws": "^1.1.0"
   },
   "devDependencies": {
+    "actioncable": "^5.0.2",
     "babel-preset-react": "^6.23.0",
+    "babel-preset-stage-3": "^6.24.1",
     "browser-sync": "^2.18.8",
+    "chai": "^3.5.0",
+    "enzyme": "^2.8.2",
     "fuse.js": "^2.6.2",
     "gulp": "^3.9.1",
     "gulp-autoprefixer": "^3.1.1",
@@ -43,6 +51,7 @@
     "gulp-less": "^3.3.0",
     "gulp-nodemon": "^2.2.1",
     "immutable": "^3.8.1",
+    "mocha": "^3.2.0",
     "moment": "^2.18.1",
     "react": "^15.4.2",
     "react-dom": "^15.4.2",
