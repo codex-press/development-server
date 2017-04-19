@@ -1,17 +1,7 @@
 import React from 'react';
 import { connect } from 'react-redux'
 
-import { contentOrigin } from '../env';
-
-import {
-  styleLoadComplete,
-  toggleModal,
-  removeAlert,
-  saveState,
-  restoreState,
-  setArticle,
-  loadConfig,
-} from '../actions';
+import { styleLoadComplete, toggleModal, removeAlert } from '../actions';
 
 import Config from './Config';
 import Search from './Search';
@@ -36,9 +26,6 @@ const mapDispatchToProps = {
   styleLoadComplete,
   toggleModal,
   removeAlert,
-  restoreState,
-  saveState,
-  loadConfig,
 }
 
 
@@ -51,22 +38,6 @@ class App extends React.Component {
     this.windowKey = this.windowKey.bind(this);
     this.focusHandler = this.focusHandler.bind(this);
     this.state = { focus: document.hasFocus() };
-
-    props.loadConfig();
-
-    // load the article
-    fetch(`${contentOrigin}${location.pathname}.json?full`)
-    .then(response => response.json())
-    .then(data => {
-      let article = require('article').default;
-      article.set(data);
-      setArticle(data);
-      document.documentElement.classList.add('javascript','focus');
-      article.tick();
-    });
-
-    props.restoreState();
-    window.addEventListener('beforeunload', props.saveState);
   }
 
 

@@ -12,7 +12,10 @@ if (true || config.development)
 // fx.on('ready', () => console.log('hiya', fx.inlineAssets));
 
 let parent = makeRepo('parent', '/Users/omar/code/codex_press/parent');
-//parent.on('ready', () => console.log('hiya', parent.assets));
+let app = makeRepo('app', '/Users/omar/code/codex_press/app');
+let render = makeRepo('render', '/Users/omar/code/codex_press/render');
+// let codex = makeRepo('codex', '/Users/omar/code/codex_press/codex');
+// parent.on('ready', () => console.log('hiya', parent.assets));
 
 
 function makeRepo(name, path) {
@@ -32,6 +35,14 @@ function makeRepo(name, path) {
 export function getRepo(assetPath) {
   let repoName = assetPath.match(/(.+?)[./]/)[1];
   return list.find(r => r.name === repoName);
+}
+
+
+export function getFileList() {
+  return list.reduce((list,r) => {
+    list[r.name] = {assets: r.assets, inlineAssets: r.inlineAssets};
+    return list;
+  }, {});
 }
 
 

@@ -28,22 +28,32 @@ var _moduleDeps2 = _interopRequireDefault(_moduleDeps);
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 var compilers = {};
+var dependencies = {};
 
 function transpileJavascript(filename, directory, assetPath) {
   var fullPath = _path2.default.join(directory, filename);
 
-  if (!compilers[fullPath]) compilers[fullPath] = createCompiler(filename, directory, assetPath);
+  // create compiler
+  if (!compilers[fullPath]) {
+    var _deps = [];
+    compilers[fullPath] = createCompiler(filename, directory, assetPath, _deps);
+    dependencies[fullPath] = _deps;
+  }
+  // reset dependency list (but keeping the same array)
+  else {
+      dependencies[fullPath].length = 0;
+    }
 
   return findExternal(filename, directory).then(function (external) {
 
     var code = '';
     return new Promise(function (resolve, reject) {
       compilers[fullPath].external(external).bundle().on('error', function (error) {
-        console.log('here!', error);reject(error);
+        return reject(error);
       }).on('data', function (data) {
         return code += data;
       }).on('end', function () {
-        return resolve(code);
+        return resolve({ dependencies: dependencies[fullPath], code: code });
       });
     });
   }).catch(function (error) {
@@ -51,7 +61,6 @@ function transpileJavascript(filename, directory, assetPath) {
     console.error(error);
 
     // send to browser console
-    res.send('console.error("' + error.message + '");');
 
     if (error._babel) {
       throw {
@@ -73,8 +82,10 @@ function transpileJavascript(filename, directory, assetPath) {
   });
 }
 
-function createCompiler(filename, directory, assetPath) {
-  return (0, _browserifyIncremental2.default)(filename, { basedir: directory, debug: true }).transform('babelify', { 'presets': ['es2015'] }).require(_path2.default.join(directory, filename), { expose: '/' + assetPath });
+function createCompiler(filename, directory, assetPath, dependencies) {
+  return (0, _browserifyIncremental2.default)(filename, { basedir: directory, debug: true }).transform('babelify', { 'presets': ['es2015'] }).require(_path2.default.join(directory, filename), { expose: '/' + assetPath }).on('dep', function (data) {
+    if (data.file.indexOf(directory) === 0) dependencies.push(data.file.slice(directory.length + 1));
+  });
 }
 
 function findExternal(filename, directory) {
@@ -91,7 +102,8 @@ function findExternal(filename, directory) {
     }).on('missing', function (id, parent) {
       if (RegExp('^/').test(id)) external.push(id);
     }).on('file', function (path, relative) {
-      if (path.indexOf(directory) !== 0) throw 'Bad import: ' + relative;
+      if (path[0] === '/' && path.indexOf(directory) !== 0) console.log(chalk.green('issue!'), path, relative);
+      //reject({message: `Bad import: ${relative}`});
     }).on('data', function () {}).on('end', function () {
       return resolve(external);
     }).end({ file: _path2.default.join(directory, filename) });

@@ -10,6 +10,10 @@ var _ws = require('ws');
 
 var _ws2 = _interopRequireDefault(_ws);
 
+var _chalk = require('chalk');
+
+var _chalk2 = _interopRequireDefault(_chalk);
+
 var _config = require('./config');
 
 var _config2 = _interopRequireDefault(_config);
@@ -25,8 +29,9 @@ function start(server) {
 
   ws.on('connection', function connection(ws) {
     var client = ws._socket.remoteAddress + ':' + ws._socket.remotePort;
-    console.log('--WebSocket connect: ' + client);
-    // ws.send(JSON.stringify({repositories}));
+
+    console.log(_chalk2.default.magenta('WebSocket connect: ' + client));
+    ws.send(JSON.stringify({ fileList: (0, _repository_list.getFileList)() }));
   });
 }
 

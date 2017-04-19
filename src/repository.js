@@ -1,6 +1,7 @@
 import EventEmitter from 'events';
 import path from 'path';
 import fs from 'fs';
+import fsp from 'fs-promise';
 import chokidar from 'chokidar';
 
 import js from './javascript';
@@ -14,6 +15,7 @@ export default class Repository extends EventEmitter {
 
   constructor({name, path}) {
     super();
+
     this.name = name;
     this.path = path;
 
@@ -44,7 +46,7 @@ export default class Repository extends EventEmitter {
 
 
   hasInline(assetPath) {
-
+    return !!this.assets[assetPath];
   }
 
 
@@ -54,11 +56,19 @@ export default class Repository extends EventEmitter {
     if (!asset)
       return Promise.resolve('not found!');
 
-    // check if it should be transpiled at all...
+    // use options to see if it should be transpiled at all...
     // might just read the file with fs-promise
 
     if (/\.js/.test(assetPath))
-      return js(asset.filename, this.path, assetPath);
+      return fsp.readFile(path.join(this.path, asset.filename));
+
+    else if (/\.js/.test(assetPath)) {
+      return js(asset.filename, this.path, assetPath)
+      .then(({dependencies, code}) => {
+        this.dependencies[assetPath] = dependencies;
+        return code;
+      });
+    }
     else if (/\.css/.test(assetPath)) {
       return css(asset.filename, this.path, assetPath)
       .then(({dependencies, code}) => {
@@ -155,7 +165,7 @@ export default class Repository extends EventEmitter {
     let re = /(.*?)\.(svg|html|js)/;
 
     if (re.test(filename))
-      return this.name + filename;
+      return path.join(this.name, filename);
   }
 
 

@@ -5,31 +5,40 @@ import browserify from 'browserify-incremental';
 import deps from 'module-deps';
 
 let compilers = {};
+let dependencies = {};
 
 export default function transpileJavascript(filename, directory, assetPath) {
   let fullPath = path.join(directory, filename);
 
-  if (!compilers[fullPath])
-    compilers[fullPath] = createCompiler(filename, directory, assetPath);
+  // create compiler
+  if (!compilers[fullPath]) {
+    let deps = [];
+    compilers[fullPath] = createCompiler(filename, directory, assetPath, deps);
+    dependencies[fullPath] = deps;
+  }
+  // reset dependency list (but keeping the same array)
+  else {
+    dependencies[fullPath].length = 0;
+  }
 
   return findExternal(filename, directory)
   .then(external => {
 
     let code = '';
     return new Promise((resolve, reject) => {
-      compilers[fullPath].external(external).bundle()
-      .on('error', error => { console.log('here!', error); reject(error)})
+      compilers[fullPath]
+      .external(external)
+      .bundle()
+      .on('error', error => reject(error))
       .on('data', data => code += data)
-      .on('end', () => resolve(code));
+      .on('end', () => resolve({dependencies: dependencies[fullPath], code}));
     })
-
   })
   .catch(error => {
 
     console.error(error);
 
     // send to browser console
-    res.send(`console.error("${error.message}");`);
 
     if (error._babel) {
       throw {
@@ -54,10 +63,14 @@ export default function transpileJavascript(filename, directory, assetPath) {
 }
 
 
-function createCompiler(filename, directory, assetPath) {
+function createCompiler(filename, directory, assetPath, dependencies) {
   return browserify(filename, {basedir: directory, debug: true})
   .transform('babelify', {'presets': ['es2015']})
   .require(path.join(directory, filename), {expose: '/' + assetPath})
+  .on('dep', data => {
+    if (data.file.indexOf(directory) === 0)
+      dependencies.push(data.file.slice(directory.length + 1));
+  })
 }
 
 
@@ -77,8 +90,9 @@ function findExternal(filename, directory) {
         external.push(id);
     })
     .on('file', (path, relative) => {
-      if (path.indexOf(directory) !== 0)
-        throw `Bad import: ${relative}`;
+      if (path[0] === '/' && path.indexOf(directory) !== 0)
+        console.log(chalk.green('issue!'), path, relative);
+      //reject({message: `Bad import: ${relative}`});
     })
     .on('data', () => { })
     .on('end', () => resolve(external))

@@ -21,4 +21,26 @@ export function api(route) {
 
 }
 
+export function addStylesheet(url, attrs = {}) {
+  return new Promise((resolve, reject) => {
+    let tag = document.createElement('link');
+    tag.setAttribute('rel', 'stylesheet');
+    Object.keys(attrs).map(k => tag.setAttribute(k, attrs[k]));
+    tag.href = url;
+    document.head.appendChild(tag);
+    tag.onload = resolve;
+    tag.onerror = reject;
+  });
+}
+
+export function addScript(url, attrs = {}) {
+  return new Promise((resolve, reject) => {
+    let tag = document.createElement('script');
+    Object.keys(attrs).map(k => tag.setAttribute(k, attrs[k]));
+    tag.src = url;
+    document.head.appendChild(tag);
+    tag.onload = resolve;
+    tag.onerror = reject;
+  });
+}
 

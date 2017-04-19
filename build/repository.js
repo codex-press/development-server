@@ -18,6 +18,10 @@ var _fs = require('fs');
 
 var _fs2 = _interopRequireDefault(_fs);
 
+var _fsPromise = require('fs-promise');
+
+var _fsPromise2 = _interopRequireDefault(_fsPromise);
+
 var _chokidar = require('chokidar');
 
 var _chokidar2 = _interopRequireDefault(_chokidar);
@@ -82,7 +86,9 @@ var Repository = function (_EventEmitter) {
     }
   }, {
     key: 'hasInline',
-    value: function hasInline(assetPath) {}
+    value: function hasInline(assetPath) {
+      return !!this.assets[assetPath];
+    }
   }, {
     key: 'code',
     value: function code(assetPath) {
@@ -92,13 +98,21 @@ var Repository = function (_EventEmitter) {
 
       if (!asset) return Promise.resolve('not found!');
 
-      // check if it should be transpiled at all...
+      // use options to see if it should be transpiled at all...
       // might just read the file with fs-promise
 
-      if (/\.js/.test(assetPath)) return (0, _javascript2.default)(asset.filename, this.path, assetPath);else if (/\.css/.test(assetPath)) {
-        return (0, _css2.default)(asset.filename, this.path, assetPath).then(function (_ref2) {
+      if (/\.js/.test(assetPath)) return _fsPromise2.default.readFile(_path2.default.join(this.path, asset.filename));else if (/\.js/.test(assetPath)) {
+        return (0, _javascript2.default)(asset.filename, this.path, assetPath).then(function (_ref2) {
           var dependencies = _ref2.dependencies;
           var code = _ref2.code;
+
+          _this2.dependencies[assetPath] = dependencies;
+          return code;
+        });
+      } else if (/\.css/.test(assetPath)) {
+        return (0, _css2.default)(asset.filename, this.path, assetPath).then(function (_ref3) {
+          var dependencies = _ref3.dependencies;
+          var code = _ref3.code;
 
           _this2.dependencies[assetPath] = dependencies;
           return code;
@@ -190,7 +204,7 @@ var Repository = function (_EventEmitter) {
     value: function inlineAssetPath(filename) {
       var re = /(.*?)\.(svg|html|js)/;
 
-      if (re.test(filename)) return this.name + filename;
+      if (re.test(filename)) return _path2.default.join(this.name, filename);
     }
   }]);
 

@@ -1,4 +1,6 @@
 import WebSocket from 'ws';
+import chalk from 'chalk';
+
 import config from './config';
 import { getFileList } from './repository_list';
 
@@ -9,8 +11,9 @@ export default function start(server) {
 
   ws.on('connection', function connection(ws) {
     let client = ws._socket.remoteAddress + ':' + ws._socket.remotePort;
-    console.log(`--WebSocket connect: ${ client }`);
-    // ws.send(JSON.stringify({repositories}));
+
+    console.log(chalk.magenta(`WebSocket connect: ${ client }`));
+    ws.send(JSON.stringify({fileList: getFileList()}));
   });
 }
 
