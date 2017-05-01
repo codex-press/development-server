@@ -19,12 +19,16 @@ export default class Repository extends EventEmitter {
     this.name = name;
     this.path = path;
 
-    this.assets = {};
-    this.inlineAssets = {};
+    this.files = [];
+    this.external = {};
+    this.inline = {};
     this.dependencies = {};
 
     this.loadConfig();
     this.watch();
+
+    // promise to the point when all the files are found by chokidar
+    this.ready = new Promise(resolve => this._resolve = resolve);
   }
 
 
@@ -41,17 +45,23 @@ export default class Repository extends EventEmitter {
 
 
   has(assetPath) {
-    return !!this.assets[assetPath];
+    return !!this.external[assetPath];
   }
 
 
   hasInline(assetPath) {
-    return !!this.assets[assetPath];
+    return !!this.external[assetPath];
   }
 
 
+  getMeta(assetPath) {
+    return {
+      noParse: true,
+    }
+  }
+
   code(assetPath) {
-    let asset = this.assets[assetPath];
+    let asset = this.external[assetPath];
 
     if (!asset)
       return Promise.resolve('not found!');
@@ -59,7 +69,9 @@ export default class Repository extends EventEmitter {
     // use options to see if it should be transpiled at all...
     // might just read the file with fs-promise
 
-    if (/\.js/.test(assetPath))
+    let config = this.getMeta(assetPath);
+
+    if (/\.js/.test(assetPath) && config.noParse)
       return fsp.readFile(path.join(this.path, asset.filename));
 
     else if (/\.js/.test(assetPath)) {
@@ -81,7 +93,7 @@ export default class Repository extends EventEmitter {
 
 
   filename(assetPath) {
-    return this.assets[assetPath].filename;
+    return this.external[assetPath].filename;
   }
 
 
@@ -90,15 +102,20 @@ export default class Repository extends EventEmitter {
   }
 
 
+  close() {
+    this.watcher.close()
+  }
+
+
   watch() {
     let ignored = /node_modules|(^|[\/\\])\../;
-    let path = this.path + '**/*@(js|css|less|svg|html)';
+    let path = this.path + '/**/*@(js|css|less|svg|html|woff|woff2|ttf|json)';
     this.watcher = chokidar.watch(path, { ignored })
-      .add(this.path + '/package.json')
+      .on('error', () => console.log('error', this.name))
       .on('add', path => this.add(path))
-      .on('ready', () => this.emit('ready'))
+      .on('ready', () => this._resolve())
       .on('change', path => this.change(path))
-      .on('unlink', path => this.remove(path));
+      .on('unlink', path => this.remove(path))
   }
 
 
@@ -109,8 +126,14 @@ export default class Repository extends EventEmitter {
       this.loadConfig();
       return;
     }
+    // ignore other .json files. unfortunately there's a bug in chokidar where
+    // it will never file 'ready' if you give it an array of paths or add one
+    // later :/
+    else if (/.json$/.test(filename)) {
+      return;
+    }
 
-    // uses dependency tree to get all assetPaths being updated
+    // XXX use dependency tree to get all assetPaths being updated
 
     this.emit('update', {change: [filename]});
   }
@@ -118,7 +141,7 @@ export default class Repository extends EventEmitter {
 
   remove(filename) {
 
-    // uses dependency tree to get all assetPaths being updated
+    // XXX use dependency tree to get all assetPaths being updated
 
     this.emit('update', {remove: [filename]});
   }
@@ -127,15 +150,23 @@ export default class Repository extends EventEmitter {
   add(filename) {
     filename = filename.slice(this.path.length + 1);
 
+    console.log(this.name, filename);
+
+    if (filename !== 'package.json')
+      this.files.push({filename});
+
     let assetPath = this.assetPath(filename);
     if (assetPath) {
-      this.assets[assetPath] = {assetPath, filename};
+      this.external[assetPath] = {assetPath, filename};
     }
 
     let inlinePath = this.inlineAssetPath(filename);
     if (inlinePath) {
-      this.inlineAssets[inlinePath] = {assetPath: inlinePath, filename};
+      this.inline[inlinePath] = {assetPath: inlinePath, filename};
     }
+
+    // XXX would be nice to keep track of missing files in the dependency
+    // tree and update as well
 
     this.emit('update', {add: [filename]});
   }

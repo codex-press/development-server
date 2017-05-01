@@ -1,34 +1,40 @@
+import chokidar from 'chokidar';
+
 import config from './config';
 import { broadcast } from './socket';
 import Repository from './repository';
 
+let publicWatcher = chokidar.watch(['./public/main.js', './public/main.css'])
+.on('change', name => broadcast({publicUpdate: name}));
+
 var list = [];
 export {list as default};
 
-if (true || config.development)
-  makeRepo('public', './public');
 
-// let fx = makeRepo('fx', '/Users/omar/code/codex_press/fx');
-// fx.on('ready', () => console.log('hiya', fx.inlineAssets));
+export function updateRepoList() {
+  let names = Object.keys(config.repositories);
 
-let parent = makeRepo('parent', '/Users/omar/code/codex_press/parent');
-let app = makeRepo('app', '/Users/omar/code/codex_press/app');
-let render = makeRepo('render', '/Users/omar/code/codex_press/render');
-// let codex = makeRepo('codex', '/Users/omar/code/codex_press/codex');
-// parent.on('ready', () => console.log('hiya', parent.assets));
+  list = list.reduce((list, r) => {
+    let isRemoved = !names.find(n => {
+      return r.name == n && r.path && config.repositories[n].path;
+    });
 
+    isRemoved ? r.close() : list.push(r);
 
-function makeRepo(name, path) {
-  let repo = new Repository({name, path});
+    return list;
+  }, []);
 
-  repo.on('update', e => {
-    // console.log(`--${ e.type }: ${ e.filename }`);
-    broadcast(e.filename);
+  names.forEach(name => {
+    if (list.find(r => r.name === name))
+      return;
+
+    let path = config.repositories[name].path;
+    let repo = new Repository({name, path});
+
+    repo.on('update', e => broadcast(e.filename));
+
+    list.push(repo);
   });
-
-  list.push(repo);
-
-  return repo;
 }
 
 
@@ -40,7 +46,7 @@ export function getRepo(assetPath) {
 
 export function getFileList() {
   return list.reduce((list,r) => {
-    list[r.name] = {assets: r.assets, inlineAssets: r.inlineAssets};
+    list[r.name] = {external: r.external, inline: r.inline, files: r.files};
     return list;
   }, {});
 }

@@ -1,9 +1,15 @@
 import { contentOrigin } from './env';
-import { addScript, addStylesheet } from './helpers'
+import { getKey } from './index';
+import { addScript, addStylesheet } from './utility'
 
 export default function renderArticle(fileList) {
 
-  return fetch(`${contentOrigin}${location.pathname}.json?full`)
+  let request = {};
+  let key = getKey();
+  if (key)
+    request.headers = { Authorization: `Token token="${ key }"` };
+
+  return fetch(`${contentOrigin}${location.pathname}.json?full`, request)
   .then(response => response.json())
   .then(data => {
 

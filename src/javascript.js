@@ -3,6 +3,7 @@ import fs from 'fs';
 import path from 'path';
 import browserify from 'browserify-incremental';
 import deps from 'module-deps';
+import chalk from 'chalk';
 
 let compilers = {};
 let dependencies = {};

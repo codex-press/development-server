@@ -1,4 +1,4 @@
-import { api } from './helpers';
+import { api, devAPI } from './utility';
 
 
 export function saveState() {
@@ -110,22 +110,53 @@ export function navigate(url) {
 
 
 
-export const SET_CONFIG = 'SET_CONFIG';
-export const RECEIVE_CONFIG = 'RECEIVE_CONFIG';
+export const RECEIVE_REPOSITORIES = 'RECEIVE_REPOSITORIES';
 
-export function setConfig(prop, value) {
+export function receiveRepositories(data) {
   return {
-    type: SET_CONFIG,
-    prop,
-    value,
+    type: RECEIVE_REPOSITORIES,
+    data,
   }
+}
+
+
+
+export const SET_TOKEN = 'SET_TOKEN';
+export const RECEIVE_CONFIG = 'RECEIVE_CONFIG';
+export const RECEIVE_ACCOUNT = 'RECEIVE_ACCOUNT';
+export const ADD_REPO = 'ADD_REPO';
+export const REMOVE_REPO = 'REMOVE_REPO';
+export const UPDATE_REPO = 'UPDATE_REPO';
+export const SET_INVALID_TOKEN = 'SET_INVALID_TOKEN';
+
+
+export function setToken(value) {
+  return dispatch => {
+
+    dispatch({
+      type: SET_TOKEN,
+      value,
+    });
+
+    return Promise.all([
+      dispatch(saveConfig()),
+      dispatch(loadAccount()),
+    ]);
+  }
+}
+
+
+export function setInvalidToken(value) {
+  return {
+    type: SET_INVALID_TOKEN,
+    value,
+  };
 }
 
 
 export function loadConfig() {
   return dispatch => {
-    return fetch('/api/config')
-    .then(response => response.json())
+    return devAPI('/config')
     .then(data => dispatch(receiveConfig(data)));
   }
 }
@@ -141,12 +172,64 @@ export function receiveConfig(data) {
 
 export function saveConfig() {
   return (dispatch, getState) => {
-    return fetch('/api/config', {
-      method: 'POST',
-      headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify(getState().get('config')),
-    })
-    .then(response => response.json())
+    return devAPI('/config', {post: getState().get('config')})
     // .then(data => console.log(data));
   }
 }
+
+
+export function loadAccount() {
+  return dispatch => {
+    return api('/account')
+    .then(data => dispatch(receiveAccount(data)))
+    .catch(data => dispatch(toggleModal('login')));
+  }
+}
+
+export function receiveAccount(data) {
+  return {
+    type: RECEIVE_ACCOUNT,
+    data,
+  }
+}
+
+
+export function addRepo(name, path) {
+  return dispatch => {
+    dispatch({
+      type: ADD_REPO,
+      name,
+      path,
+    });
+
+    return dispatch(saveConfig());
+  }
+}
+
+
+export function removeRepo(name) {
+  return dispatch => {
+    dispatch({
+      type: REMOVE_REPO,
+      name,
+    });
+
+    return dispatch(saveConfig());
+  }
+}
+
+
+export function updateRepo(currentName, name, path) {
+  return dispatch => {
+    dispatch({
+      type: UPDATE_REPO,
+      currentName,
+      name,
+      path
+    });
+
+    return dispatch(saveConfig());
+  }
+}
+
+

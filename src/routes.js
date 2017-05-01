@@ -5,7 +5,6 @@ import { getRepo } from './repository_list';
 import { broadcast } from './socket';
 
 
-
 export function sendAsset(req, res, next) {
   let assetPath = req.path.slice(1);
   let repo = getRepo(assetPath);

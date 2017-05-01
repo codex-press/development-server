@@ -24,13 +24,19 @@ var _mkdirp2 = _interopRequireDefault(_mkdirp);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-var config = readConfig() || {};
+var config = readConfig();
 
 exports.default = config;
 var version = exports.version = require('../package.json').version;
 
 function writeConfig(newConfig) {
-  exports.default = config = newConfig;
+
+  exports.default = config = {
+    version: version,
+    token: newConfig.token,
+    repositories: newConfig.repositories || {}
+  };
+
   _mkdirp2.default.sync(_path2.default.dirname(configPath()));
   _fs2.default.writeFileSync(configPath(), JSON.stringify(config), "utf8");
 }

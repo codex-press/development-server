@@ -59,12 +59,18 @@ var Repository = function (_EventEmitter) {
     _this.name = name;
     _this.path = path;
 
-    _this.assets = {};
-    _this.inlineAssets = {};
+    _this.files = [];
+    _this.external = {};
+    _this.inline = {};
     _this.dependencies = {};
 
     _this.loadConfig();
     _this.watch();
+
+    // promise to the point when all the files are found by chokidar
+    _this.ready = new Promise(function (resolve) {
+      return _this._resolve = resolve;
+    });
     return _this;
   }
 
@@ -82,26 +88,35 @@ var Repository = function (_EventEmitter) {
   }, {
     key: 'has',
     value: function has(assetPath) {
-      return !!this.assets[assetPath];
+      return !!this.external[assetPath];
     }
   }, {
     key: 'hasInline',
     value: function hasInline(assetPath) {
-      return !!this.assets[assetPath];
+      return !!this.external[assetPath];
+    }
+  }, {
+    key: 'getMeta',
+    value: function getMeta(assetPath) {
+      return {
+        noParse: true
+      };
     }
   }, {
     key: 'code',
     value: function code(assetPath) {
       var _this2 = this;
 
-      var asset = this.assets[assetPath];
+      var asset = this.external[assetPath];
 
       if (!asset) return Promise.resolve('not found!');
 
       // use options to see if it should be transpiled at all...
       // might just read the file with fs-promise
 
-      if (/\.js/.test(assetPath)) return _fsPromise2.default.readFile(_path2.default.join(this.path, asset.filename));else if (/\.js/.test(assetPath)) {
+      var config = this.getMeta(assetPath);
+
+      if (/\.js/.test(assetPath) && config.noParse) return _fsPromise2.default.readFile(_path2.default.join(this.path, asset.filename));else if (/\.js/.test(assetPath)) {
         return (0, _javascript2.default)(asset.filename, this.path, assetPath).then(function (_ref2) {
           var dependencies = _ref2.dependencies;
           var code = _ref2.code;
@@ -122,7 +137,7 @@ var Repository = function (_EventEmitter) {
   }, {
     key: 'filename',
     value: function filename(assetPath) {
-      return this.assets[assetPath].filename;
+      return this.external[assetPath].filename;
     }
   }, {
     key: 'inlineFilename',
@@ -130,16 +145,23 @@ var Repository = function (_EventEmitter) {
       return this.inlieAssets[assetPath].filename;
     }
   }, {
+    key: 'close',
+    value: function close() {
+      this.watcher.close();
+    }
+  }, {
     key: 'watch',
     value: function watch() {
       var _this3 = this;
 
       var ignored = /node_modules|(^|[\/\\])\../;
-      var path = this.path + '**/*@(js|css|less|svg|html)';
-      this.watcher = _chokidar2.default.watch(path, { ignored: ignored }).add(this.path + '/package.json').on('add', function (path) {
+      var path = this.path + '/**/*@(js|css|less|svg|html|woff|woff2|ttf|json)';
+      this.watcher = _chokidar2.default.watch(path, { ignored: ignored }).on('error', function () {
+        return console.log('error', _this3.name);
+      }).on('add', function (path) {
         return _this3.add(path);
       }).on('ready', function () {
-        return _this3.emit('ready');
+        return _this3._resolve();
       }).on('change', function (path) {
         return _this3.change(path);
       }).on('unlink', function (path) {
@@ -155,8 +177,14 @@ var Repository = function (_EventEmitter) {
         this.loadConfig();
         return;
       }
+      // ignore other .json files. unfortunately there's a bug in chokidar where
+      // it will never file 'ready' if you give it an array of paths or add one
+      // later :/
+      else if (/.json$/.test(filename)) {
+          return;
+        }
 
-      // uses dependency tree to get all assetPaths being updated
+      // XXX use dependency tree to get all assetPaths being updated
 
       this.emit('update', { change: [filename] });
     }
@@ -164,7 +192,7 @@ var Repository = function (_EventEmitter) {
     key: 'remove',
     value: function remove(filename) {
 
-      // uses dependency tree to get all assetPaths being updated
+      // XXX use dependency tree to get all assetPaths being updated
 
       this.emit('update', { remove: [filename] });
     }
@@ -173,15 +201,22 @@ var Repository = function (_EventEmitter) {
     value: function add(filename) {
       filename = filename.slice(this.path.length + 1);
 
+      console.log(this.name, filename);
+
+      if (filename !== 'package.json') this.files.push({ filename: filename });
+
       var assetPath = this.assetPath(filename);
       if (assetPath) {
-        this.assets[assetPath] = { assetPath: assetPath, filename: filename };
+        this.external[assetPath] = { assetPath: assetPath, filename: filename };
       }
 
       var inlinePath = this.inlineAssetPath(filename);
       if (inlinePath) {
-        this.inlineAssets[inlinePath] = { assetPath: inlinePath, filename: filename };
+        this.inline[inlinePath] = { assetPath: inlinePath, filename: filename };
       }
+
+      // XXX would be nice to keep track of missing files in the dependency
+      // tree and update as well
 
       this.emit('update', { add: [filename] });
     }

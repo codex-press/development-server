@@ -25,16 +25,14 @@ export default function Info(props) {
 
   let classed_content = props.classed_content || {};
 
+  let el;
   let onWheel = e => {
-    let el = e.nativeEvent.path.find(el => el.classList.contains('Info'));
-    if (el.scrollHeight > el.clientHeight) {
-      e.preventDefault();
-      el.scrollTop += e.deltaY;
-    }
+    e.preventDefault();
+    el.scrollTop += e.deltaY;
   };
 
   return (
-    <div className="Info" onWheel={ onWheel }>
+    <div className="Info" ref={ ref => el = ref } onWheel={ onWheel }>
       <h2>{ props.title }</h2>
 
       <div className="url">

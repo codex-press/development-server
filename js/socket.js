@@ -1,14 +1,11 @@
 import { store } from './index.js';
 import { addAlert, removeAlert } from './actions';
 
-// XXX move these inside
-let reconnectTimeout;
-
 export default class Socket {
 
-  constructor() {
+  constructor(callback) {
+    this.callback = callback;
     this.fileList = {};
-    this.firstConnection = true;
   }
 
 
@@ -21,9 +18,11 @@ export default class Socket {
 
       ws.addEventListener('close', this.onClose.bind(this));
       ws.addEventListener('message', this.onMessage.bind(this));
+      ws.addEventListener('open', this.onOpen.bind(this))
 
       const firstMessage = e => {
         let data = JSON.parse(e.data);
+        this.callback(data.fileList);
         resolve(data.fileList);
         ws.removeEventListener('message', firstMessage);
       };
@@ -34,14 +33,8 @@ export default class Socket {
   }
 
 
-  sendAlert(args) {
-    console.log(args);
-    // article.send('alert', args);
-  }
-
-
   onClose(error) {
-    console.log('socket close', error);
+    // console.log('socket close', error);
 
     // first time we got a close, so alert that it was lost
     // if (!this.reconnectTimeout) {
@@ -58,51 +51,45 @@ export default class Socket {
   }
 
 
+  onOpen() {
+    clearTimeout(this.reconnectTimeout);
+    this.reconnectTimeout = null;
+  }
+
+
   onMessage(e) {
     let data = JSON.parse(e.data);
     // console.log('ws message', data);
 
-    if (data === 'public/main.js')
-      location.reload();
-    else if (data === 'public/main.css') {
-      let el = document.querySelector('#dev-server');
-      let link = el.shadowRoot.querySelector('link');
-      link.href = `/main.css?${Date.now()}`
+    if (data.publicUpdate) {
+      if (data.publicUpdate === 'public/main.js')
+        location.reload();
+      else if (data.publicUpdate === 'public/main.css') {
+        let el = document.querySelector('#dev-server');
+        let link = el.shadowRoot.querySelector('link');
+        link.href = `/main.css?${Date.now()}`
+      }
     }
 
+    return;
+
+    // Use a callback for this. actual alerts created elsewhere
     store.dispatch(addAlert({
-      body: `Update: ${data}`,
+      body: `Update: ${assetPath}`,
       id: data
     }));
+
+    if (data.fileList)
+      this.callback(data.fileList);
+
+
+
 
     return;
 
     this.fileList = data.fileList;
-    if (firstMessage) {
-      reconnectTimeout = undefined;
-      this.firstConnection = false;
-      firstMessage = false;
 
-      if (data.version === version) {
-        this.sendAlert({
-          body: 'Connected To Development Server',
-          id: 'connect',
-        });
-      }
-      else {
-        this.sendAlert({
-          head: 'Your Development Server Is Out Of Date',
-          body: `The current version is v${version} and you are running
-            v${data.version || '0.0.0'}. You must update it like this:`,
-          pre: 'git pull\nnpm install',
-          id: 'connect',
-          timeout: false
-        });
-        reject();
-      }
-    }
-
-    else if (data.error) {
+    if (data.error) {
 
       let head;
       if (data.error.filename)
@@ -139,70 +126,5 @@ export default class Socket {
   }
 
 }
-
-
-
-class InfoAlerter {
-
-  constructor() {
-    this.listenTo(window, 'message');
-
-    this.alerts = {};
-    this.alertTimers = {};
-   
-    let container = dom.create('<div class=alert-container></div>');
-
-    dom.body().append(container);
-
-    this.dom = dom(container);
-  }
-
-
-  remove() {
-    this.stopListening();
-    this.dom.remove();
-  }
-
-
-  message(e) {
-    if (e.data.event === 'alert')
-      this.showAlert(e.data.args);
-  }
-
-
-  showAlert({
-    head = '',
-    body = '',
-    pre = '',
-    type = 'info',
-    id = Math.random(),
-    timeout = 2000
-  }) {
-
-    if (!['error','info'].includes(type))
-      throw 'Invalid alert type';
-
-    dom(el).on('click', () => removeAlert())
-
-    // replace existing
-    if (this.alerts[id])
-      this.alerts[id].remove();
-
-    if (this.alertTimers[id])
-      clearTimeout(this.alertTimers[id]);
-
-    this.alerts[id] = el;
-
-    this.dom.append(el);
-
-    if (timeout)
-      this.alertTimers[id] = setTimeout(() => removeAlert(), timeout)
-    else
-      clearTimeout(this.alertTimers[id])
-
-    return el;
-  }
-
-};
 
 

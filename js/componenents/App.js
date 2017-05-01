@@ -1,18 +1,26 @@
 import React from 'react';
 import { connect } from 'react-redux'
 
-import { styleLoadComplete, toggleModal, removeAlert } from '../actions';
+import { isLocalhost } from '../utility';
 
 import Config from './Config';
+import LoginPrompt from './LoginPrompt';
 import Search from './Search';
 import Info from './Info';
 import AlertContainer from './AlertContainer';
-import { InfoIcon, EditIcon, SearchIcon, ConfigIcon } from './icons';
+import { IconInfo, IconEdit, IconSearch, IconConfig } from './icons';
 
+import {
+  styleLoadComplete,
+  toggleModal,
+  removeAlert,
+  setToken,
+} from '../actions';
 
 
 const mapStateToProps = state => {
   return {
+    invalid_token: state.getIn(['ui','invalid_token']),
     loaded: state.getIn(['ui','style_loaded']),
     alerts: state.get('alerts'),
     modal: state.getIn(['ui','modal']),
@@ -26,6 +34,7 @@ const mapDispatchToProps = {
   styleLoadComplete,
   toggleModal,
   removeAlert,
+  setToken,
 }
 
 
@@ -52,21 +61,29 @@ class App extends React.Component {
 
         <link ref={el => this.styleEl = el} rel="stylesheet" href="/main.css" />
 
-        <nav>
-          <InfoIcon onClick={ () => props.toggleModal('info') } />
-          <EditIcon onClick={ () => this.openEdit() } />
-          <SearchIcon onClick={ () => props.toggleModal('search') } />
-          <ConfigIcon onClick={ () => props.toggleModal('config') } />
-        </nav>
-
-        <Info open={ props.modal === 'info' } {...props.article} />
-        <Search />
-        <Config />
-        
         <AlertContainer alerts={ props.alerts } remove={ props.removeAlert } />
 
-        { props.modal &&
-          <div className="dimmer" onClick={ () => props.toggleModal(null) }/>
+        { isLocalhost() &&
+          <div>
+            <nav>
+              <IconInfo onClick={ () => this.toggleModal('info') } />
+              <IconEdit onClick={ () => this.openEdit() } />
+              <IconSearch onClick={ () => this.toggleModal('search') } />
+              <IconConfig onClick={ () => this.toggleModal('config') } />
+            </nav>
+
+            { this.props.invalid_token &&
+              <LoginPrompt submit={ token => this.props.setToken(token) } />
+            }
+
+            <Info open={ props.modal === 'info' } {...props.article} />
+            <Search />
+            <Config />
+
+            { props.modal &&
+              <div className="dimmer" onClick={ () => this.toggleModal(null) }/>
+            }
+          </div>
         }
 
       </div>
@@ -100,13 +117,23 @@ class App extends React.Component {
   }
 
 
+  toggleModal(value) {
+    // don't want to let a double click open and then close it
+    if (performance.now() - this.lastToggle < 500)
+      return;
+    this.props.toggleModal(value);
+    this.lastToggle = performance.now();
+  }
+
+
   windowKey(e) {
 
     if (e.key === 'Escape') {
       e.preventDefault();
       this.props.toggleModal(null);
     }
-    else if (e.path[0].tagName === 'INPUT' || e.defaultPrevented) {
+    else if (e.path[0].tagName === 'INPUT' || e.defaultPrevented || e.metaKey ||
+             e.ctrlKey || e.altKey) {
       return;
     }
     else if (e.key === 'f') {

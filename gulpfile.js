@@ -15,7 +15,7 @@ var rename = require("gulp-rename");
 gulp.task('app', () => {
   return gulp.src('src/*')
   .pipe(cache('app'))
-  .pipe(babel({presets: ['es2015']}))
+  .pipe(babel({presets: ['es2015', 'stage-3']}))
   .on('error', onError)
   .pipe(gulp.dest('build'))
 });
@@ -24,7 +24,7 @@ gulp.task('app', () => {
 var js = (
   browserify({entries: ['./js/index.js'], debug: true, ignoreMissing: true})
   .transform(babelify, {
-    presets: ['es2015', 'stage-3','react'],
+    presets: ['es2015', 'stage-3', 'react'],
     sourceMaps: true
   })
 );

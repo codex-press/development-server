@@ -25,6 +25,10 @@ var _moduleDeps = require('module-deps');
 
 var _moduleDeps2 = _interopRequireDefault(_moduleDeps);
 
+var _chalk = require('chalk');
+
+var _chalk2 = _interopRequireDefault(_chalk);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 var compilers = {};
@@ -102,7 +106,7 @@ function findExternal(filename, directory) {
     }).on('missing', function (id, parent) {
       if (RegExp('^/').test(id)) external.push(id);
     }).on('file', function (path, relative) {
-      if (path[0] === '/' && path.indexOf(directory) !== 0) console.log(chalk.green('issue!'), path, relative);
+      if (path[0] === '/' && path.indexOf(directory) !== 0) console.log(_chalk2.default.green('issue!'), path, relative);
       //reject({message: `Bad import: ${relative}`});
     }).on('data', function () {}).on('end', function () {
       return resolve(external);

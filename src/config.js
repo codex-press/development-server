@@ -3,14 +3,20 @@ import os from 'os';
 import path from 'path';
 import mkdirp from 'mkdirp';
 
-var config = readConfig() || {};
+var config = readConfig();
 
 export {config as default};
 
 export const version = require('../package.json').version;
 
 export function writeConfig(newConfig) {
-  config = newConfig;
+
+  config = {
+    version,
+    token: newConfig.token,
+    repositories: newConfig.repositories || {},
+  };
+
   mkdirp.sync(path.dirname(configPath()));
   fs.writeFileSync(configPath(), JSON.stringify(config), "utf8");
 }

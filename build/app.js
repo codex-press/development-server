@@ -44,24 +44,27 @@ var _routes = require('./routes');
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-var app = (0, _express2.default)();
-var server = _http2.default.createServer(app);
+(0, _repository_list.updateRepoList)();
 
-(0, _socket2.default)(server);
+var app = (0, _express2.default)();
 app.set('view engine', 'pug');
 
+var server = _http2.default.createServer(app);
+(0, _socket2.default)(server);
+
+// middleware
 app.use((0, _morgan2.default)('tiny'));
 app.use(_express2.default.static('public'));
 app.use('/api', _api2.default);
 
+// routes
 app.get('inline', _routes.sendInline);
 app.get('*.(js|css)', _routes.sendAsset);
 app.get(/^[^.]*$/, _routes.sendHTML);
 
-// find an open port
 _portfinder2.default.getPort(function (err, port) {
-  var hostname = '127.0.0.1';
-  server.listen(port, hostname, function () {
+
+  server.listen(port, function () {
     return console.log('listening ' + port);
   });
 

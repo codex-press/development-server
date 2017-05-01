@@ -1,9 +1,44 @@
+* {
+  box-sizing: border-box;
+}
 [data-reactroot] {
   all: initial;
   font-family: Avenir, "Helvetica Neue", Helvetica, Arial, sans-serif;
 }
+a {
+  color: #777;
+  -webkit-text-decoration-skip: ink;
+  text-decoration-skip: ink;
+}
+input {
+  font-size: inherit;
+  font-family: inherit;
+  outline-color: white;
+  text-overflow: ellipsis;
+}
+button {
+  font-size: inherit;
+  border: 0;
+  border-radius: 0.1em;
+  padding: 0.3em 0.8em;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  cursor: pointer;
+  outline-color: white;
+}
+button.primary {
+  background-color: #1277c4;
+  color: white;
+  outline-color: #1277c4;
+}
+button.small {
+  font-size: .8em;
+}
 .modal,
 .App nav,
+.LoginPrompt,
 .Info,
 .Config,
 .Search {
@@ -12,6 +47,14 @@
   box-shadow: inset 0 0 1px #555, 0 0 2px #000;
   background: linear-gradient(rgba(30, 30, 30, 0.95), rgba(0, 0, 0, 0.9));
   z-index: 2147483647;
+}
+svg.invalid {
+  color: #db2929;
+  transform: scale(1.5) translateY(-5%);
+}
+svg.valid {
+  color: #21ba45;
+  transform: scale(1.3) translateY(-10%);
 }
 .App .dimmer {
   position: fixed;
@@ -43,7 +86,7 @@
   width: 1.4em;
   height: 1.4em;
   fill: currentColor;
-  padding: 0.4em;
+  margin: 0.4em;
 }
 .App nav svg.info path {
   transform: translateX(50%);
@@ -53,6 +96,33 @@
 }
 .App:not(.focused) nav {
   background: #2e2e2e;
+}
+.LoginPrompt {
+  position: fixed;
+  width: 400px;
+  left: calc(50% - 200px);
+  top: 20%;
+  padding: 1em;
+  font-size: 1.2rem;
+}
+.LoginPrompt h3 {
+  font-size: 1.4rem;
+  margin: 0;
+}
+.LoginPrompt label {
+  display: block;
+  margin: 1rem 0;
+}
+.LoginPrompt input {
+  width: 100%;
+  font-size: 1.5rem;
+}
+.LoginPrompt.invalid input {
+  color: red;
+  outline: 1px solid red;
+}
+.LoginPrompt .button-container {
+  text-align: right;
 }
 .Info {
   position: fixed;
@@ -70,11 +140,6 @@
   margin-top: 0;
   margin-bottom: 0.5rem;
 }
-.Info a {
-  color: #777;
-  -webkit-text-decoration-style: ink;
-  text-decoration-style: ink;
-}
 .Info h3 {
   margin: 0.3em 0;
 }
@@ -91,42 +156,115 @@
   left: calc(50% - 250px);
   top: calc(50% - 250px);
   padding: 1em;
+  overflow: auto;
+}
+.Config h2 {
+  margin: 0 0 1rem 0;
+  text-align: center;
+}
+.Config button {
+  margin: 0.5rem 0;
 }
 .Config label {
   display: block;
   margin: 1em 0;
 }
-.Config label.invalid {
-  color: red;
-}
-.Config label.invalid input:not(:focus) {
-  outline: red solid 1px;
-}
-.Config label.invalid input {
-  outline-color: red;
-}
-.Config input[type=text] {
+.Config input {
   width: 100%;
   font-size: 20px;
-  outline-color: white;
-  text-overflow: ellipsis;
 }
-.Config button {
+.Config form.invalid input {
+  color: red;
+  outline: 1px solid red;
+}
+.Config h3 {
+  font-size: 22px;
+  margin-bottom: 0;
+}
+.Repository h3 {
+  font-size: 20px;
+}
+.Repository div.path {
+  cursor: pointer;
+  color: #999;
+}
+.Repository .expand,
+.Repository .collapse {
+  cursor: pointer;
+  text-decoration: underline;
+  -webkit-text-decoration-skip: ink;
+  text-decoration-skip: ink;
+}
+.Repository .collapse {
+  margin-bottom: 1rem;
+}
+.Repository ul {
+  list-style: none;
+  padding-left: 1rem;
+}
+.Repository .open {
+  cursor: pointer;
+}
+.RepositoryAdd .icon.plus {
+  height: 1em;
+  width: 1em;
+  display: block;
+  fill: white;
+}
+.RepositoryAdd button {
   font-size: 1.3rem;
   background-color: #1277c4;
+  outline: none;
   color: white;
-  float: right;
   border: 0;
-  border-radius: 0.1em;
-  padding: 0.3em 0.8em;
+  line-height: 1;
+  border-radius: 50%;
+  padding: 0.3em;
   -webkit-user-select: none;
   -moz-user-select: none;
   -ms-user-select: none;
   user-select: none;
   cursor: pointer;
+  margin: 1rem 0;
 }
-.Config button {
-  outline-color: #1277c4;
+.RepositoryEdit input {
+  font-size: 20px;
+  background-color: #555;
+  display: block;
+  width: 100%;
+  border: 0;
+  color: inherit;
+  padding: 0.1em 0.3em;
+}
+.RepositoryEdit input.path {
+  font-size: 16px;
+}
+.RepositoryEdit .button-container {
+  text-align: right;
+}
+.Search {
+  position: fixed;
+  left: 50vw;
+  top: 20vh;
+  width: 100%;
+  max-width: 700px;
+  transform: translateX(-50%);
+  padding: 1em;
+}
+.Search input {
+  width: calc(100% - 1rem);
+  font-size: 28px;
+  border: 0;
+  padding: 0.1em 0.5rem;
+  font-family: inherit;
+  font-weight: 500;
+}
+.Search .articles-container {
+  position: relative;
+  margin-top: 1em;
+  padding-bottom: 1em;
+  max-height: 60vh;
+  overflow: auto;
 }
 .Article {
   display: -ms-flexbox;
@@ -159,29 +297,8 @@
 .Article img {
   width: 100%;
 }
-.Search {
-  position: fixed;
-  left: 50vw;
-  top: 20vh;
-  width: 100%;
-  max-width: 700px;
-  transform: translateX(-50%);
-  padding: 1em;
-}
-.Search input {
-  width: calc(100% - 1rem);
-  font-size: 28px;
-  border: 0;
-  padding: 0.1em 0.5rem;
-  font-family: inherit;
-  font-weight: 500;
-}
-.Search .articles-container {
-  position: relative;
-  margin-top: 1em;
-  padding-bottom: 1em;
-  max-height: 60vh;
-  overflow: auto;
+.Article .byline:before {
+  content: 'By ';
 }
 .AlertContainer {
   position: fixed;

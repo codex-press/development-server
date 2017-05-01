@@ -1,14 +1,19 @@
-import { Map, OrderedMap, List } from 'immutable';
+import { Map, OrderedMap, List, fromJS } from 'immutable';
 
 import * as actions from './actions';
 
 let initialState = Map({
   ui: Map({
+    invalid_token: false,
     current_article: null,
     style_loaded: false,
     modal: null,
   }),
-  config: Map(),
+  config: Map({
+    token: '',
+    repositories: OrderedMap({}),
+  }),
+  account: null,
   article: Map(),
   articles: List(),
   alerts: OrderedMap(),
@@ -55,14 +60,45 @@ export function rootReducer(state = initialState, action) {
     case actions.STYLE_LOAD_COMPLETE:
       return state.setIn(['ui','style_loaded'], true);
 
+    case actions.SET_INVALID_TOKEN:
+      return state.setIn(['ui','invalid_token'], action.value);
+
     case actions.RECEIVE_ARTICLES:
       return state.set('articles', List(action.data));
 
-    case actions.SET_CONFIG:
-      return state.setIn(['config', action.prop], action.value);
+    case actions.SET_TOKEN:
+      return state.setIn(['config', 'token'], action.value);
 
     case actions.RECEIVE_CONFIG:
-      return state.set('config', Map(action.data));
+      let config = {}
+      config.token = action.data.token || '';
+      config.repositories = fromJS(action.data.repositories) || Map();
+      return state.set('config', Map(config));
+
+    case actions.RECEIVE_ACCOUNT:
+      return state.set('account', Map(action.data));
+
+    case actions.RECEIVE_REPOSITORIES:
+      return state.set('repositories', Map(action.data));
+
+    case actions.ADD_REPO:
+      return state.updateIn(['config','repositories'], repos =>
+        repos.set(action.name, Map({name: action.name, path: action.path}))
+      );
+
+    case actions.REMOVE_REPO:
+      return state.updateIn(
+        ['config','repositories'],
+        repos => repos.delete(action.name)
+      );
+
+    case actions.UPDATE_REPO:
+      return state.updateIn(['config','repositories'], repos => {
+        repos = repos.toArray();
+        let index = repos.findIndex(r => r.get('name') === action.currentName);
+        repos[index] = Map({name: action.name, path: action.path});
+        return OrderedMap(repos.map(r => [r.get('name'), r]))
+      });
 
     default:
       return state;

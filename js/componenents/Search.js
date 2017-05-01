@@ -1,15 +1,14 @@
 import React from 'react';
-import Fuse from 'fuse.js';
 import { connect } from 'react-redux'
 
 import Article from './Article';
 import { navigate } from '../actions';
+import { debounce, api } from '../utility'
 
 
 const mapStateToProps = state => {
   return {
     open: state.getIn(['ui','modal']) === 'search',
-    articles: state.get('articles'),
   }
 }
 
@@ -24,16 +23,14 @@ class Search extends React.Component {
 
   constructor(props) {
     super();
-    this.key = this.key.bind(this);
-    this.wheel = this.wheel.bind(this);
-    this.search = this.search.bind(this);
-    this.state = {query: '', articles: null};
+    this.search = debounce(500, this.search, this);
+    this.state = {query: '', articles: null, selected: null};
   }
 
 
   render() {
 
-    if (!this.props.open || !this.state.articles)
+    if (!this.props.open)
       return null;
 
     return (
@@ -42,25 +39,25 @@ class Search extends React.Component {
         <input
           autoFocus
           value={ this.state.query }
-          onChange={ this.search }
-          onKeyDown={ this.key }/>
+          onChange={ e => this.updateQuery(e) }
+          onKeyDown={ e => this.key(e) }/>
 
         <div
           className="articles-container"
-          onWheel={ this.wheel }
+          onWheel={ e => this.wheel(e) }
           ref={ el => this.articlesContainer = el }>
 
-          { this.state.articles.length === 0 &&
+          { this.state.articles && this.state.articles.length === 0 &&
             <span className="empty">No match</span>
           }
 
-          { this.state.articles.map(a =>
+          { this.state.articles && this.state.articles.map(a =>
             <Article
               navigate={ () => this.props.navigate(a.url) }
               select={ () => this.select(a) }
               key={a.id}
               {...a}
-              selected={ this.selected().id === a.id } />)
+              selected={ this.selected() && this.selected().id === a.id } />)
           }
         </div>
 
@@ -69,12 +66,14 @@ class Search extends React.Component {
   }
 
 
+  componentDidMount() {
+    this.search();
+  }
+
+
   componentWillReceiveProps(props) {
     if (!props.open && this.state.query)
-      this.setState({query: ''});
-
-    if (!this.state.articles && props.articles.count())
-      this.setState({articles: props.articles.toJS()});
+      this.setState({query: '', articles: null, selected: null});
   }
 
 
@@ -149,25 +148,30 @@ class Search extends React.Component {
   }
 
 
-  search(e) {
+  updateQuery(e) {
+    this.setState({query: e.target.value}, () => this.search());
+  }
 
-    if (!this.fuse) {
-      let keys = [
-        "title",
-        "url",
-        "classed_content.hed",
-        "classed_content.byline"
-      ];
 
-      this.fuse = new Fuse(this.props.articles.toJS(), {keys});
+  search() {
+    if (this.state.query) {
+      api(`/articles?limit=20&q=${ encodeURIComponent(this.state.query) }`)
+      .then(articles => {
+        if (this.articlesContainer) {
+          this.articlesContainer.scrollTop = 0;
+        }
+        this.setState({articles, selected: null})
+      })
     }
-
-    let query = e.target.value;
-    this.setState({
-      query,
-      selected: null,
-      articles: query ? this.fuse.search(query) : this.props.articles.toJS(),
-    });
+    else {
+      api(`/articles?limit=20&order=updated_at_desc`)
+      .then(articles => {
+        if (this.articlesContainer) {
+          this.articlesContainer.scrollTop = 0;
+        }
+        this.setState({articles, selected: null})
+      })
+    }
   }
 
 
