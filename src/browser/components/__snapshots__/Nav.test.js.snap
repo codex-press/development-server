@@ -1,0 +1,20 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Renders a Nav 1`] = `
+<nav
+  className="Nav"
+>
+  <IconInfo
+    onClick={[Function]}
+  />
+  <IconEdit
+    onClick={[Function]}
+  />
+  <IconSearch
+    onClick={[Function]}
+  />
+  <IconConfig
+    onClick={[Function]}
+  />
+</nav>
+`;

@@ -1,9 +1,4 @@
 
+build
 node_modules
-repos/*
-ssl/*
-
-npm-debug
-
-.DS_Store
 

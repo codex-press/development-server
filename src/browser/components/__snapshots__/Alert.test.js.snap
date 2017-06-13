@@ -1,0 +1,18 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Renders an alert 1`] = `
+<div
+  className="Alert info"
+>
+  <h2>
+    heading
+  </h2>
+  <div
+    dangerouslySetInnerHTML={
+      Object {
+        "__html": "<li>body</li>",
+      }
+    }
+  />
+</div>
+`;

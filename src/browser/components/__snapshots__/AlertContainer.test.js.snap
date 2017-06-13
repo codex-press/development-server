@@ -1,0 +1,13 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Renders an alert 1`] = `
+<div
+  className="AlertContainer"
+>
+  <Alert
+    head="Lost Connection"
+    id="connection"
+    remove={[Function]}
+  />
+</div>
+`;

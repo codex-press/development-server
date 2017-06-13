@@ -1,0 +1,14 @@
+@import (reference) "../index.less";
+
+.Dimmer {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  background-color: hsla(0, 100%, 100%, 0.5);
+  z-index: (@maxZIndex - 2);
+  backdrop-filter: blur(10px);
+}
+
+

@@ -1,0 +1,29 @@
+@import (reference) "../index.less";
+
+.Config {
+  position: fixed;
+  width: 500px;
+  height: 500px;
+  left: calc(50% - 250px);
+  top: calc(50% - 250px);
+  padding: 1em;
+  overflow: auto;
+
+  &:extend(.modal);
+
+  h2 {
+    margin: 0 0 1rem 0;
+    text-align: center;
+  }
+
+  button {
+    margin: 0.5rem 0;
+  }
+
+  h3 {
+    font-size: 22px;
+    margin-bottom: 0;
+  }
+
+}
+

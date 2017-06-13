@@ -1,0 +1,39 @@
+@import (reference) "../index.less";
+
+.LoginPrompt {
+  position: fixed;
+  width: 400px;
+  left: calc(50% - 200px);
+  top: 20%;
+  padding: 1em;
+  font-size: 1.2rem;
+
+  &:extend(.modal);
+
+  h3 {
+    font-size: 1.4rem;
+    margin: 0;
+  }
+
+  label {
+    display: block;
+    margin: 1rem 0;
+  }
+
+  input {
+    width: 100%;
+    font-size: 1.5rem;
+  }
+
+  &.invalid input {
+    color: red;
+    outline: 1px solid red;
+  }
+
+  .button-container {
+    text-align: right;
+  }
+
+}
+
+
