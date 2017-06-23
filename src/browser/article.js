@@ -3,6 +3,7 @@ import { addScript, addStylesheet } from './utility'
 
 
 export default function renderArticle(data, fileList) {
+  console.log('renderArticle', data, fileList);
 
   data.asset_data.forEach(d => {
     let repo = d.asset_path.match(RegExp('/(.+?)[./]'))[1];

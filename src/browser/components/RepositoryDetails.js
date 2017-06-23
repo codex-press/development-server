@@ -10,7 +10,7 @@ export default function RepositoryDetails(props) {
   return (
     <div className="Repository">
 
-      <h3 className="name">{ props.name }</h3>
+      <h4 className="name">{ props.name }</h4>
 
       <div className="path" onClick={ () => openFileSystem(props.path) }>
         { props.path }

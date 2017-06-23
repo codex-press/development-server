@@ -39,8 +39,6 @@ export default function transpileJavascript(filename, directory, noParse = [], a
 
     console.error(error.toString());
 
-    // send to browser console
-
     if (error._babel) {
       throw {
         type: 'JavaScript',

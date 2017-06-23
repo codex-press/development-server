@@ -1,6 +1,7 @@
 import path from 'path';
 import chalk from 'chalk';
 
+import config from './config';
 import { getRepo } from './repository_list';
 import { broadcast } from './socket';
 
@@ -29,9 +30,13 @@ export function sendAsset(req, res, next) {
   let filename = path.join(repo.name, repo.filename(assetPath));
   console.log(chalk.cyan(`serving: ${filename}`));
 
+
   repo.code(assetPath)
   .then(code => res.send(code))
-  .catch(error => res.send(`console.error("${error.message}");`));
+  .catch(error => {
+    let message = error.message.replace(/"/g, '\\"');
+    res.send(`console.error("${ message }");`)
+  });
 }
 
 
@@ -51,7 +56,8 @@ export function sendInline(req, res, next) {
 
 export function sendHTML(req, res) {
   let contentOrigin = 'https://usercontent.codex.press';
-  let devOrigin = 'http://localhost';
+  let codexOrigin = 'https://codex.press';
+  let apiOrigin = 'http://api.dev';
 
   let script = '/main.js';
   let webpack = '';
@@ -61,24 +67,27 @@ export function sendHTML(req, res) {
     script = 'http://localhost:8001/main.js';
     webpack = 'http://localhost:8001/';
     webpackWS = 'ws://localhost:8001/';
+    codexOrigin = 'http://localhost';
   }
 
   let csp = (`
     default-src  'none';
-    connect-src  'self' ${ webpack } ${ webpackWS } ${ devOrigin }
-                 ${ contentOrigin } ws://${ req.get('Host') }
+    connect-src  'self' ${ webpack } ${ webpackWS } ${ apiOrigin }
+                 ${ codexOrigin } ws://${ req.get('Host') }
                  https://performance.typekit.net;
-    script-src   'unsafe-eval' 'self' ${ webpack } ${ devOrigin }
-                 ${ contentOrigin } https://use.typekit.net;
-    style-src    'unsafe-inline' 'self' ${ devOrigin } ${ contentOrigin }
+    script-src   'unsafe-eval' 'self' ${ webpack } ${ apiOrigin }
+                 ${ codexOrigin } ${ contentOrigin } https://use.typekit.net;
+    style-src    'unsafe-inline' 'self' ${ codexOrigin } ${ contentOrigin }
                  https://use.typekit.net https://fonts.googleapis.com;
-    font-src     data: 'self' ${ devOrigin } ${ contentOrigin } 
+    font-src     data: 'self' ${ contentOrigin } 
                  https://use.typekit.net https://fonts.gstatic.com;
     img-src      blob: data: 'self' ${ contentOrigin } https://p.typekit.net;
     media-src    blob: ${ contentOrigin };
   `).replace(/\s+/g,' ');
 
-  res.setHeader('Content-Security-Policy', csp);
+  if (!config.disable_csp)
+    res.setHeader('Content-Security-Policy', csp);
+
   res.render('index.pug', { script });
 }
 

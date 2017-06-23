@@ -6,20 +6,28 @@ import {
   addRepository,
   removeRepository,
   changeRepository,
-  setToken
+  setTokenStatus,
+  impersonate,
+  changeConfig,
 } from '../actions';
 
 import AccountDetails from './AccountDetails';
 import Repository from './Repository';
 import RepositoryAdd from './RepositoryAdd';
+import Impersonate from './Impersonate'; 
 
 import './Config.less';
+
+
 
 const mapStateToProps = state => {
   return {
     config       : state.get('config'),
+    ui           : state.get('ui'),
     repositories : state.get('repositories'),
+    domains      : state.get('domains'),
     account      : state.get('account'),
+    users        : state.get('users'),
   }
 }
 
@@ -28,7 +36,9 @@ const mapDispatchToProps = {
   addRepository,
   removeRepository,
   changeRepository,
-  setToken,
+  setTokenStatus,
+  impersonate,
+  changeConfig,
 }
 
 
@@ -36,13 +46,18 @@ export function Config(props) {
 
   const wheel = e => {
     e.preventDefault();
-    e.target.scrollTop += e.deltaY;
+    e.currentTarget.scrollTop += e.deltaY;
   }
 
   const usedNames = props.repositories.map(a => a.get('name'));
 
-  const changeRepository = (newName, path) => {
+  const changeRepository = name => (newName, path) => {
     props.changeRepository(name, newName, path) 
+  }
+
+  const changeCSP = e => {
+    props.changeConfig('disable_csp',e.target.checked)
+    location.reload();
   }
 
   return (
@@ -50,7 +65,44 @@ export function Config(props) {
 
       <h2>Codex Press Develepment Server</h2>
 
-      <AccountDetails account={ props.account } />
+      <Impersonate
+        account={ props.account }
+        users={ props.users }
+        impersonate={ props.impersonate }
+      />
+
+      <AccountDetails
+        account={ props.account }
+        change={ () => props.setTokenStatus('changing') }
+      />
+
+      <label className="for-checkbox">
+        <input
+          type="checkbox"
+          checked={ props.config.get('disable_csp') }
+          onChange={ changeCSP }
+        />
+        Disable the Content Security Policy {}
+        <a target="_blank" href="https://codex.press/docs/dev-server#csp">
+          (help)
+        </a>
+      </label>
+
+      { props.domains.size > 0 &&
+        <label>
+          Domain: {}
+          <select
+            value={ props.config.get('domain') }
+            onChange={ e => props.changeConfig('domain', e.target.value) }>
+            <option>None</option>
+            { props.domains.map(d =>
+              <option key={ d.get('id') }>
+                { d.get('name') }
+              </option>)
+            }
+          </select>
+        </label>
+      }
 
       <h3>Repositories</h3>
 
@@ -67,7 +119,7 @@ export function Config(props) {
             key={ name }
             { ...repo.toJS() }
             remove={ () => props.removeRepository(name) }
-            change={ changeRepository }
+            change={ changeRepository(name) }
             usedNames={ usedNames }
           />
         ).toArray()

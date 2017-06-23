@@ -7,12 +7,13 @@ import './RepositoryEdit.less';
 
 export default class RepositoryEdit extends React.Component {
 
+
   constructor(props) {
-    super();
+    super(props);
     this.state = {
-      name: props.name,
+      name: props.name || '',
       validName: null,
-      path: props.path,
+      path: props.path || '',
       validPath: null
     };
     this.checkPath = debounce(500, this.checkPath, this);
@@ -31,7 +32,7 @@ export default class RepositoryEdit extends React.Component {
       <form className="RepositoryEdit" onSubmit={ e => this.submit(e) } >
 
         <label>
-          Name {' '}
+          Name {}
 
           { this.state.validName !== null && (this.state.validName ?
             <IconValid /> :
@@ -48,7 +49,7 @@ export default class RepositoryEdit extends React.Component {
         </label>
 
         <label>
-          Path {' '}
+          Path {}
 
           { this.state.validPath !== null && (this.state.validPath ?
             <IconValid /> :
@@ -82,61 +83,63 @@ export default class RepositoryEdit extends React.Component {
 
 
   nameUpdate(e) {
-    let name = e.target.value;
-    this.setState({ name, validName: this.validName(name) });
+    let name = e.target.value.toLowerCase();
+    this.setState({ name, validName: this.checkName(name) });
   }
 
 
-  validName(name) {
+  checkName(name = this.state.name) {
     return (
-      name === this.props.name ||
       name.length > 1 &&
       !/[^\w-]/.test(name) &&
-      !this.props.usedNames.includes(name)
+      (name === this.props.name || !this.props.usedNames.includes(name))
     );
-  }
-
-
-  pastePath() {
-    this.setState({path: this.pathInput.value});
-
-    if (this.nameInput.value.length > 0)
-      return;
-
-    let match = this.pathInput.value.match(/[\\/]([^\\/]+)[\\/]?$/)
-    if (match) {
-      this.setState({name: match[1]}, () => this.checkName());
-    }
   }
 
 
   pathUpdate(e) {
     let path = e.target.value;
     this.setState({path, validPath: null});
-    this.checkPath();
+    this.checkPath(path);
   }
 
 
+  // checks if it's a valid path on this computer
   checkPath() {
-    let val = this.pathInput.value;
-    devAPI(`/path?path=${ encodeURIComponent(val) }`)
+    let path = this.state.path;
+    devAPI(`/path?path=${ encodeURIComponent(path) }`)
     .then(validPath => {
-      if (val !== this.pathInput.value)
+      // already changed because they continued typing
+      if (path !== this.state.path)
         return;
       this.setState({validPath});
     });
   }
 
 
+  // sets name based on end of the path
+  pastePath(e) {
+    let path = e.clipboardData.getData('text/plain');
+
+    if (this.state.name.length > 0)
+      return;
+
+    let match = path.match(/[\\/]([^\\/]+)[\\/]?$/)
+    if (match) {
+      this.setState({ name: match[1], validName: this.checkName(match[1]) });
+    }
+  }
+
+
   submit(e) {
     e.preventDefault();
-    this.setState({validName: this.validName()});
+    this.setState({validName: this.checkName()});
 
     if (this.state.path.length === 0)
       this.setState({validPath: false});
 
     let notValid = (
-      !this.validName() ||
+      !this.checkName() ||
       this.state.path.length === 0 ||
       this.state.validPath === false
     );
@@ -144,10 +147,7 @@ export default class RepositoryEdit extends React.Component {
     if (notValid)
       return;
 
-    let name = this.nameInput.value;
-    let path = this.pathInput.value;
-
-    this.props.submit(name, path);
+    this.props.submit(this.state.name, this.state.path);
   }
 
 }

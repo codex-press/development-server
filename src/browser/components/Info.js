@@ -8,9 +8,8 @@ import './Info.less';
 let dateFormat = 'MMM D, YYYY, h:mm A'
 
 const mapStateToProps = state => {
-  console.log(state.get('article').toJS());
   return {
-    ...state.get('article').toJS(),
+    article: state.get('article'),
   }
 }
 
@@ -45,13 +44,13 @@ export function Info(props) {
 
   let classed_content = props.classed_content || {};
 
-  let onWheel = e => {
+  let wheel = e => {
     e.preventDefault();
-    ReactDOM.findDOMNode(this).scrollTop += e.deltaY;
+    e.currentTarget.scrollTop += e.deltaY;
   }
 
   return (
-    <div className="Info" onWheel={ onWheel }>
+    <div className="Info" onWheel={ wheel }>
       <h2>{ props.title }</h2>
 
       <div className="url">

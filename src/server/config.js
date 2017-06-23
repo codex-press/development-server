@@ -15,6 +15,8 @@ export function writeConfig(newConfig) {
     version,
     token: newConfig.token,
     repositories: newConfig.repositories || {},
+    disable_csp: newConfig.disable_csp || false,
+    domain: newConfig.domain || '',
   };
 
   mkdirp.sync(path.dirname(configPath()));
@@ -26,7 +28,13 @@ function readConfig() {
     return JSON.parse(fs.readFileSync(configPath()));
   }
   catch (e) {
-    return {};
+    return {
+      version,
+      token: null,
+      repositories: {},
+      disable_csp: false,
+      domain: '',
+    };
   }
 }
 

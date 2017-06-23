@@ -49,8 +49,6 @@ export class Nav extends React.Component {
 
 
   toggleModal(value) {
-    console.log(value);
-    console.log(Date.now() - this.lastToggle);
     // don't want to let a double click open and then close it
     if (Date.now() - this.lastToggle < 500)
       return;

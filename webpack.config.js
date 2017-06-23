@@ -50,6 +50,16 @@ module.exports = {
         exclude: /node_modules/
       },
       {
+        test: /\.css$/,
+        use: [
+          {
+            loader: 'style-loader',
+            options: { attrs: { class: 'webpack-styles' } },
+          },
+          'css-loader',
+        ]
+      },
+      {
         test: /\.less$/,
         use: [
           {

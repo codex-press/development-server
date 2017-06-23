@@ -50,11 +50,6 @@ export default class Repository extends EventEmitter {
   }
 
 
-  hasInline(assetPath) {
-    return !!this.external[assetPath];
-  }
-
-
   getMeta(filename) {
     return {
       noParse: this.config.noParse.includes(filename),

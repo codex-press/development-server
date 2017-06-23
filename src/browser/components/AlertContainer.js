@@ -26,9 +26,9 @@ export function AlertContainer(props) {
     <div className="AlertContainer">
       { props.alerts.toArray().map(a =>
         <Alert
-          {...a}
-          key={ a.id }
-          remove={ () => props.removeAlert(a.id) }
+          {...a.toJS()}
+          key={ a.get('id') }
+          remove={ () => props.removeAlert(a.get('id')) }
         />)
       }
     </div>

@@ -48,7 +48,13 @@ export function getRepo(assetPath) {
 
 export function getFileList() {
   return list.reduce((list,r) => {
-    list[r.name] = {external: r.external, inline: r.inline, files: r.files};
+    list[r.name] = {
+      name: r.name,
+      path: r.path,
+      external: r.external,
+      inline: r.inline, 
+      files: r.files
+    };
     return list;
   }, {});
 }

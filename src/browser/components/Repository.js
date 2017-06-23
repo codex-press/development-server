@@ -16,7 +16,7 @@ export default class Repository extends React.Component {
   }
 
   
-  render(props) {
+  render() {
 
     if (this.state.editing) {
       return (
@@ -41,7 +41,7 @@ export default class Repository extends React.Component {
     return (
       <div className="Repository">
 
-        <h3 className="name">{ this.props.name }</h3>
+        <h4 className="name">{ this.props.name }</h4>
 
         <div
           className="path"

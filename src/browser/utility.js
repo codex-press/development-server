@@ -19,7 +19,9 @@ export function api(route, method = 'GET', data, options = {}) {
   if (token && options.auth !== false)
     request.headers['Authorization'] = `Token token="${ token }"`;
 
-  return fetch(`${apiOrigin}/api${route}`, request)
+  let origin = 'origin' in options ? options.origin : apiOrigin;
+
+  return fetch(origin + route, request)
   .then(response => {
     if (response.ok)
       return response.json()

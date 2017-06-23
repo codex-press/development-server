@@ -32,9 +32,9 @@ if (module.hot) module.hot.accept('./components/App', render);
 store.dispatch(actions.initialize());
 
 let dispatch = action => () => store.dispatch(action());
-window.addEventListener('beforeunload', dispatch(actions.saveState));
 window.addEventListener('focus',  dispatch(actions.focus));
 window.addEventListener('blur', dispatch(actions.blur));
+window.addEventListener('beforeunload', dispatch(actions.saveState));
 
 
 // annoying but the styles are added before the page is loaded so
