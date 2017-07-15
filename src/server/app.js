@@ -1,3 +1,4 @@
+import 'regenerator-runtime/runtime';
 import portfinder from 'portfinder';
 import express from 'express';
 import http from 'http';
@@ -22,11 +23,9 @@ app.set('view engine', 'pug')
 const server = http.createServer(app);
 socket(server);
 
-
 // middleware
 app.use(morgan('tiny'));
 app.use('/api', api);
-
 
 // routes
 app.get('*.(js|css|html|svg)', sendAsset);

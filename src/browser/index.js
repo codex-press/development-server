@@ -2,12 +2,11 @@ import 'regenerator-runtime/runtime';
 import React from 'react';
 import ReactDOM from 'react-dom';
 
-import deepForceUpdate from 'react-deep-force-update';
-
 import store from './store';
 import * as actions from './actions';
-import App from './components/App';
-import Root from './components/Root';
+
+import App from './app/App';
+import Root from './app/Root';
 
 import './index.less';
 
@@ -22,24 +21,22 @@ const render = () => ReactDOM.render(
     <div id="styles-container" />
   </Root>,
   root,
-  moveStyles
+  // styles must be added to shadow dom once this is mounted
+  () => {
+    document.querySelectorAll('.webpack-styles').forEach(style => {
+      root.querySelector('#styles-container').appendChild(style)
+    });
+  }
 );
 
 render();
 
-if (module.hot) module.hot.accept('./components/App', render);
+if (module.hot)
+  module.hot.accept('./app/App', render);
 
 store.dispatch(actions.initialize());
 
-let dispatch = action => () => store.dispatch(action());
-window.addEventListener('focus',  dispatch(actions.focus));
-window.addEventListener('blur', dispatch(actions.blur));
-window.addEventListener('beforeunload', dispatch(actions.saveState));
+let wrapDispatch = action => () => store.dispatch(action());
+window.addEventListener('focus',  wrapDispatch(actions.focus));
+window.addEventListener('blur', wrapDispatch(actions.blur));
 
-
-// annoying but the styles are added before the page is loaded so
-function moveStyles() {
-  document.querySelectorAll('.webpack-styles').forEach(style => {
-    root.querySelector('#styles-container').appendChild(style)
-  });
-}

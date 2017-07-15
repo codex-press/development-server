@@ -1,0 +1,43 @@
+
+.Repository {
+
+  h4 {
+    font-size: 1.4rem;
+    margin: 0;
+    margin-top: 1rem;
+  }
+
+  div.path {
+    cursor: pointer;
+    color: #999;
+  }
+
+  .expand, .collapse {
+    cursor: pointer;
+    text-decoration: underline;
+    text-decoration-skip: ink;
+  }
+
+  .collapse {
+    margin-bottom: 1rem;
+  }
+
+  ul {
+    list-style: none;
+    padding-left: 1rem;
+  }
+
+  .open {
+    cursor: pointer;
+  }
+
+  &.RepositoryBroken {
+
+    div.path {
+      cursor: initial;
+    }
+
+  }
+
+}
+

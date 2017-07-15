@@ -5,41 +5,39 @@ import browserify from 'browserify-incremental';
 import deps from 'module-deps';
 import chalk from 'chalk';
 
-let compilers = {};
 let dependencies = {};
 
-export default function transpileJavascript(filename, directory, noParse = [], assetPath) {
+import { Readable } from 'stream';
+import concat from 'concat-stream';
+
+import * as babel from 'babel-core';
+
+export default async function transpileJavascript({
+  filename, directory, assetPath
+}) {
+
   let fullPath = path.join(directory, filename);
 
-  // create compiler
-  if (!compilers[fullPath]) {
-    let deps = [];
-    compilers[fullPath] = createCompiler(filename, directory, assetPath, deps, noParse);
-    dependencies[fullPath] = deps;
+  let code = await fsp.readFile(fullPath, 'utf-8');
+
+  try {
+    let result = babel.transform(code, {
+      moduleId: assetPath,
+      sourceMaps: 'inline',
+      presets: [['es2015', { modules: false }]],
+      plugins: [ 'transform-es2015-modules-systemjs' ]
+    });
+
+    // must return dependencies as well? or the frontend knows them???
+    return result.code;
   }
-  // reset dependency list (but keeping the same array)
-  else {
-    dependencies[fullPath].length = 0;
-  }
-
-  return findExternal(filename, directory, noParse)
-  .then(external => {
-
-    let code = '';
-    return new Promise((resolve, reject) => {
-      compilers[fullPath]
-      .external(external)
-      .bundle()
-      .on('error', error => reject(error))
-      .on('data', data => code += data)
-      .on('end', () => resolve({dependencies: dependencies[fullPath], code}));
-    })
-  })
-  .catch(error => {
-
-    console.error(error.toString());
+  catch (error) {
 
     if (error._babel) {
+      let message = `Error in file "${ fullPath }":\n  ${ error.message}`;
+      console.error(chalk.red(message));
+      console.error(error.codeFrame);
+
       throw {
         type: 'JavaScript',
         filename,
@@ -51,69 +49,16 @@ export default function transpileJavascript(filename, directory, noParse = [], a
       };
     }
     else {
+      console.error(error);
       throw {
         type: 'Syntax',
         filename,
         message: error.message,
       };
     }
-  });
 
-}
+  }
 
-
-function createCompiler(filename, directory, assetPath, dependencies, noParse) {
-  return browserify(filename, {basedir: directory, debug: true})
-  .transform(babelify)
-  .require(path.join(directory, filename), {expose: '/' + assetPath})
-  .on('dep', data => {
-    if (data.file.indexOf(directory) === 0)
-      dependencies.push(data.file.slice(directory.length + 1));
-  })
-}
-
-
-function findExternal(filename, directory, noParse) {
-
-  let builtIn = ['assert', 'buffer', 'child_process', 'cluster', 'crypto',
-    'dgram', 'dns', 'domain', 'events', 'fs', 'http', 'https', 'net', 'os',
-    'path', 'punycode', 'querystring', 'readline', 'stream', 'string_decoder',
-    'tls', 'tty', 'url', 'util', 'v8', 'vm', 'zlib'
-  ];
-
-  return new Promise((resolve, reject) => {
-
-    let external = [];
-
-    deps({
-      transform: [ babelify ], 
-      ignoreMissing: true,
-      noParse,
-      filter: id => !builtIn.includes(id),
-    })
-    .on('error', err => {
-      reject(err)
-    })
-    .on('missing', (id, parent) => { 
-      if (RegExp('^/').test(id))
-        external.push(id);
-    })
-    .on('file', (path, relative) => {
-      if (path[0] === '/' && path.indexOf(directory) !== 0)
-        console.log(chalk.green('bad import!'), path);
-      // reject({message: `Bad import: ${relative}`});
-    })
-    .on('data', () => { })
-    .on('end', () => resolve(external))
-    .end({file: path.join(directory, filename)});
-
-  });
-
-}
-
-
-function babelify(file, opts) {
-  return require('babelify')(file, Object.assign({presets: 'es2015'}, opts))
 }
 
 

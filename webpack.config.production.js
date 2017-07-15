@@ -7,13 +7,9 @@ module.exports = {
   entry: './src/browser/index.js',
 
   output: {
-    filename: 'main.js',
+    filename: 'browser.js',
     path: __dirname + '/build',
     publicPath: '/',
-  },
-
-  externals: {
-    "/app/article.js" : "require('/app/article.js')"
   },
 
   resolve: {
@@ -41,6 +37,7 @@ module.exports = {
             options: { attrs: { class: 'webpack-styles' } },
           },
           'css-loader',
+          'postcss-loader',
           {
             loader: 'less-loader',
             options: {

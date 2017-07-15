@@ -5,7 +5,7 @@ import bodyParser from 'body-parser';
 import open from 'open';
 
 import config, { writeConfig } from './config';
-import repos, { updateRepoList, getFileList } from './repository_list';
+import repos, { updateRepoList } from './repository_list';
 import { isLocalhost } from './utility';
 
 var router = express.Router();
@@ -21,6 +21,11 @@ router.get('/config', (req, res) => {
 let message = `For security, the Codex Development Server only accepts \
 requests from localhost.`;
 
+router.get('/repositories', async (req, res) => {
+  await Promise.all(repos.map(r => r.ready));
+  res.send(repos.map(r => r.toJSON()));
+});
+
 router.use((req, res, next) => {
   isLocalhost(req) ?  next() : res.status(403).send(message);
 });
@@ -31,13 +36,14 @@ router.post('/config', (req, res) => {
   res.json(config);
 });
 
-router.get('/path', (req, res) => {
-  if (req.query.path.indexOf(os.type() === 'Windows_NT' ? 'C:\\' : '/'))
+router.get('/path', async (req, res) => {
+  try {
+    let stats = await fsp.stat(`${req.query.path}/.git`)
+    res.send(stats.isDirectory() ? 'true' : 'false')
+  }
+  catch (error) {
     res.send('false');
-  else
-    fsp.stat(`${req.query.path}/.git`)
-    .then(stats => res.send(stats.isDirectory() ? 'true' : 'false'))
-    .catch(err => res.send('false'));
+  }
 });
 
 
@@ -47,9 +53,6 @@ router.post('/open', (req, res) => {
 });
 
 
-router.get('/repositories', (req, res) => {
-  Promise.all(repos.map(r => r.ready))
-  .then(() => res.send(getFileList()));
-});
+
 
 

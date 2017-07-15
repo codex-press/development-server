@@ -12,10 +12,6 @@ module.exports = {
     './src/browser/index.js',
   ],
 
-  externals: {
-    "/app/article.js" : "require('/app/article.js')"
-  },
-
   output: {
     filename: 'main.js',
     path: resolve(__dirname, 'build'),
@@ -50,16 +46,6 @@ module.exports = {
         exclude: /node_modules/
       },
       {
-        test: /\.css$/,
-        use: [
-          {
-            loader: 'style-loader',
-            options: { attrs: { class: 'webpack-styles' } },
-          },
-          'css-loader',
-        ]
-      },
-      {
         test: /\.less$/,
         use: [
           {
@@ -67,6 +53,7 @@ module.exports = {
             options: { attrs: { class: 'webpack-styles' } },
           },
           'css-loader',
+          'postcss-loader',
           {
             loader: 'less-loader',
             options: {

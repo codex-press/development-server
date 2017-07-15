@@ -2,6 +2,8 @@ import EventEmitter from 'events';
 import path from 'path';
 import fs from 'fs';
 import fsp from 'fs-promise';
+
+import NodeCache from 'node-cache';
 import chokidar from 'chokidar';
 
 import js from './javascript';
@@ -13,110 +15,160 @@ let sep = path.sep === '\\' ? '\\\\' : '/';
 
 export default class Repository extends EventEmitter {
 
-  constructor({name, path}) {
+  constructor({ name, directory, persistent = true }) {
     super();
 
     this.name = name;
-    this.path = path;
-
+    this.directory = directory;
+    this.broken = false;
     this.files = [];
-    this.external = {};
-    this.inline = {};
-    this.dependencies = {};
-
-    this.loadConfig();
-    this.watch();
+    this.cache = new NodeCache({ stdTTL: 600 });
 
     // promise to the point when all the files are found by chokidar
     this.ready = new Promise(resolve => this._resolve = resolve);
+
+    try {
+      fs.statSync(directory);
+      this.loadConfig();
+      this.watch({ persistent });
+    }
+    catch (e) {
+      this.ready = Promise.resolve();
+      if (e.code === 'ENOENT')
+        this.broken = true;
+      else
+        console.error(e);
+    }
+
   }
 
 
+  findFilename(assetPath) {
+    let asset = this.files.find(f => f.path === assetPath);
+    if (asset)
+      return asset.filename;
+  }
+
+
+  // will need to remove ignored here
+  assets() {
+    return this.files.reduce((list, a) => (
+      !a.ignored && list.includes(a.path) ? list : list.concat([a.path])
+    ), []);
+  }
+
+
+  toJSON() {
+    if (this.broken) {
+      return {
+        name: this.name,
+        path: this.directory,
+        broken: true
+      };
+    }
+
+    return {
+      name: this.name,
+      path: this.directory,
+      assets: this.assets(),
+      files: this.files,
+    };
+  }
+
   loadConfig() {
     try {
-      this.config = JSON.parse(fs.readFileSync(this.path + '/package.json')).codex
+      const json = fs.readFileSync(this.directory + '/package.json');
+      this.config = JSON.parse(json).codex
     }
     catch (e) {
-      if (e.code !== 'ENOENT') console.error(e);
+      if (e.code !== 'ENOENT')
+        console.error(e);
     }
 
     this.config = this.config || {};
-    this.config.noParse = this.config.noParse || [];
+    this.config.script = this.config.script || [];
   }
 
 
   has(assetPath) {
-    return !!this.external[assetPath];
+    return !!this.files.find(f => f.path === assetPath);
   }
 
 
   getMeta(filename) {
     return {
-      noParse: this.config.noParse.includes(filename),
+      script: this.config.script.includes(filename),
     }
   }
 
 
-  code(assetPath) {
-    let asset = this.external[assetPath];
+  async code(assetPath, {useModules = false} = {}) {
+
+    let asset = this.files.find(f => f.path === assetPath);
 
     if (!asset)
-      return Promise.resolve('not found!');
+      return 'not found!';
 
-    // use options to see if it should be transpiled at all...
-    // might just read the file with fs-promise
+    // already compiled
+    let cached = this.cache.get(assetPath);
+    if (cached) return cached;
 
     let config = this.getMeta(asset.filename);
 
-    if (/\.js/.test(assetPath) && config.noParse)
-      return fsp.readFile(path.join(this.path, asset.filename));
-    else if (/\.js/.test(assetPath)) {
-      return js(asset.filename, this.path, this.config.noParse, assetPath)
-      .then(({dependencies, code}) => {
-        this.dependencies[assetPath] = dependencies;
-        return code;
-      });
+    if (/\.css$/.test(assetPath)) {
+      let {dependencies, code} = await css(asset.filename, this.directory, assetPath)
+
+      // this.dependencies[assetPath] = dependencies;
+      return code;
     }
-    else if (/\.css/.test(assetPath)) {
-      return css(asset.filename, this.path, assetPath)
-      .then(({dependencies, code}) => {
-        this.dependencies[assetPath] = dependencies;
+    else if (/\.js$/.test(assetPath)) {
+
+      if (config.script || useModules) {
+        let code = fsp.readFile(path.join(this.directory, asset.filename));
+        //console.log('serving raw');
+        this.cache.set(assetPath, code);
         return code;
-      });
+      }
+      else {
+
+        //console.log('serving compiled');
+        let code = await js({
+          assetPath,
+          filename: asset.filename,
+          directory: this.directory,
+        });
+
+        this.cache.set(assetPath, code);
+
+        return code;
+      }
+
     }
 
   }
 
-
-  filename(assetPath) {
-    return this.external[assetPath].filename;
-  }
-
-
-  inlineFilename(assetPath) {
-    return this.inlieAssets[assetPath].filename;
-  }
 
 
   close() {
-    this.watcher.close()
+    if (this.watcher) this.watcher.close()
   }
 
 
-  watch() {
+
+  watch({ persistent }) {
     let ignored = /node_modules|(^|[\/\\])\../;
-    let path = this.path + '/**/*@(js|css|less|svg|html|woff|woff2|ttf|json)';
-    this.watcher = chokidar.watch(path, { ignored })
-      .on('error', () => console.log('error', this.name))
-      .on('add', path => this.add(path))
-      .on('ready', () => this._resolve())
-      .on('change', path => this.change(path))
-      .on('unlink', path => this.remove(path))
+
+    this.watcher = chokidar.watch(this.directory, { ignored, persistent })
+    .on('error', () => console.log('error', this.name))
+    .on('add', path => this.add(path))
+    .on('ready', this._resolve)
+    .on('change', path => this.change(path))
+    .on('unlink', path => this.remove(path))
   }
 
 
   change(filename) {
-    filename = filename.slice(this.path.length + 1);
+    filename = filename.slice(this.directory.length + 1);
 
     if (filename === 'package.json') {
       this.loadConfig();
@@ -128,6 +180,9 @@ export default class Repository extends EventEmitter {
     else if (/.json$/.test(filename)) {
       return;
     }
+
+    let assetPath = this.assetPath(filename);
+    this.cache.del(assetPath);
 
     // XXX use dependency tree to get all assetPaths being updated
 
@@ -143,66 +198,61 @@ export default class Repository extends EventEmitter {
   }
 
 
+  // XXX
+  shouldIgnore(filename) {
+    return false;
+  }
+
+
   add(filename) {
-    filename = filename.slice(this.path.length + 1);
+    filename = filename.slice(this.directory.length + 1);
 
-    console.log(this.name, filename);
-
-    if (filename !== 'package.json')
-      this.files.push({filename});
+    if (process.env.NODE_ENV !== 'test')
+      console.log(this.name + ': ' + filename);
 
     let assetPath = this.assetPath(filename);
+
+    if (filename !== 'package.json') {
+      this.files.push({
+        filename,
+        path: this.assetPath(filename),
+        ignored: this.shouldIgnore(filename),
+      });
+    }
+
     if (assetPath) {
 
       // XXX there's an issue where if the existing file is removed, this one
       // won't come in to replace it.... hrm
+
+      // use .css for .less 
       let shouldReplace = (
-        !this.external[assetPath] ||
-        this.external[assetPath].filename.length > filename.length
+        !this.assets[assetPath] ||
+        this.assets[assetPath].filename.length > filename.length
       );
 
       if (shouldReplace)
-        this.external[assetPath] = {assetPath, filename};
-    }
+        this.assets[assetPath] = { assetPath, filename };
 
-    let inlinePath = this.inlineAssetPath(filename);
-    if (inlinePath) {
-      this.inline[inlinePath] = {assetPath: inlinePath, filename};
     }
-
-    // XXX would be nice to keep track of missing files in the dependency
-    // tree and update as well
 
     this.emit('update', {add: [filename]});
   }
 
 
   assetPath(filename) {
-    let cssRE = /(.*?)(\.css|\.less|[/\\]?index\.css|[/\\]?index\.less)$/;
-    let jsRE = /(.*?)(\.js|\/?index\.dev\.js|\/?index\.js)$/;
+    let ext = path.extname(filename).slice(1);
 
     let assetPath = '';
-    if (cssRE.test(filename))
-      assetPath = filename.match(cssRE)[1] + '.css';
-    else if (jsRE.test(filename))
-      assetPath = filename.match(jsRE)[1] + '.js';
+    if ('less' == ext)
+      assetPath = filename.slice(0, -4) + 'css';
+    else if (['css','js'].includes(ext))
+      assetPath = filename
     else
       return null;
 
-    if (assetPath[0] !== '.')
-      assetPath = '/' + assetPath;
-
     // Windows backslash nightmare
-    return this.name + assetPath.replace(RegExp(sep, 'g'), '/');
+    return '/' + this.name + '/' + assetPath.replace(RegExp(sep, 'g'), '/');
   }
-
-
-  inlineAssetPath(filename) {
-    let re = /(.*?)\.(svg|html|js)/;
-
-    if (re.test(filename))
-      return path.join(this.name, filename);
-  }
-
 
 }

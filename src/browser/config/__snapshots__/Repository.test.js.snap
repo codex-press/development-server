@@ -1,0 +1,29 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Renders a Repository 1`] = `
+<div
+  className="Repository"
+>
+  <h4
+    className="name"
+  >
+    app
+  </h4>
+  <div
+    className="path"
+    onClick={[Function]}
+  >
+    /Users/omar/code/codex_press/app
+  </div>
+  <div
+    className="expand"
+    onClick={[Function]}
+  >
+    see more
+  </div>
+  <div>
+    0
+     files
+  </div>
+</div>
+`;

@@ -1,0 +1,42 @@
+@import (reference) "../index.less";
+
+.BuildOutput {
+  position: fixed;
+  width: 500px;
+  left: calc(50% - 250px);
+  top: calc(50% - 250px);
+  max-height: 50%;
+  padding: 1em;
+  overflow: auto;
+
+  &:extend(.modal);
+
+  display: flex;
+  overflow:hide;
+  flex-flow: column nowrap;
+
+  .close {
+    position: absolute;
+    user-select: none;
+    right: 0.3rem;
+    top: 0.3rem;
+    font-size: 2.3rem;
+    line-height: 0.8;
+    cursor: pointer;
+  }
+
+  // minimized it's down in the lefthand corner
+  &.minimal {
+    bottom: 1rem;    
+    left: 1rem;    
+    width: 300px;
+    height: initial;
+    top: initial;
+  }
+ 
+  &.minimal .close {
+    display: none;
+  }
+}
+
+

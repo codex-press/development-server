@@ -1,59 +1,44 @@
 
-
-// Small wrapper on web socket API that returns a Promise to the nextEvent()
-// for use in redux-sagas.
-
+// Small wrapper on web socket API that reconnects automatically
+// fires events: CONNECT, DISCONNECT, RECONNECT and MESSAGE
 export default class Socket {
 
-
-  constructor() {
-    this._promise = new Promise(resolve => this._resolve = resolve);
-  }
-
-
-  nextEvent() {
-    return this._promise;
-  }
-
-
-  event(e) {
-    this._resolve(e);
-    this._promise = new Promise(resolve => this._resolve = resolve);
+  constructor(callback) {
+    this.callback = callback;
+    this.connect();
   }
 
 
   connect() {
-    let resolved = false;
-
     let ws = new WebSocket('ws://' + location.host);
-
     ws.addEventListener('message', this.onMessage.bind(this));
     ws.addEventListener('close', this.onClose.bind(this));
     ws.addEventListener('open', this.onOpen.bind(this))
   }
 
 
+  onMessage(e) {
+    this.callback({ type: 'MESSAGE', data: JSON.parse(e.data) });
+  }
+
+
   onClose(error) {
     if (!this.reconnectTimeout)
-      this.event({type: 'DISCONNECT'});
-    this.reconnectTimeout = setTimeout(this.connect.bind(this), 2000);
+      this.callback({ type: 'DISCONNECT' });
+    this.reconnectTimeout = setTimeout(() => this.connect(), 2000);
   }
 
 
   onOpen() {
-    this.event({type: 'CONNECT'});
-    if (this.reconnectTimeout) {
+    if (!this.reconnectTimeout) {
+      this.callback({ type: 'CONNECT' });
+    }
+    else {
+      this.callback({ type: 'RECONNECT' });
       clearTimeout(this.reconnectTimeout);
       this.reconnectTimeout = null;
     }
   }
-
-
-  onMessage(e) {
-    let data = JSON.parse(e.data);
-    this.event({type: 'MESSAGE', data});
-  }
-
 
 }
 

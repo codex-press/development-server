@@ -1,42 +1,62 @@
 import path from 'path';
 import chalk from 'chalk';
+import uaParser from 'ua-parser-js';
+import url from 'url';
 
 import config from './config';
 import { getRepo } from './repository_list';
 import { broadcast } from './socket';
 
 
-export function sendAsset(req, res, next) {
+export async function sendAsset(req, res, next) {
 
-  // serves js/css for dev server
-  if (/\/main\.(js|css)/.test(req.path))
-    return res.sendFile(path.resolve(__dirname + '/..') + req.path);
+  if (req.path === '/dev-server.js')
+    return res.sendFile(path.join(__dirname, '../browser.js'));
 
-  let assetPath = req.path.slice(1);
+  let assetPath = req.path;
   let repo = getRepo(assetPath);
+
+  // required for using this to serve assets for Codex server in development
+  if (process.env.CP_ENV === 'development') {
+    res.setHeader('Access-Control-Allow-Methods', 'GET');
+    res.setHeader('Access-Control-Allow-Origin', '*');
+  }
 
   if (!repo || !repo.has(assetPath))
     return next();
 
-  // required for using this to serve assets for Codex server in development
-  res.setHeader('Access-Control-Allow-Methods', 'GET');
-  res.setHeader('Access-Control-Allow-Origin', '*');
+  let filename = path.join(repo.name, repo.findFilename(assetPath));
+  console.log(chalk.cyan(`serving: /${ filename }`));
 
-  if (/\.js/.test(req.path))
-    res.setHeader('Content-Type', 'application/javascript');
-  else if (/\.css/.test(req.path)) 
-    res.setHeader('Content-Type', 'text/css');
+  let useModules = (
+    req.get('referrer') &&
+    'modules' in url.parse(req.get('referrer'), true).query
+  );
 
-  let filename = path.join(repo.name, repo.filename(assetPath));
-  console.log(chalk.cyan(`serving: ${filename}`));
+  let ext = path.extname(req.path).slice(1);
 
+  try {
+    let code = await repo.code(assetPath, { useModules })
 
-  repo.code(assetPath)
-  .then(code => res.send(code))
-  .catch(error => {
-    let message = error.message.replace(/"/g, '\\"');
-    res.send(`console.error("${ message }");`)
-  });
+    if ('js' === ext)
+      res.setHeader('Content-Type', 'application/javascript');
+    else if ('css' === ext) 
+      res.setHeader('Content-Type', 'text/css');
+
+    res.send(code);
+  }
+  catch (error) {
+    console.log(error)
+    if ('js' === ext) {
+      res.setHeader('Content-Type', 'application/javascript');
+      let message = error.message.replace(/"/g, '\\"');
+      res.send(`console.error("${ message }");`)
+    }
+    else {
+      res.send(error.message);
+    }
+  }
+
 }
 
 
@@ -55,19 +75,24 @@ export function sendInline(req, res, next) {
 
 
 export function sendHTML(req, res) {
-  let contentOrigin = 'https://usercontent.codex.press';
-  let codexOrigin = 'https://codex.press';
-  let apiOrigin = 'http://api.dev';
+  let env = 'production';
+  let contentOrigin = 'https://usercontent.staging.codex.press';
+  let codexOrigin = 'https://staging.codex.press';
+  let apiOrigin = 'http://staging.codex.press/api';
 
-  let script = '/main.js';
+  let script = '/dev-server.js';
   let webpack = '';
   let webpackWS = '';
 
-  if (process.env.CP_ENV === 'development') {
+  if (process.env.NODE_ENV === 'development') {
+    env = 'development';
+    contentOrigin = 'http://localhost';
+    codexOrigin = 'http://localhost';
+    apiOrigin = 'http://api.dev';
+
     script = 'http://localhost:8001/main.js';
     webpack = 'http://localhost:8001/';
     webpackWS = 'ws://localhost:8001/';
-    codexOrigin = 'http://localhost';
   }
 
   let csp = (`
@@ -88,7 +113,18 @@ export function sendHTML(req, res) {
   if (!config.disable_csp)
     res.setHeader('Content-Security-Policy', csp);
 
-  res.render('index.pug', { script });
+  const data = { script, contentOrigin, codexOrigin, apiOrigin, env };
+  res.render('index.pug', data);
 }
 
+
+function browserAcceptsModules(userAgentString) {
+  let ua = uaParser(userAgentString);
+  let toInt = str => typeof(str) == 'string' ? str.split(".")[0] : 0;
+
+  return (
+    (ua.browser.name == 'Safari' && toInt(ua.browser.version) >= 10) ||
+    (ua.browser.name == 'Mobile Safari' && toInt(ua.browser.version) >= 10) //||
+  );
+}
 

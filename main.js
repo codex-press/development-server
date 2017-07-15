@@ -28,7 +28,7 @@ if (cluster.isMaster) {
 
 if (cluster.isWorker) {
   process.chdir(path.dirname(require.main.filename) + '/..')
-  process.env.CP_ENV = 'production';
+  process.env.NODE_ENV = 'production';
   process.env.CP_PORT = argv.port;
   process.env.CP_OPEN = (argv.open != false);
   require('./build/server/app.js');

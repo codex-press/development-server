@@ -1,15 +1,10 @@
-import chokidar from 'chokidar';
-
 import config from './config';
 import { broadcast } from './socket';
 import Repository from './repository';
 
-let publicWatcher = chokidar.watch(['./build/main.js', './build/main.css'])
-.on('change', name => broadcast({publicUpdate: name}));
-
-
 var list = [];
 export {list as default};
+
 
 
 export function updateRepoList() {
@@ -30,8 +25,8 @@ export function updateRepoList() {
     if (list.find(r => r.name === name))
       return;
 
-    let path = config.repositories[name].path;
-    let repo = new Repository({name, path});
+    let directory = config.repositories[name].path;
+    let repo = new Repository({name, directory});
 
     repo.on('update', e => broadcast(e));
 
@@ -41,20 +36,15 @@ export function updateRepoList() {
 
 
 export function getRepo(assetPath) {
-  let repoName = assetPath.match(/(.+?)[./]/)[1];
+  let repoName = assetPath.match(/[/](.+?)[./]/)[1];
   return list.find(r => r.name === repoName);
 }
 
 
+// XXX THIS IS TERRIBLE
 export function getFileList() {
   return list.reduce((list,r) => {
-    list[r.name] = {
-      name: r.name,
-      path: r.path,
-      external: r.external,
-      inline: r.inline, 
-      files: r.files
-    };
+    list[r.name] = r.toJSON()
     return list;
   }, {});
 }

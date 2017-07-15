@@ -1,0 +1,52 @@
+@import (reference) "../index.less";
+
+.Commit {
+  flex: 1 1 400px;
+  min-height: 150px;
+  display: flex;
+  flex-flow: column nowrap;
+
+
+  .BuildOutput.minimal & {
+    flex: 1 1 auto;
+    min-height: auto;
+
+    .message { 
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    pre {
+      display: none;
+    }
+
+  }
+
+
+
+  h4 {
+    margin: 0;
+  }
+
+  .sha {
+    font-family: @mono;    
+  }
+
+  .progress-bar {
+    margin: 0.5rem 0;
+  }
+
+  pre {
+    flex: 1 1 auto;
+    font-family: @mono;
+    border-radius: 4px;
+    margin: 1rem 0;
+    background: #ddd;
+    color: #333;
+    padding: 0.5rem;
+    overflow: scroll;
+  }
+
+}
+

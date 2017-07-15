@@ -1,55 +1,65 @@
-import { apiOrigin } from './env.js';
 
 
-export function isLocalhost() {
-  return ['localhost','127.0.0.1'].includes(location.hostname);
-}
+export const isLocalhost = ['localhost','127.0.0.1'].includes(location.hostname);
 
+export async function api(path, { method, query, body, token } = {}) {
 
-export function api(route, method = 'GET', data, options = {}) {
+  let request = {
+    method: (method || 'GET').toUpperCase(),
+    headers: { Accept: 'application/json' }
+  };
 
-  let request = { headers: {}, method };
+  if (token)
+    request.headers['Authorization'] = `Token token="${ token }"`;
 
-  if (data) {
-    request.body = JSON.stringify(data)
+  if (body instanceof FormData)
+    request.body = body
+  else if (body) {
+    request.body = JSON.stringify(body)
     request.headers['Content-Type'] = 'application/json';
   }
 
-  const token = sessionStorage.token;
-  if (token && options.auth !== false)
-    request.headers['Authorization'] = `Token token="${ token }"`;
-
-  let origin = 'origin' in options ? options.origin : apiOrigin;
-
-  return fetch(origin + route, request)
-  .then(response => {
-    if (response.ok)
-      return response.json()
-    else
-      throw response
-  });
-}
-
-
-export function devAPI(route, method = 'GET', data) {
-
-  let request = { method };
-
-  if (data) {
-    request.body = JSON.stringify(data)
-    request.headers = {'Content-Type': 'application/json'}
+  let queryString = '';
+  if (query && Object.keys(query).length) {
+    let pairs = Object.keys(query).map(k => {
+      if (query[k] instanceof Array)
+        return query[k].map(v => k + '[]=' + encodeURIComponent(v)).join('&')
+      else
+        return k + '=' + encodeURIComponent(query[k])
+    })
+    queryString = '?' + pairs.join('&');
+  }
+  
+  let response;
+  try {
+    response = await fetch(path + queryString, request);
+  }
+  catch (error) {
+    error.fetchError = true;
+    throw error;
   }
 
-  return fetch(`/api${route}`, request)
-  .then(response => {
-    if (response.ok)
-      return response.json()
-    else
-      throw response
-  });
+  // we do this so that an empty body is returned as an empty object and
+  // doesn't throw errors when you ask for JSON
+  body = await response.text();
+  let json = {};
+  if (body) {
+    try {
+      json = JSON.parse(body);
+    }
+    catch (e) {
+    }
+  }
+
+  if (response.ok)
+    return json;
+  else {
+    if (body)
+      response.json = json;
+    throw response;
+  }
 
 }
-
 
 export function addStylesheet(url, attrs = {}) {
   return new Promise((resolve, reject) => {
@@ -88,7 +98,7 @@ export function debounce(time, func, context) {
 
 
 export function openFileSystem(path) {
-  devAPI(`/open?path=${path}`, 'post');
+  api(`/api/open?path=${path}`, { method: 'post' });
 }
 
 
