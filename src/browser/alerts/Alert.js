@@ -5,9 +5,9 @@ import './Alert.less';
 export default function Alert({
   head = '',
   body = '',
-  type = 'info',
-  buttons = {},
+  type = '',
   dismissable = true,
+  buttons = {},
   remove,
 }) {
 
@@ -18,13 +18,13 @@ export default function Alert({
 
   return (
     <div className={ 'Alert ' + type }>
+      { dismissable && 
+        <div className="close" onClick={ remove } >&times;</div>
+      }
       { head && <h2>{ head }</h2> }
       { body && <div dangerouslySetInnerHTML={ { __html: body } } /> }
       { Object.keys(buttons).map((b, n) =>
         <button key={ n } onClick={ buttonClick(b) }> { b } </button>)
-      }
-      { dismissable && 
-        <div className="close" onClick={ remove } >&times;</div>
       }
     </div>
   );

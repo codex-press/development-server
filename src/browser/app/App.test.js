@@ -13,7 +13,7 @@ test('Renders nothing when it is loading', () => {
 
 
 test('Renders only alert container when not on localhost', () => {
-  utility.isLocalhost = () => false;
+  utility.isLocalhost = false;
   let props = {
     ui: Map({ token_status: 'valid' }),
     config: Map({})
@@ -27,7 +27,7 @@ test('Renders only alert container when not on localhost', () => {
 
 
 test('Renders login when access token is invalid', () => {
-  utility.isLocalhost = () => true;
+  utility.isLocalhost = true;
 
   let props = {
     ui: Map({ token_status: 'invalid' }),
@@ -39,7 +39,7 @@ test('Renders login when access token is invalid', () => {
 
 
 test('Renders Nav and Modals when on localhost', () => {
-  utility.isLocalhost = () => true;
+  utility.isLocalhost = true;
 
   let props = {
     ui: Map({ token_status: 'valid' }),

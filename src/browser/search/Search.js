@@ -4,6 +4,7 @@ import { connect } from 'react-redux';
 import Article from './Article';
 import { debounce, api } from '../utility';
 import * as env from '../env';
+import { apiError } from '../actions';
 
 import './Search.less';
 
@@ -13,6 +14,9 @@ const mapStateToProps = state => {
   }
 }
 
+const mapDispatchToProps = {
+  apiError
+}
 
 export class Search extends React.Component {
 
@@ -154,12 +158,17 @@ export class Search extends React.Component {
     else 
       opts.query = { limit: 20, order: 'updated_at_desc' };
 
-    const articles = await api(env.apiOrigin + '/articles', opts);
+    try {
+      const articles = await api(env.apiOrigin + '/articles', opts);
 
-    if (this.articlesContainer)
-      this.articlesContainer.scrollTop = 0;
+      if (this.articlesContainer)
+        this.articlesContainer.scrollTop = 0;
 
-    this.setState({articles, selected: null})
+      this.setState({articles, selected: null})
+    }
+    catch (error) {
+      this.props.apiError(error)
+    }
   }
 
 
@@ -200,6 +209,8 @@ export class Search extends React.Component {
 
 
 export default connect(
-  mapStateToProps
+  mapStateToProps,
+  mapDispatchToProps
 )(Search);
+
 

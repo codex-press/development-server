@@ -1,17 +1,15 @@
 import WebSocket from 'ws';
-import chalk from 'chalk';
 
+import * as log from './log';
 import config from './config';
-import { getFileList } from './repository_list';
 
 let ws;
 
 export default function start(server) {
   ws = new WebSocket.Server({server});
 
-  ws.on('connection', function connection(ws) {
-    let client = ws._socket.remoteAddress + ':' + ws._socket.remotePort;
-    console.log(chalk.magenta(`WebSocket connect: ${ client }`));
+  ws.on('connection', ws => {
+    log.magenta(`WebSocket connected: ${ ws._socket.remoteAddress }`);
   });
 
 }

@@ -2,7 +2,7 @@ import { api } from '../utility';
 import Socket from '../socket';
 import * as env from '../env';
 import { addAlert, reload } from '../actions';
-
+import { reloadAssetPaths } from '../article/render';
 
 export const FETCH_ARTICLE = 'FETCH_ARTICLE';
 export const CLEAR_ARTICLE = 'CLEAR_ARTICLE';
@@ -28,7 +28,7 @@ export function fetchArticle(url, domain, token) {
 
     let article;
     try {
-      article = await api(env.contentOrigin + url + '.json', { query, token });
+      article = await api(env.codexOrigin + url + '.json', { query, token });
     }
     catch (error) {
       if (error.json)
@@ -85,49 +85,36 @@ export function receiveRepositories(data) {
 
 let socket;
 export function createSocket() {
-  return dispatch => {
+  return (dispatch, getState) => {
 
     dispatch({ type: CREATE_SOCKET });
 
     if (!socket)
-      socket = new Socket(socketEventHandler(dispatch));
+      socket = new Socket(socketEventHandler(dispatch, getState));
 
   }
 }
 
-function socketEventHandler(dispatch) {
+export function socketEventHandler(dispatch, getState) {
   return event => {
 
-    console.log('socket event', event);
+    // console.log('socket event', event);
 
     if (event.type === 'DISCONNECT') {
       dispatch(addAlert({
         id: 'connect',
-        head: 'Lost Connection to Development Server',
-        type: 'error',
+        body: 'Lost Connection to Development Server',
+        type: 'negative',
         timeout: false
       }));
     }
     else if (event.type === 'RECONNECT') {
       dispatch(addAlert({
         id: 'connect',
-        head: 'Reconnected to Development Server',
-        type: 'info',
+        body: 'Reconnected to Development Server',
       }));
     }
-    else if (event.type === 'MESSAGE' && event.data.change) {
-
-      dispatch(addAlert({
-        id: event.data.change[0],
-        body: 'change: ' + event.data.change,
-        type: 'info',
-      }));
-
-      if (event.data.change[0].endsWith('.js'))
-        dispatch(reload());
-
-    }
-    else if (event.type === 'MESSAGE' && event.data.error) {
+    else if (event.type === 'MESSAGE' && event.data.event === 'error') {
 
       let head;
       if (event.data.error.filename)
@@ -145,12 +132,31 @@ function socketEventHandler(dispatch) {
         body += event.data.error.extract;
 
       dispatch(addAlert({
-        id: event.data.assetPath,
+        id: event.data.filename,
         head,
         body,
         type: 'error',
         timeout: false
       }));
+
+    }
+    else if (event.type === 'MESSAGE') {
+
+      dispatch(addAlert({
+        id: event.data.filename,
+        body:
+          `File ${ event.data.event }d in <b>${ event.data.repositoryName }</b>:
+          ${ event.data.filename }`,
+      }));
+
+      const articleAssets = getState().get('article')
+        .filter((v,k) => ['assets','header_path','footer_path'].includes(k))
+        .toJS();
+
+      const reloadNeeded = reloadAssetPaths(event.data, articleAssets);
+
+      if (reloadNeeded)
+        dispatch(reload());
 
     }
   

@@ -4,6 +4,11 @@ exports[`Renders an alert 1`] = `
 <div
   className="Alert info"
 >
+  <div
+    className="close"
+  >
+    ×
+  </div>
   <h2>
     heading
   </h2>

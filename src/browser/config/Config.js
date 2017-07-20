@@ -63,7 +63,8 @@ export function Config(props) {
   }
 
   const changeDomain = e => {
-    props.changeConfig('domain', e.target.value)
+    let value = e.target.value === "None" ? '' : e.target.value;
+    props.changeConfig('domain', value)
     props.reload();
   }
 

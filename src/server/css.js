@@ -6,38 +6,41 @@ import postcss from 'postcss';
 import autoprefixer from 'autoprefixer';
 
 
-export default function processCSS(filename, directory) {
+export default async function processCSS(args) {
+  const { assetPath, filename, directory, repositoryName } = args;
+
+  const fullPath = path.join(directory, filename);
 
   if (/\.css$/.test(filename)) {
-    return fsp.readFile(path.join(directory, filename), {encoding:'utf8'})
-    .then(css => postcss([autoprefixer]).process(css))
-    .then(out => { 
-      res.setHeader('content-type', 'text/css');
-      res.send(out.css);
-    });
+
+    const source = await fsp.readFile(fullPath, 'utf8')
+    const css = postcss([autoprefixer]).process(source);
+
+    return css;
   }
   else if (/\.less$/.test(filename)) {
 
-    let dependencies = [];
+    try {
 
-    let opts = {
-      filename: path.join(directory, filename),
-      strictMath: true,
-      strictUnits: true,
-      sourceMap: {
-        outputSourceFiles: true,
-        sourceMapFileInline: true,
-      },
-    };
+      const source = await fsp.readFile(fullPath, 'utf8');
 
-    return fsp.readFile(path.join(directory, filename), 'utf8')
-    .then(out => less.render(out, opts))
-    .then(out => {
-      dependencies = out.imports;
-      return postcss([autoprefixer]).process(out.css);
-    })
-    .then(out => ({dependencies, code: out.css}))
-    .catch(error => {
+      let out = await less.render(source, {
+        filename: fullPath,
+        strictMath: true,
+        strictUnits: true,
+        sourceMap: {
+          outputSourceFiles: true,
+          sourceMapFileInline: true,
+        },
+      });
+
+      const deps = out.imports.map(i => i.slice(directory.length + 1));
+
+      out = await postcss([autoprefixer]).process(out.css, { map: true });
+
+      return { deps, code: out.css };
+    }
+    catch (error) {
       console.log(error);
 
       throw {
@@ -47,8 +50,9 @@ export default function processCSS(filename, directory) {
         line: error.line, 
         column: error.index,
         extract: error.extract ? error.extract.join('\n') : '',
-      }
-    })
+      };
+    }
+
   }
 
 }

@@ -81,12 +81,29 @@ button.loading {
 }
 
 
-.modal {
+
+.modal,
+.modal-colors {
   color: white;
   border-radius: 4px;
   box-shadow: inset 0 0 1px #555, 0 0 2px #000;
   background: linear-gradient(rgba(30,30,30,0.95), rgba(0,0,0,0.9));
   z-index: @maxZIndex;
+}
+
+.modal {
+  position: fixed;
+  width: 500px;
+  max-width: calc(100% - 2rem);
+  height: 600px;
+  max-height: calc(100% - 2rem);
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  margin: auto;
+  padding: 1em;
+  overflow: auto;
 }
 
 

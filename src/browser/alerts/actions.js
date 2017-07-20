@@ -4,7 +4,7 @@ export const ADD_ALERT = 'ADD_ALERT';
 export const REMOVE_ALERT = 'REMOVE_ALERT';
 
 let timeouts = {};
-export var lastAlertID = 0;
+export var lastAlertID;
 export function addAlert(attrs) {
   return dispatch => {
 
@@ -12,9 +12,7 @@ export function addAlert(attrs) {
       attrs = { body: attrs };
 
     attrs = {
-      id: lastAlertID++,
-      dismissable: true,
-      type: 'info',
+      id: Math.random(),
       timeout: 5000,
       ...attrs,
     }

@@ -7,6 +7,9 @@ export function config(state = Map({}), action) {
 
   switch (action.type) {
 
+    case actions.CLEAR_TOKEN:
+      return state.set('token', null);
+
     case actions.RECEIVE_TOKEN:
       return state.set('token', action.value);
 

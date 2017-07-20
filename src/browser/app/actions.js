@@ -4,6 +4,8 @@ import * as env from '../env';
 import renderArticle from '../article/render';
 import * as actions from '../actions';
 
+export const API_ERROR = 'API_ERROR';
+
 export const INITIALIZE = 'INITIALIZE';
 export const RELOAD = 'RELOAD';
 export const NAVIGATE = 'NAVIGATE';
@@ -21,6 +23,26 @@ export const ARTICLE_CHANGED = 'ARTICLE_CHANGED';
 
 
 
+export function apiError(error) {
+  return dispatch => {
+
+    dispatch({
+      type: API_ERROR,
+      status: error.status,
+      message: error.message,
+    });
+
+    if (error.status === 401) {
+      dispatch(actions.clearToken());      
+    }
+    else {
+      throw error;
+    }
+
+  }
+}
+
+
 export function initialize() {
   return async dispatch => {
 
@@ -36,10 +58,13 @@ export function initialize() {
         ));
       }
 
-      renderArticle(state.article, state.repositories);
+      const repositories = Object.keys(state.repositories).map(k => state.repositories[k]);
+      renderArticle(state.article, repositories);
 
       if (isLocalhost)
         dispatch(createCable(state.config.token, state.account.id));
+
+      dispatch(actions.createSocket());
 
       return;
     }
@@ -105,13 +130,11 @@ export function restoreState(state) {
     if ('reduxState' in window.sessionStorage) {
       try {
         let state = JSON.parse(window.sessionStorage.reduxState)
-        console.log('found in sessionstorage', state);
         window.sessionStorage.removeItem('reduxState');
 
         // recreate timeouts for alerts
         Object.keys(state.alerts).forEach(id => {
           let alert = state.alerts[id];
-          console.log(alert.timeout);
           if (alert.timeout) {
             alert.timeoutID = setTimeout(
               () => dispatch(actions.removeAlert(id)),

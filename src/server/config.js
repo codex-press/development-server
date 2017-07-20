@@ -4,10 +4,10 @@ import path from 'path';
 import mkdirp from 'mkdirp';
 
 var config = readConfig();
-
 export { config as default };
 
-export const version = require('../../package.json').version;
+const version = require('../../package.json').version;
+
 
 export function writeConfig(newConfig) {
 
@@ -23,6 +23,7 @@ export function writeConfig(newConfig) {
   fs.writeFileSync(configPath(), JSON.stringify(config), "utf8");
 }
 
+
 function readConfig() {
   try {
     return JSON.parse(fs.readFileSync(configPath()));
@@ -37,6 +38,7 @@ function readConfig() {
     };
   }
 }
+
 
 // https://medium.com/@ccnokes/how-to-store-user-data-in-electron-3ba6bf66bc1e#.x725pogpf
 function configPath() {
@@ -55,5 +57,6 @@ function configPath() {
       return os.homedir() + '/.config/codex/development_server.json';
   }
 }
+
 
 

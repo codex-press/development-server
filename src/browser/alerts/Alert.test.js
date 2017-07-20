@@ -17,7 +17,7 @@ test('Renders an alert', () => {
 test('Calls remove function onClick', () => {
   const remove = jest.fn();
   let c = shallow(<Alert remove={ remove } />);
-  c.simulate('click');
+  c.find('.close').simulate('click');
   expect(remove.mock.calls.length).toBe(1);
 });
 

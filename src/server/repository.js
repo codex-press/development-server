@@ -4,239 +4,118 @@ import fs from 'fs';
 import fsp from 'fs-promise';
 
 import NodeCache from 'node-cache';
-import chokidar from 'chokidar';
+import glob from 'glob';
+import sane from 'sane';
+import micromatch from 'micromatch';
 
+import * as log from './log';
 import js from './javascript';
 import css from './css';
 
 
-// windows backslash nightmare
-let sep = path.sep === '\\' ? '\\\\' : '/';
-
 export default class Repository extends EventEmitter {
 
-  constructor({ name, directory, persistent = true }) {
+  constructor({ name, directory, watch = true }) {
     super();
-
-    this.name = name;
-    this.directory = directory;
     this.broken = false;
-    this.files = [];
-    this.cache = new NodeCache({ stdTTL: 600 });
+    this.name = name;
+    this.dir = path.normalize(directory);
+    if (this.dir.endsWith(path.sep))
+      this.dir = this.dir.slice(0, -1);
+    this.loadFiles();
+    if (watch) this.watch();
+  }
 
-    // promise to the point when all the files are found by chokidar
-    this.ready = new Promise(resolve => this._resolve = resolve);
 
+  loadFiles() {
     try {
-      fs.statSync(directory);
+      fs.statSync(this.dir);
+      this.files = [];
+      this.cache = new NodeCache({ stdTTL: 600 });
       this.loadConfig();
-      this.watch({ persistent });
+      this.ready = new Promise(resolve => {
+        let opts = { cwd: this.dir, ignore: 'node_modules/**', nodir: true };
+        glob('**/*', opts, (error, files) => {
+          this.files = files.map(filename => ({ filename }))
+          this.dedupeFiles();
+          resolve();
+        });
+      });
     }
-    catch (e) {
+    catch (error) {
+      this.broken = true;
       this.ready = Promise.resolve();
-      if (e.code === 'ENOENT')
-        this.broken = true;
-      else
-        console.error(e);
+      if (error.code !== 'ENOENT')
+        log.error(error);
     }
-
   }
 
 
-  findFilename(assetPath) {
-    let asset = this.files.find(f => f.path === assetPath);
-    if (asset)
-      return asset.filename;
+  watch() {
+    this.watcher = sane(this.dir, { ignored: /node_modules/ })
+    .on('error',  () => log.error('error', this.name))
+    .on('add',    path => this.add(path))
+    .on('change', path => this.change(path))
+    .on('delete', path => this.remove(path));
   }
 
 
-  // will need to remove ignored here
-  assets() {
-    return this.files.reduce((list, a) => (
-      !a.ignored && list.includes(a.path) ? list : list.concat([a.path])
-    ), []);
+  close() {
+    if (this.watcher) this.watcher.close();
   }
 
 
   toJSON() {
+
     if (this.broken) {
       return {
         name: this.name,
-        path: this.directory,
+        path: this.dir,
         broken: true
       };
     }
 
+    const assets = this.files
+    .map(a => a.path)
+    .filter(p => !!p)
+    .sort((a, b) => {
+      if (a < b)
+        return -1;
+      else if (a > b)
+        return 1;
+      else
+        return 0;
+    });
+
+    const files = this.files
+    .sort((a, b) => {
+      if (a.filename < b.filename)
+        return -1;
+      else if (a.filename > b.filename)
+        return 1;
+      else
+        return 0;
+    });
+
+
     return {
       name: this.name,
-      path: this.directory,
-      assets: this.assets(),
-      files: this.files,
+      path: this.dir,
+      assets,
+      files,
     };
   }
 
-  loadConfig() {
-    try {
-      const json = fs.readFileSync(this.directory + '/package.json');
-      this.config = JSON.parse(json).codex
-    }
-    catch (e) {
-      if (e.code !== 'ENOENT')
-        console.error(e);
-    }
 
-    this.config = this.config || {};
-    this.config.script = this.config.script || [];
+  findAsset(assetPath) {
+    return this.files.find(f => f.path === assetPath);
   }
 
 
-  has(assetPath) {
-    return !!this.files.find(f => f.path === assetPath);
-  }
-
-
-  getMeta(filename) {
-    return {
-      script: this.config.script.includes(filename),
-    }
-  }
-
-
-  async code(assetPath, {useModules = false} = {}) {
-
-    let asset = this.files.find(f => f.path === assetPath);
-
-    if (!asset)
-      return 'not found!';
-
-    // already compiled
-    let cached = this.cache.get(assetPath);
-    if (cached) return cached;
-
-    let config = this.getMeta(asset.filename);
-
-    if (/\.css$/.test(assetPath)) {
-      let {dependencies, code} = await css(asset.filename, this.directory, assetPath)
-
-      // this.dependencies[assetPath] = dependencies;
-      return code;
-    }
-    else if (/\.js$/.test(assetPath)) {
-
-      if (config.script || useModules) {
-        let code = fsp.readFile(path.join(this.directory, asset.filename));
-        //console.log('serving raw');
-        this.cache.set(assetPath, code);
-        return code;
-      }
-      else {
-
-        //console.log('serving compiled');
-        let code = await js({
-          assetPath,
-          filename: asset.filename,
-          directory: this.directory,
-        });
-
-        this.cache.set(assetPath, code);
-
-        return code;
-      }
-
-    }
-
-  }
-
-
-
-  close() {
-    if (this.watcher) this.watcher.close()
-  }
-
-
-
-  watch({ persistent }) {
-    let ignored = /node_modules|(^|[\/\\])\../;
-
-    this.watcher = chokidar.watch(this.directory, { ignored, persistent })
-    .on('error', () => console.log('error', this.name))
-    .on('add', path => this.add(path))
-    .on('ready', this._resolve)
-    .on('change', path => this.change(path))
-    .on('unlink', path => this.remove(path))
-  }
-
-
-  change(filename) {
-    filename = filename.slice(this.directory.length + 1);
-
-    if (filename === 'package.json') {
-      this.loadConfig();
-      return;
-    }
-    // ignore other .json files. unfortunately there's a bug in chokidar where
-    // it will never file 'ready' if you give it an array of paths or add one
-    // later :/
-    else if (/.json$/.test(filename)) {
-      return;
-    }
-
-    let assetPath = this.assetPath(filename);
-    this.cache.del(assetPath);
-
-    // XXX use dependency tree to get all assetPaths being updated
-
-    this.emit('update', {change: [filename]});
-  }
-
-
-  remove(filename) {
-
-    // XXX use dependency tree to get all assetPaths being updated
-
-    this.emit('update', {remove: [filename]});
-  }
-
-
-  // XXX
-  shouldIgnore(filename) {
-    return false;
-  }
-
-
-  add(filename) {
-    filename = filename.slice(this.directory.length + 1);
-
-    if (process.env.NODE_ENV !== 'test')
-      console.log(this.name + ': ' + filename);
-
-    let assetPath = this.assetPath(filename);
-
-    if (filename !== 'package.json') {
-      this.files.push({
-        filename,
-        path: this.assetPath(filename),
-        ignored: this.shouldIgnore(filename),
-      });
-    }
-
-    if (assetPath) {
-
-      // XXX there's an issue where if the existing file is removed, this one
-      // won't come in to replace it.... hrm
-
-      // use .css for .less 
-      let shouldReplace = (
-        !this.assets[assetPath] ||
-        this.assets[assetPath].filename.length > filename.length
-      );
-
-      if (shouldReplace)
-        this.assets[assetPath] = { assetPath, filename };
-
-    }
-
-    this.emit('update', {add: [filename]});
+  findFilename(assetPath) {
+    let asset = this.findAsset(assetPath);
+    if (asset)
+      return asset.filename;
   }
 
 
@@ -244,15 +123,253 @@ export default class Repository extends EventEmitter {
     let ext = path.extname(filename).slice(1);
 
     let assetPath = '';
-    if ('less' == ext)
+
+    // can't have strange characters, including underscores
+    if (/[^-/.a-z0-9]/i.test(filename))
+      return null;
+    // .less files become .css
+    else if ('less' == ext)
       assetPath = filename.slice(0, -4) + 'css';
-    else if (['css','js'].includes(ext))
+    // .dev.css becomes .css
+    else if (/\.dev\.(js|css)$/.test(filename))
+      assetPath = filename.replace(/\.dev\.(js|css)$/, '.$1');
+    // normal extensions
+    else if (['css', 'js', 'svg', 'html', 'ttf', 'woff', 'woff2'].includes(ext))
       assetPath = filename
+    // other things are ignored
     else
       return null;
 
     // Windows backslash nightmare
-    return '/' + this.name + '/' + assetPath.replace(RegExp(sep, 'g'), '/');
+    if (path.sep === '\\')
+      assetPath = assetPath.replace(/\\/g, '/');
+
+    return '/' + this.name + '/' + assetPath;
+  }
+
+
+  loadConfig() {
+
+    this.ignoreMatchers = [ '**/_*' ];
+
+    this.config = {
+      script: [],
+      ignore: [],
+    }
+
+    try {
+      const json = fs.readFileSync(this.dir + '/package.json');
+      const config = JSON.parse(json).codex || {};
+      
+      const validStrArr = prop => {
+        const valid = (
+          !(prop in config) || (
+            config[prop] instanceof Array &&
+            config[prop].every(s => typeof s === 'string')
+          )
+        );
+
+        if (valid)
+          return config[prop];
+        else
+          log.error(
+            `"${ prop }" section of Codex configuration must be an array of strings`
+          );
+      }
+
+      this.config.script = validStrArr('script') || [];
+      this.config.ignore = validStrArr('ignore') || [];
+      if (validStrArr('only'))
+        this.config.only = config.only;
+    }
+    catch (e) {
+      if (e.code !== 'ENOENT')
+        log.error(e);
+
+      return;
+    }
+
+    this.ignoreMatchers = this.config.ignore.reduce((ignore, i) => {
+      ignore.push(i);
+      // recursively ignore by default
+      ignore.push(i.endsWith('/') ? i + '**/*' : i + '/**/*');
+      return ignore;
+    }, this.ignoreMatchers);
+
+    this.dedupeFiles();
+  }
+
+
+  async code(assetPath, { useModules = false } = {}) {
+
+    let asset = this.files.find(f => f.path === assetPath);
+
+    if (!asset)
+      throw new Error('Not found: ' + assetPath);
+
+    const cached = this.cache.get(assetPath);
+    if (cached)
+      return cached;
+
+    try {
+      if (/\.css$/.test(assetPath)) {
+        let { deps, code } = await css({
+          repositoryName: this.name,
+          assetPath,
+          filename: asset.filename,
+          directory: this.dir,
+        });
+
+        // XXX cache
+
+        asset.deps = deps;
+
+        return code;
+      }
+      else if (/\.js$/.test(assetPath)) {
+
+        let script = this.config.script.includes(asset.filename);
+
+        if (script || useModules) {
+          return fsp.readFile(path.join(this.dir, asset.filename));
+        }
+        else {
+          let code = await js({
+            assetPath,
+            filename: asset.filename,
+            directory: this.dir,
+          });
+          this.cache.set(assetPath, code);
+          return code;
+        }
+
+      }
+    }
+    catch (error) {
+
+      this.emit('message', {
+        event: 'error',
+        repositoryName: this.name,
+        filename,
+        paths: this.findAffectedAssetPaths(filename),
+      });
+
+      throw error;
+    }
+
+  }
+
+
+  shouldIgnore(filename) {
+    if (!/\.(js|css|less|svg|html|ttf|woff|woff2)$/.test(filename))
+      return true;
+    else if (this.config.only)
+      return !this.config.only.includes(filename);
+    else
+      return micromatch.any(filename, this.ignoreMatchers);
+  }
+
+
+  findAffectedAssetPaths(filename) {
+    return this.files
+      .filter(f => f.deps && f.deps.includes(filename))
+      .map(f => f.path)
+      .concat([this.assetPath(filename)]);
+  }
+
+
+  change(filename) {
+    log.cyan(`change ${ this.name }:  ${ filename }`);
+
+    if (filename === 'package.json') {
+      this.loadConfig();
+      this.emit('message', { change: ['package.json'] });
+      return;
+    }
+
+    let file = this.files.find(f => f.filename === filename);
+
+    if (file.path) {
+      this.cache.del(file.path);
+      this.emit('message', {
+        repositoryName: this.name,
+        event: 'change',
+        filename,
+        paths: this.findAffectedAssetPaths(filename),
+      });
+    }
+
+  }
+
+
+
+  add(filename, silent = false) {
+    log.cyan(`add ${ this.name }:  ${ filename }`);
+
+    if (this.shouldIgnore(filename))
+      this.files.push({ filename });
+    else
+      this.files.push({ filename, path: this.assetPath(filename) });
+
+    this.dedupeFiles();
+
+    this.emit('message', {
+      repositoryName: this.name,
+      event: 'add',
+      filename,
+      paths: [ this.assetPath(filename) ],
+    });
+
+  }
+
+
+
+  remove(filename) {
+    log.cyan(`remove ${ this.name }:  ${ filename }`);
+
+    this.files = this.files.filter(f => f.filename !== filename);
+
+    this.dedupeFiles();
+
+    this.emit('message', {
+      repositoryName: this.name,
+      event: 'remove',
+      filename,
+      paths: [ this.assetPath(filename) ],
+    });
+  }
+
+
+
+  dedupeFiles() {
+
+    // add asset paths to everything
+    this.files = this.files.map(f => {
+      if (this.shouldIgnore(f.filename))
+        return { filename: f.filename };
+      else
+        return { filename: f.filename, path: this.assetPath(f.filename) };
+    });
+
+    // remove asset paths from the ones that have duplicates
+    this.files.forEach(f => {
+      if (!f.path) return;
+
+      this.files
+      .filter(dup => dup.path === f.path && dup.filename != f.filename)
+      .forEach(dup => {
+
+        var weaker = (
+          f.filename.endsWith('.less') ||
+          dup.filename.endsWith('.dev.js') ||
+          dup.filename.endsWith('.dev.css')
+        );
+
+        if (weaker) delete f.path;
+      });
+    });
+
   }
 
 }
+

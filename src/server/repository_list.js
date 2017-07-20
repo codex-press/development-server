@@ -1,13 +1,23 @@
+import tableFactory from 'terminal-table-output';
+import pad from 'pad';
+
 import config from './config';
 import { broadcast } from './socket';
 import Repository from './repository';
+import * as log from './log';
+
 
 var list = [];
 export {list as default};
 
 
+export function getRepo(assetPath) {
+  let repoName = assetPath.match(/[/](.+?)[./]/)[1];
+  return list.find(r => r.name === repoName);
+}
 
-export function updateRepoList() {
+
+export async function updateRepoList() {
   let names = Object.keys(config.repositories);
 
   list = list.reduce((list, r) => {
@@ -26,27 +36,37 @@ export function updateRepoList() {
       return;
 
     let directory = config.repositories[name].path;
-    let repo = new Repository({name, directory});
-
-    repo.on('update', e => broadcast(e));
+    let repo = new Repository({ name, directory });
+    
+    repo.on('message', e => broadcast(e));
 
     list.push(repo);
   });
+
+  await Promise.all(list.map(r => r.ready));
+
+  list.forEach(printFiles);
 }
 
 
-export function getRepo(assetPath) {
-  let repoName = assetPath.match(/[/](.+?)[./]/)[1];
-  return list.find(r => r.name === repoName);
-}
+function printFiles(repo) {
+  log.info('Repository: ', repo.name);
+  log.info('Directory: ', repo.dir);
 
+  const table = tableFactory.create()
+    .line()
+    .pushrow(['| Filename', 'Path'])
+    .line()
 
-// XXX THIS IS TERRIBLE
-export function getFileList() {
-  return list.reduce((list,r) => {
-    list[r.name] = r.toJSON()
-    return list;
-  }, {});
+  repo.toJSON().files.forEach(f => {
+    table.pushrow([
+      ('| ' + pad(f.filename, 35)).slice(0, 37),
+      pad(f.path || '', 37).slice(0, 37)
+    ])
+  });
+
+  log.info(table.line().print());
+
 }
 
 

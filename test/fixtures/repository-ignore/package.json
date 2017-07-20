@@ -1,0 +1,10 @@
+{
+  "codex" : {
+    "ignore" : [
+      "dir",
+      "dir2/subdir",
+      "ignored.js",
+      "dir2/ignored.js"
+    ]
+  }
+}

@@ -5,6 +5,7 @@ import * as actions  from '../actions';
 
 export const REQUEST_TOKEN = 'REQUEST_TOKEN';
 export const RECEIVE_TOKEN = 'RECEIVE_TOKEN';
+export const CLEAR_TOKEN = 'CLEAR_TOKEN';
 export const SET_TOKEN_STATUS = 'SET_TOKEN_STATUS';
 export const IMPERSONATE = 'IMPERSONATE';
 
@@ -48,6 +49,15 @@ export function requestToken(email, password) {
         dispatch(setTokenStatus('rejected'));
     }
 
+  }
+}
+
+
+export function clearToken() {
+  return dispatch => {
+    dispatch({ type: CLEAR_TOKEN });
+    dispatch(setTokenStatus('invalid'));
+    dispatch(saveConfig());
   }
 }
 
@@ -180,14 +190,7 @@ export function fetchAccount() {
       return account
     }
     catch (error) {
-      console.log(error);
-      // if (error.status === 401) {
-      //   // should send an alert here ?
-      //   yield put(actions.receiveToken(null));
-      //   yield put(actions.setTokenStatus('invalid'));
-      // }
-      // else
-      //   console.error(error);
+      dispatch(actions.apiError(error));
     }
   }
 }
@@ -207,8 +210,13 @@ export function receiveAccount(data) {
 export function fetchDomains() {
   return async (dispatch, getState) => {
     let token = getState().getIn(['config','token']);
-    let domains = await api(env.apiOrigin + '/domains', { token });
-    dispatch(receiveDomains(domains));
+    try {
+      let domains = await api(env.apiOrigin + '/domains', { token });
+      dispatch(receiveDomains(domains));
+    }
+    catch (error) {
+      dispatch(actions.apiError(error));
+    }
   }
 }
 

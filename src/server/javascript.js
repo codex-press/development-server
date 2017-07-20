@@ -1,20 +1,17 @@
 import fsp from 'fs-promise';
 import fs from 'fs';
 import path from 'path';
-import browserify from 'browserify-incremental';
-import deps from 'module-deps';
-import chalk from 'chalk';
+
+import * as log from './log';
+import { Readable } from 'stream';
+import * as babel from 'babel-core';
 
 let dependencies = {};
 
-import { Readable } from 'stream';
-import concat from 'concat-stream';
 
-import * as babel from 'babel-core';
+export default async function transpileJavascript(args) {
 
-export default async function transpileJavascript({
-  filename, directory, assetPath
-}) {
+  const { filename, directory, assetPath } = args;
 
   let fullPath = path.join(directory, filename);
 
@@ -24,8 +21,9 @@ export default async function transpileJavascript({
     let result = babel.transform(code, {
       moduleId: assetPath,
       sourceMaps: 'inline',
-      presets: [['es2015', { modules: false }]],
-      plugins: [ 'transform-es2015-modules-systemjs' ]
+      sourceFileName: fullPath,
+      presets: [[ require.resolve('babel-preset-es2015'), { modules: false }]],
+      plugins: [ require.resolve('babel-plugin-transform-es2015-modules-systemjs') ]
     });
 
     // must return dependencies as well? or the frontend knows them???
@@ -35,8 +33,8 @@ export default async function transpileJavascript({
 
     if (error._babel) {
       let message = `Error in file "${ fullPath }":\n  ${ error.message}`;
-      console.error(chalk.red(message));
-      console.error(error.codeFrame);
+      log.error(message);
+      log.error(error.codeFrame);
 
       throw {
         type: 'JavaScript',

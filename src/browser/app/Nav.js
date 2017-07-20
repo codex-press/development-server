@@ -11,6 +11,8 @@ import './Nav.less';
 const mapStateToProps = state => {
   return {
     focus: state.getIn(['ui','focus']),
+    article: state.get('article'),
+    account: state.get('account'),
   }
 }
 
@@ -18,6 +20,7 @@ const mapStateToProps = state => {
 const mapDispatchToProps = {
   toggleModal,
 }
+
 
 
 export class Nav extends React.Component {
@@ -42,10 +45,12 @@ export class Nav extends React.Component {
 
 
   openEdit() {
-    const editUrl = (
-      env.codexOrigin + '/edit/article' + window.location.pathname
-    );
-    window.open(editUrl, '_blank');
+    let editURL = env.codexOrigin + '/edit' 
+
+    if (this.props.article.get('account_id') === this.props.account.get('id'))
+      editURL += '/article' + this.props.article.get('url');
+
+    window.open(editURL, '_blank');
   }
 
 

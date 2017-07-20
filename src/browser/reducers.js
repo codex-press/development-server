@@ -20,7 +20,7 @@ const root = combineReducers({
 
 
 export default (state = Map(), action) => {
-  console.log('action', action);
+  //console.log('action', action);
 
   if (action.type === actions.RESTORE_STATE)
     state = fromJS(action.state);
