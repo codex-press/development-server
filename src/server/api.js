@@ -5,7 +5,7 @@ import bodyParser from 'body-parser';
 import open from 'open';
 
 import config, { writeConfig } from './config';
-import repos, { updateRepoList } from './repository_list';
+import repos, { updateRepositories } from './repository_list';
 import { isLocalhost } from './utility';
 
 var router = express.Router();
@@ -13,28 +13,33 @@ export {router as default};
 
 router.use(bodyParser.json());
 
-router.get('/config', (req, res) => {
-  res.json({ ...config});
-});
 
-// All following requests must be from localhost
-let message = `For security, the Codex Development Server only accepts \
-requests from localhost.`;
 
 router.get('/repositories', async (req, res) => {
   await Promise.all(repos.map(r => r.ready));
   res.send(repos.map(r => r.toJSON()));
 });
 
+
+
+// All following requests must be from localhost
+let message = `For security, the Codex Development Server only accepts \
+requests from localhost.`;
+
 router.use((req, res, next) => {
   isLocalhost(req) ?  next() : res.status(403).send(message);
 });
 
+
+
+router.get('/config', (req, res) => res.json(config));
 router.post('/config', (req, res) => {
   writeConfig(req.body);
-  updateRepoList();
   res.json(config);
+  updateRepositories();
 });
+
+
 
 router.get('/path', async (req, res) => {
   try {
@@ -45,6 +50,7 @@ router.get('/path', async (req, res) => {
     res.send('false');
   }
 });
+
 
 
 router.post('/open', (req, res) => {

@@ -1,3 +1,4 @@
+import moment from 'moment';
 import { api } from '../utility';
 import * as env from '../env';
 
@@ -71,6 +72,7 @@ export function receiveToken(value) {
     let account = await dispatch(fetchAccount());
     dispatch(actions.createCable(value, account.id));
     dispatch(actions.clearCommits());
+    dispatch(actions.navigate(account.root_directory_url));
   }
 }
 
@@ -81,6 +83,7 @@ export function setTokenStatus(value) {
     value,
   };
 }
+
 
 export function impersonate(id) {
   return async (dispatch, getState) => {
@@ -116,10 +119,38 @@ export function saveConfig() {
 export function receiveConfig(data) {
   return async dispatch => {
     dispatch({ type: RECEIVE_CONFIG, data });
-    if (data.token)
-      dispatch(actions.setTokenStatus('valid'));
-    else
+
+    if (!data.token)
       dispatch(actions.setTokenStatus('invalid'));
+    else {
+
+      const payload = JSON.parse(atob(data.token.match(/\.(.*)\./)[1]));
+
+      const expiresAt = moment(payload.exp * 1000);
+      const issuedAt = moment(payload.iat * 1000);
+
+      const valid = expiresAt.isAfter(moment().add(1, 'hour'));
+      const stale = issuedAt.isBefore(moment().subtract(1, 'day'));
+
+      if (valid) {
+        dispatch(actions.setTokenStatus('valid'));
+
+        if (stale) {
+          try {
+            let opts = { method: 'post', token: data.token };
+            let { token } = await api(env.apiOrigin + '/token', opts)
+            dispatch({ type: RECEIVE_TOKEN, value: token });
+            dispatch(saveConfig());
+          }
+          catch (error) {
+            dispatch(actions.setTokenStatus('invalid'));
+            console.log(error);
+          }
+        }
+
+      }
+
+    }
   }
 }
 

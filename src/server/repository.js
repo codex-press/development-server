@@ -250,8 +250,9 @@ export default class Repository extends EventEmitter {
       this.emit('message', {
         event: 'error',
         repositoryName: this.name,
-        filename,
-        paths: this.findAffectedAssetPaths(filename),
+        filename: asset.filename,
+        paths: this.findAffectedAssetPaths(asset.filename),
+        error,
       });
 
       throw error;

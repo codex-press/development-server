@@ -66,7 +66,7 @@ export default class RepositoryEdit extends React.Component {
         </label>
 
         <div className="button-container">
-          <button onClick={ e => this.cancel(e) }>Cancel</button>
+          <button type="button" onClick={ e => this.cancel(e) }>Cancel</button>
           {' '}
           <button className="primary">Submit</button>
         </div>
@@ -110,8 +110,7 @@ export default class RepositoryEdit extends React.Component {
     api(`/api/path?path=${ encodeURIComponent(path) }`)
     .then(validPath => {
       // already changed because they continued typing
-      if (path !== this.state.path)
-        return;
+      if (path !== this.state.path) return;
       this.setState({ validPath });
     });
   }
@@ -140,12 +139,10 @@ export default class RepositoryEdit extends React.Component {
       this.state.validPath === false
     );
 
-    console.log({ notValid });
-
     if (notValid) {
-      this.setState({validName: this.checkName()});
+      this.setState({ validName: this.checkName() });
       if (this.state.path.length === 0)
-        this.setState({validPath: false});
+        this.setState({ validPath: false });
       return;
     }
 

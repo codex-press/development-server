@@ -4,7 +4,7 @@ import { connect } from 'react-redux';
 import Article from './Article';
 import { debounce, api } from '../utility';
 import * as env from '../env';
-import { apiError } from '../actions';
+import { apiError, toggleModal, navigate } from '../actions';
 
 import './Search.less';
 
@@ -15,7 +15,9 @@ const mapStateToProps = state => {
 }
 
 const mapDispatchToProps = {
-  apiError
+  apiError,
+  navigate,
+  toggleModal,
 }
 
 export class Search extends React.Component {
@@ -49,7 +51,7 @@ export class Search extends React.Component {
 
           { this.state.articles && this.state.articles.map(a =>
             <Article
-              navigate={ () => window.location.href = a.url }
+              navigate={ () => this.navigate(a.url) }
               select={ () => this.select(a) }
               key={a.id}
               {...a}
@@ -77,6 +79,12 @@ export class Search extends React.Component {
     if (this.setScrollTriggered)
       this.setScroll();
     this.setScrollTriggered = false;
+  }
+
+
+  navigate(url) {
+    this.props.toggleModal(null);
+    this.props.navigate(url);
   }
 
 
@@ -119,7 +127,7 @@ export class Search extends React.Component {
 
 
   select(article) {
-    this.setState({selected: article.id});
+    this.setState({ selected: article.id });
   }
 
 
@@ -132,7 +140,7 @@ export class Search extends React.Component {
   selectNext() {
     let i = this.selectedIndex();
     if (i+1 < this.state.articles.length)
-      this.setState({selected: this.state.articles[i+1].id});
+      this.setState({ selected: this.state.articles[i+1].id });
     this.setScrollTriggered = true;
   }
 
@@ -140,13 +148,13 @@ export class Search extends React.Component {
   selectPrevious() {
     let i = this.selectedIndex();
     if (i > 0)
-      this.setState({selected: this.state.articles[i-1].id});
+      this.setState({ selected: this.state.articles[i-1].id });
     this.setScrollTriggered = true;
   }
 
 
   updateQuery(e) {
-    this.setState({query: e.target.value}, () => this.search());
+    this.setState({ query: e.target.value }, () => this.search());
   }
 
 
@@ -164,7 +172,7 @@ export class Search extends React.Component {
       if (this.articlesContainer)
         this.articlesContainer.scrollTop = 0;
 
-      this.setState({articles, selected: null})
+      this.setState({ articles, selected: null })
     }
     catch (error) {
       this.props.apiError(error)

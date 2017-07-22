@@ -8,11 +8,12 @@ import open from 'open';
 import * as log from './log';
 import api from './api';
 import config from './config';
-import repos, { updateRepoList } from './repository_list';
+import repos, { updateRepositories, printRepositories } from './repository_list';
 import socket from './socket';
 import * as routes from './routes';
 
-updateRepoList();
+updateRepositories();
+printRepositories();
 
 process.on('unhandledRejection', reason => console.log(reason));
 
@@ -24,7 +25,7 @@ const server = http.createServer(app);
 socket(server);
 
 app.use('/api', api);
-app.get('*.(js|css|html|svg|ttf|woff|woff2)', routes.sendAsset);
+app.get('*.(js|css|map|html|svg|ttf|woff|woff2)', routes.sendAsset);
 app.get('*', routes.sendHTML);
 
 export var port;

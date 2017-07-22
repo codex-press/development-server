@@ -1,3 +1,4 @@
+import ReactDOMServer from 'react-dom/server';
 
 
 export const ADD_ALERT = 'ADD_ALERT';
@@ -22,6 +23,11 @@ export function addAlert(attrs) {
         () => dispatch(removeAlert(attrs.id)),
         attrs.timeout
       );
+    }
+
+    // change react to a component
+    if (typeof attrs.body == 'function') {
+      attrs.body = ReactDOMServer.renderToStaticMarkup(attrs.body());
     }
 
     dispatch({

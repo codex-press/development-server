@@ -1,3 +1,5 @@
+import React from 'react';
+
 import { api } from '../utility';
 import Socket from '../socket';
 import * as env from '../env';
@@ -33,7 +35,6 @@ export function fetchArticle(url, domain, token) {
     catch (error) {
       if (error.json)
         article = error.json;
-      // XXX could show alert here....
       else
         return console.error(error);
     }
@@ -116,27 +117,40 @@ export function socketEventHandler(dispatch, getState) {
     }
     else if (event.type === 'MESSAGE' && event.data.event === 'error') {
 
-      let head;
-      if (event.data.error.filename)
-        head = `${event.data.error.type} Error: ${event.data.error.filename}`;
-      else
-        head = `${event.data.error.type} Error`;
+      let body = () => (
+        <div>
+          <div>
+            { event.data.error.type } Error
+            { event.data.filename && ': ' + event.data.filename }
+          </div>
 
-      let body = event.data.error.message;
-      if (event.data.error.line)
-        body += `\nline: ${event.data.error.line}`;
-      if (event.data.error.column)
-        body += `\ncolumn: ${event.data.error.column}`;
-      
-      if (event.data.error.extract)
-        body += event.data.error.extract;
+          <div>
+            { event.data.error.message }
+          </div>
+
+          { event.data.error.line && 
+            <div style={ { fontSize: '0.8em' } } >
+              Line: { event.data.error.line }
+            </div>
+          }
+        
+          { event.data.error.column &&
+            <div style={ { fontSize: '0.8em' } } >
+              Column: { event.data.error.column }
+            </div>
+          }
+
+          { event.data.error.extract &&
+            <pre>{ event.data.error.extract }</pre>
+          }
+        </div>
+      )
 
       dispatch(addAlert({
         id: event.data.filename,
-        head,
         body,
-        type: 'error',
-        timeout: false
+        type: 'negative',
+        timeout: false,
       }));
 
     }
@@ -144,9 +158,13 @@ export function socketEventHandler(dispatch, getState) {
 
       dispatch(addAlert({
         id: event.data.filename,
-        body:
-          `File ${ event.data.event }d in <b>${ event.data.repositoryName }</b>:
-          ${ event.data.filename }`,
+        body: () => (
+          <div>
+            File { event.data.event }d in {}
+            <b>{ event.data.repositoryName }</b>: {}
+            { event.data.filename }
+          </div>
+        ),
       }));
 
       const articleAssets = getState().get('article')

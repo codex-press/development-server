@@ -86,38 +86,56 @@ const cache = new NodeCache({ stdTTL: 600 });
 
 export function proxyAsset(req, res) {
 
-  // this is all fucked up... needs to set headers etc.
-  // also cache should depend on request headers...
-
   const cached = cache.get(req.path);
+
   if (cached) {
-    console.log('\n\nSENDING CACHED HEADERS:\n\n', cached.headers);
-    res.set(cached.headers);
-    return res.send(cached.body);
+    // console.log('proxy cached: ' + req.path);
+    return res.set(cached.headers).send(cached.body);
   }
 
+  // console.log('proxy: ' + req.path);
+ 
   const options = {
     host: url.parse(env.contentOrigin).host,
     proto: url.parse(env.contentOrigin).protocol,
     port: url.parse(env.contentOrigin).protocol === 'https' ? 443 : 80,
     path: req.path,
-    headers: req.headers,
   };
 
+  if (req.get('referer'))
+    options.headers = { 'Referer' : req.get('referer') };
+
   const pipe = codexResponse => {
-    res.writeHeader(codexResponse.statusCode, codexResponse.headers);
+
+    const headerNames = [ 
+      'etag',
+      'content-length',
+      'content-type',
+      'sourcemap',
+      'connection',
+    ];
+
+    const headers = Object.keys(codexResponse.headers).reduce((headers, h) => {
+      if (headerNames.includes(h)) headers[h] = codexResponse.headers[h];
+      return headers;
+    }, {});
+
+    res.writeHeader(codexResponse.statusCode, headers);
+
     let body = '';
     codexResponse.on('data', chunk => body += chunk);
+
+    codexResponse.on('error', error => {
+      res.status(500).send(error.message);
+      log.error(error); 
+    });
+
     codexResponse.on('end', () => {
 
-      if (codexResponse.statusCode === 200) {
-        cache.set(req.path, {
-          body,
-          headers: codexRepsonse.headers,
-        });
-      }
+      if (codexResponse.statusCode === 200)
+        cache.set(req.path, { body, headers });
 
-      res.send(body);
+      res.write(body);
     });
   }
 
@@ -149,20 +167,19 @@ export function sendInline(req, res, next) {
 export function sendHTML(req, res) {
   log.yellow(`serving: ${ req.path }`);
 
-  let env = 'production';
+  let environment = 'production';
   let contentOrigin = env.contentOrigin;
   let codexOrigin = env.codexOrigin;
   let assetOrigin = req.protocol + '://' + req.hostname + ':' + port;
+  let actionCableOrigin = 'wss://' + env.codexHost;
 
   let script = '/dev-server.js';
   let webpack = '';
   let webpackWS = '';
 
   if (process.env.NODE_ENV === 'development') {
-    env = 'development';
-    contentOrigin = 'http://localhost';
-    codexOrigin = 'http://localhost';
-
+    environment = 'development';
+    actionCableOrigin = 'ws://' + env.codexHost;
     script = 'http://localhost:8001/main.js';
     webpack = 'http://localhost:8001/';
     webpackWS = 'ws://localhost:8001/';
@@ -171,7 +188,8 @@ export function sendHTML(req, res) {
   let csp = (`
     default-src  'none';
     connect-src  'self' ${ webpack } ${ webpackWS } ${ codexOrigin }
-                 ws://${ req.get('Host') } https://performance.typekit.net;
+                 ws://${ req.get('Host') } ${ actionCableOrigin } 
+                 https://performance.typekit.net;
     script-src   'unsafe-eval' 'self' ${ webpack }
                  ${ codexOrigin } ${ contentOrigin } https://use.typekit.net;
     style-src    'unsafe-inline' 'self' ${ codexOrigin } ${ contentOrigin }
@@ -185,7 +203,7 @@ export function sendHTML(req, res) {
   if (!config.disable_csp)
     res.setHeader('Content-Security-Policy', csp);
 
-  const data = { script, contentOrigin, codexOrigin, assetOrigin, env };
+  const data = { script, contentOrigin, codexOrigin, assetOrigin, environment };
   res.render('index.pug', data);
 }
 

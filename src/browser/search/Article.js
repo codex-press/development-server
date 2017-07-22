@@ -1,15 +1,12 @@
 import React from 'react';
 import moment from 'moment';
 
+import { contentOrigin } from '../env';
+
 import './Article.less';
 
-// import contentOrigin from '../env';
-
-// XXX
-let contentOrigin = 'https://usercontent.codex.press/';
 
 let dateFormat = 'MMM D, YYYY'
-// let origin = 'http://localhost'
 
 export default function(props) {
   let media = props.cover && props.cover.media;

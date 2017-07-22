@@ -13,7 +13,7 @@
     "clean": "rm -rf build/*",
     "build": "npm-run-all clean build-server build-browser",
     "build-server": "babel src/server -d build/server --ignore **/*.test.js",
-    "build-browser": "NODE_ENV=production webpack -p --config webpack.config.production.js",
+    "build-browser": "webpack -p --config webpack.config.production.js",
     "test": "jest --watch",
     "test-once": "jest"
   },
@@ -25,7 +25,7 @@
   },
   "babel": {
     "presets": [
-      "es2015",
+      "env",
       "stage-3",
       "react"
     ]
@@ -38,7 +38,7 @@
   "dependencies": {
     "autoprefixer": "^6.5.0",
     "babel-plugin-transform-es2015-modules-systemjs": "^6.24.1",
-    "babel-preset-es2015": "^6.14.0",
+    "babel-preset-env": "^1.6.0",
     "body-parser": "^1.15.1",
     "chalk": "^1.1.3",
     "express": "^4.14.0",

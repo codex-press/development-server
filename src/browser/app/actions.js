@@ -4,6 +4,8 @@ import * as env from '../env';
 import renderArticle from '../article/render';
 import * as actions from '../actions';
 
+
+
 export const API_ERROR = 'API_ERROR';
 
 export const INITIALIZE = 'INITIALIZE';
@@ -58,7 +60,10 @@ export function initialize() {
         ));
       }
 
-      const repositories = Object.keys(state.repositories).map(k => state.repositories[k]);
+      const repositories = Object.keys(state.repositories).map(k => {
+        return state.repositories[k]
+      });
+
       renderArticle(state.article, repositories);
 
       if (isLocalhost)
@@ -79,7 +84,7 @@ export function initialize() {
     dispatch(actions.createSocket());
 
     try {
-      if (config.token) {
+      if (config.token && isLocalhost) {
         dispatch(actions.fetchDomains());
         let account = await dispatch(actions.fetchAccount());
         if (isLocalhost)
@@ -106,6 +111,8 @@ export function reload() {
 
 export function navigate(url) {
   return dispatch => {
+    if (url.endsWith('/'))
+      url = url.slice(0, -1);
     dispatch({ type: NAVIGATE, url });
     dispatch(saveState());
     location = url;
@@ -133,11 +140,10 @@ export function restoreState(state) {
         window.sessionStorage.removeItem('reduxState');
 
         // recreate timeouts for alerts
-        Object.keys(state.alerts).forEach(id => {
-          let alert = state.alerts[id];
+        state.alerts.map(alert => {
           if (alert.timeout) {
             alert.timeoutID = setTimeout(
-              () => dispatch(actions.removeAlert(id)),
+              () => dispatch(actions.removeAlert(alert.id)),
               alert.timeout
             );
           }

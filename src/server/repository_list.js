@@ -17,16 +17,21 @@ export function getRepo(assetPath) {
 }
 
 
-export async function updateRepoList() {
+export async function updateRepositories() {
   let names = Object.keys(config.repositories);
 
   list = list.reduce((list, r) => {
 
     let isRemoved = !names.find(n => {
-      return r.name === n && r.path === config.repositories[n].path;
+      return r.name === n && r.dir === config.repositories[n].path;
     });
 
-    isRemoved ? r.close() : list.push(r);
+    // this close() is verrrrryyyy slow, like sometimes more than 10 seconds.
+    // so we just delay in hopes that it doesnt interrupt
+    if (isRemoved)
+      setTimeout(() => r.close(), 1000);
+    else
+      list.push(r);
 
     return list;
   }, []);
@@ -40,17 +45,24 @@ export async function updateRepoList() {
     
     repo.on('message', e => broadcast(e));
 
+    setTimeout(async () => {
+      await repo.ready;
+      printFiles(repo);
+    });
+
     list.push(repo);
   });
 
-  await Promise.all(list.map(r => r.ready));
-
-  list.forEach(printFiles);
 }
 
 
+export async function printRepositories() {
+  await Promise.all(list.map(r => r.ready));
+  list.forEach(printFiles);
+}
+
 function printFiles(repo) {
-  log.info('Repository: ', repo.name);
+  log.info('\nRepository: ', repo.name);
   log.info('Directory: ', repo.dir);
 
   const table = tableFactory.create()

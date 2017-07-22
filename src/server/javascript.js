@@ -22,11 +22,10 @@ export default async function transpileJavascript(args) {
       moduleId: assetPath,
       sourceMaps: 'inline',
       sourceFileName: fullPath,
-      presets: [[ require.resolve('babel-preset-es2015'), { modules: false }]],
+      presets: [[ require.resolve('babel-preset-env'), { modules: false }]],
       plugins: [ require.resolve('babel-plugin-transform-es2015-modules-systemjs') ]
     });
 
-    // must return dependencies as well? or the frontend knows them???
     return result.code;
   }
   catch (error) {

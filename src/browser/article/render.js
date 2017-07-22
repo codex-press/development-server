@@ -1,4 +1,5 @@
 import { addStylesheet, addScript } from '../utility'
+import * as env from '../env'
 
 
 var renderer;
@@ -45,6 +46,8 @@ export default async function renderArticle(data, repositories) {
   // Tell the renderer about the development repos so it doesn't add
   // those links to the page
   data.development_repositories = repositories.map(r => r.name);
+
+  data.content_origin = env.contentOrigin;
 
   // remove inline_assets that are in the dev repos. They will be loaded 
   // on demand

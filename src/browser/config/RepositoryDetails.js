@@ -24,14 +24,30 @@ export default function RepositoryDetails(props) {
       {' '}
       <button onClick={ props.edit }>Edit</button>
 
-      <ul>
-        { props.files.map(f => 
-          <li key={ f.filename }>
-            { f.filename + ' ' }
-            <span className="open" onClick={ () => open(f.filename) }>(open)</span>
-          </li>)
-        }
-      </ul>
+      <table>
+        <thead>
+          <tr>
+            <th>Filename</th>
+            <th>Path</th>
+          </tr>
+        </thead>
+        <tbody>
+          { props.files.map(f => 
+            <tr key={ f.filename }>
+              <td>
+                <span className="open" onClick={ () => open(f.filename) }>
+                  { f.filename + ' ' }
+                </span>
+              </td>
+              <td>
+                <a target="_blank" href={ f.path }>
+                  { f.path }
+                </a>
+              </td>
+            </tr>)
+          }
+        </tbody>
+      </table>
 
     </div>
   );

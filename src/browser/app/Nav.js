@@ -35,10 +35,10 @@ export class Nav extends React.Component {
   render() {
     return (
       <nav className={ 'Nav' + (this.props.focus ? ' focused' : '') } >
-        <IconInfo onClick={ () => this.toggleModal('info') } />
-        <IconEdit onClick={ () => this.openEdit() } />
-        <IconSearch onClick={ () => this.toggleModal('search') } />
-        <IconConfig onClick={ () => this.toggleModal('config') } />
+        <IconInfo onClick={ e => this.toggleModal(e, 'info') } />
+        <IconEdit onClick={ e => this.openEdit() } />
+        <IconSearch onClick={ e => this.toggleModal(e, 'search') } />
+        <IconConfig onClick={ e => this.toggleModal(e, 'config') } />
       </nav>
     );
   }
@@ -54,7 +54,9 @@ export class Nav extends React.Component {
   }
 
 
-  toggleModal(value) {
+  toggleModal(e, value) {
+    e.preventDefault();
+
     // don't want to let a double click open and then close it
     if (Date.now() - this.lastToggle < 500)
       return;
