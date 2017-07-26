@@ -9,6 +9,7 @@ import * as actions from './actions'
 var store;
 export { store as default };
 
+
 if (env.development) {
   store = createStore(
     reducer,

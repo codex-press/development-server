@@ -1,8 +1,5 @@
-@import (reference) "../index.less";
 
 .Info {
-  height: 500px;
-  &:extend(.modal);
 
   h2 {
     margin-top: 0;
@@ -10,11 +7,30 @@
   }
   
   h3 {
-    margin: 0.3em 0;
+    margin: 2rem 0 0.3rem;
+  }
+
+  .description {
+    margin: 0.5rem 0;
+  }
+
+  .url-line {
+    display: flex;
+    flex-flow: row nowrap;
+  }
+
+  .url-line :not(:last-child) {
+    padding-right: 0.3em;
+  }
+
+  .url {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
   .asset-name {
-    margin-left: 0.5rem;
+    margin: 1rem 0.5rem;
   }
 
   .asset {

@@ -9,14 +9,16 @@ import AlertContainer from '../alerts/AlertContainer';
 import BuildOutput from '../commits/BuildOutput';
 import LoginPrompt from './LoginPrompt';
 import Nav from './Nav';
-import Modal from './Modal';
+import ModalContainer from './ModalContainer';
 import Dimmer from './Dimmer';
-
+import Config from '../config/Config';
+import Search from '../search/Search';
+import Info from './Info';
 
 const mapStateToProps = state => {
   return {
-    ui     : state.get('ui'),
-    config : state.get('config'),
+    ui      : state.get('ui'),
+    config  : state.get('config'),
   }
 }
 
@@ -45,28 +47,39 @@ export function App(props) {
     return (
       <div className="App">
         <AlertContainer />
-        <LoginPrompt
-          status={ props.ui.get('token_status') }
-          requestToken={ props.requestToken }
-          cancel={ props.token ? () => props.setTokenStatus('valid') : null }
-        />
-        <Dimmer />
+        <ModalContainer>
+          <LoginPrompt
+            status={ props.ui.get('token_status') }
+            requestToken={ props.requestToken }
+            cancel={ props.token ? () => props.setTokenStatus('valid') : null }
+          />
+        </ModalContainer>
+      </div>
+    );
+  }
+
+  if (props.ui.get('modal')) {
+    return (
+      <div className="App">
+        <BuildOutput />
+        <ModalContainer toggleModal={ props.toggleModal } >
+          <Search />
+          <Config />
+          <Info />
+        </ModalContainer>
+        <AlertContainer />
+        <Nav />
       </div>
     );
   }
 
   return (
     <div className="App">
+      <BuildOutput />
       <AlertContainer />
       <Nav />
-      <BuildOutput />
-      <Modal which={ props.ui.get('modal') } />
-      { props.ui.get('modal') &&
-        <Dimmer onClick={ () => props.toggleModal(null) } />
-      }
     </div>
   );
-
 }
 
 

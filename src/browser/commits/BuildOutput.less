@@ -1,13 +1,23 @@
 @import (reference) "../index.less";
 
 .BuildOutput {
-  &:extend(.modal);
-
   display: flex;
-  overflow:hide;
   flex-flow: column nowrap;
+  padding: 1em;
+  background: linear-gradient(rgba(30,30,30,0.95), rgba(0,0,0,0.9));
+  position: fixed;
+  z-index: @maxZIndex;
 
-  .close {
+  &.centered {
+    width: 600px;
+    max-width: calc(100% - 2rem);
+    height: 50%;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+  }
+
+  .minimize {
     position: absolute;
     user-select: none;
     right: 0.3rem;
@@ -26,9 +36,10 @@
     top: initial;
   }
  
-  &.minimal .close {
+  &.minimal .minimize {
     display: none;
   }
+
 }
 
 

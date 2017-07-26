@@ -27,7 +27,7 @@ export async function api(path, { method, query, body, token } = {}) {
       else
         return k + '=' + encodeURIComponent(query[k])
     })
-    queryString = '?' + pairs.join('&');
+    queryString = '?' + pairs.join('&')
   }
   
   let response;
@@ -101,5 +101,14 @@ export function openFileSystem(path) {
   api(`/api/open?path=${path}`, { method: 'post' });
 }
 
+
+
+export function domPath(el) {
+  const path = [ el ]
+  while (![null, document].includes(path[ path.length - 1 ].parentNode)) {
+    path.push(path[ path.length - 1 ].parentNode);
+  }
+  return path;
+}
 
 

@@ -21,12 +21,36 @@
       display: none;
     }
 
+    .message {
+      display: flex;
+      flex-flow: row nowrap;
+    }
+
+    .message *:not(:last-child) {
+      margin-left: 0.2em;
+    }
+
+    .message .commit-link {
+      flex: 1 1 auto;
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
   }
 
+  .repository-name {
+    font-weight: 800;
+  }
 
+  a {
+    color: inherit;
+    text-decoration: none;
+  }
 
-  h4 {
-    margin: 0;
+  a:hover {
+    text-decoration: underline;
   }
 
   .sha {
@@ -46,6 +70,87 @@
     color: #333;
     padding: 0.5rem;
     overflow: scroll;
+  }
+
+}
+
+.progress-bar {
+  height: 1.3rem;
+  background-color: #ddd;
+  border-radius: 0.2rem;
+
+
+  .bar {
+    min-width: 2.2em;
+    color: white;
+    font-weight: 500;
+    text-align: right;
+    padding: 0 0.3em;
+    transition: width 0.3s ease;
+    height: 100%;
+    border-radius: inherit;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .text {
+    position: relative;
+    z-index: 3;  
+  }
+
+  .stripes {
+    position: absolute;
+    left: -40px;
+    width: calc(100% + 50px);
+    height: 100%;
+    background-color: hsl(206, 73%, 47%);
+    background-image: linear-gradient(
+      45deg,
+      rgba(255,255,255,.15) 25%,
+      transparent 25%,
+      transparent 50%,
+      rgba(255,255,255,.15) 50%,
+      rgba(255,255,255,.15) 75%,
+      transparent 75%,
+      transparent
+    );
+    background-size: 40px 40px;
+    animation: progress-bar-stripes 2s linear infinite;
+  }
+
+
+  @keyframes progress-bar-stripes {
+    from { transform: translate(0); }
+    to   { transform: translate(40px); }
+  }
+
+
+  .indicator {
+    position: absolute;
+    content: '';
+    opacity: 0;
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    transform: scale(0, 1);
+    transform-origin: 0;
+    background: #fff;
+    border-radius: inherit;
+    animation: progress-active 2s ease infinite;
+  }
+
+
+  @keyframes progress-active {
+    from {
+      opacity: 0.3;
+      transform: scale(0, 1);
+    }
+    to {
+      opacity: 0;
+      transform: scale(1);
+    }
   }
 
 }

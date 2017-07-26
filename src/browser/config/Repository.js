@@ -60,9 +60,12 @@ export default class Repository extends React.Component {
 
         <h4 className="name">{ this.props.name }</h4>
 
-        <div className="path"
-          onClick={ () => openFileSystem(this.props.path) }>
-          { this.props.path }
+        <div className="path">
+          { this.props.path } {}
+          <span className="open"
+            onClick={ () => openFileSystem(this.props.path) }>
+            (open)
+          </span>
         </div>
 
         <div className="expand"

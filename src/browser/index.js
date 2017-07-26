@@ -10,6 +10,7 @@ import Root from './app/Root';
 
 import './index.less';
 
+
 let root = document.querySelector('#dev-server');
 
 if (root.attachShadow)
@@ -29,12 +30,13 @@ const render = () => ReactDOM.render(
   }
 );
 
+
 render();
 
 if (module.hot)
   module.hot.accept('./app/App', render);
 
-store.dispatch(actions.initialize());
+store.dispatch(actions.initialize())
 
 let wrapDispatch = action => () => store.dispatch(action());
 window.addEventListener('focus',  wrapDispatch(actions.focus));

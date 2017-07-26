@@ -11,7 +11,7 @@ export function config(state = Map({}), action) {
       return state.set('token', null);
 
     case actions.RECEIVE_TOKEN:
-      return state.set('token', action.value);
+      return state.set('token', action.value).set('domain', '');
 
     case actions.RECEIVE_CONFIG:
       let config = {

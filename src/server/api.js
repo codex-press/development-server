@@ -14,12 +14,15 @@ export {router as default};
 router.use(bodyParser.json());
 
 
-
 router.get('/repositories', async (req, res) => {
   await Promise.all(repos.map(r => r.ready));
   res.send(repos.map(r => r.toJSON()));
 });
 
+
+router.get('/config', (req, res) => {
+  isLocalhost(req) ? res.json(config) : res.json({ ...config, token: null });
+});
 
 
 // All following requests must be from localhost
@@ -27,12 +30,11 @@ let message = `For security, the Codex Development Server only accepts \
 requests from localhost.`;
 
 router.use((req, res, next) => {
-  isLocalhost(req) ?  next() : res.status(403).send(message);
+  isLocalhost(req) ? next() : res.status(403).send(message);
 });
 
 
 
-router.get('/config', (req, res) => res.json(config));
 router.post('/config', (req, res) => {
   writeConfig(req.body);
   res.json(config);

@@ -10,6 +10,7 @@ import './Search.less';
 
 const mapStateToProps = state => {
   return {
+    visible: state.getIn(['ui', 'modal']) === 'search',
     token : state.getIn(['config','token']),
   }
 }
@@ -24,12 +25,15 @@ export class Search extends React.Component {
 
   constructor(props) {
     super();
-    this.search = debounce(500, this.search, this);
+    this.searchDebounced = debounce(500, this.search, this);
     this.state = { query: '', articles: null, selected: null };
   }
 
 
   render() {
+
+    if (!this.props.visible)
+      return null;
 
     return (
       <div className="Search">
@@ -65,12 +69,15 @@ export class Search extends React.Component {
 
 
   componentDidMount() {
-    this.search();
+    if (this.props.visible)
+      this.search();
   }
 
 
   componentWillReceiveProps(props) {
-    if (!props.open && this.state.query)
+    if (props.visible)
+      this.search();
+    else
       this.setState({query: '', articles: null, selected: null});
   }
 
@@ -154,7 +161,7 @@ export class Search extends React.Component {
 
 
   updateQuery(e) {
-    this.setState({ query: e.target.value }, () => this.search());
+    this.setState({ query: e.target.value }, () => this.searchDebounced());
   }
 
 

@@ -34,4 +34,16 @@ export function repositories(state = Map({}), action) {
 }
 
 
+export function resolvedAssets(state = Map({}), action) {
+  switch (action.type) {
+
+    case actions.RECEIVE_RESOLVED_ASSETS:
+      return fromJS(action.data);
+
+    default:
+      return state;
+  }
+}
+
+
 

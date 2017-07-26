@@ -314,12 +314,14 @@ export default class Repository extends EventEmitter {
 
     this.dedupeFiles();
 
-    this.emit('message', {
-      repositoryName: this.name,
-      event: 'add',
-      filename,
-      paths: [ this.assetPath(filename) ],
-    });
+    if (!this.shouldIgnore(filename)) {
+      this.emit('message', {
+        repositoryName: this.name,
+        event: 'add',
+        filename,
+        paths: [ this.assetPath(filename) ],
+      });
+    }
 
   }
 
@@ -332,12 +334,14 @@ export default class Repository extends EventEmitter {
 
     this.dedupeFiles();
 
-    this.emit('message', {
-      repositoryName: this.name,
-      event: 'remove',
-      filename,
-      paths: [ this.assetPath(filename) ],
-    });
+    if (!this.shouldIgnore(filename)) {
+      this.emit('message', {
+        repositoryName: this.name,
+        event: 'remove',
+        filename,
+        paths: [ this.assetPath(filename) ],
+      });
+    }
   }
 
 

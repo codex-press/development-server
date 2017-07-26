@@ -10,6 +10,7 @@ import {
   impersonate,
   changeConfig,
   reload,
+  navigate,
 } from '../actions';
 
 import AccountDetails from './AccountDetails';
@@ -20,15 +21,15 @@ import Impersonate from './Impersonate';
 import './Config.less';
 
 
-
 const mapStateToProps = state => {
   return {
-    config       : state.get('config'),
-    ui           : state.get('ui'),
-    repositories : state.get('repositories'),
-    domains      : state.get('domains'),
-    account      : state.get('account'),
-    users        : state.get('users'),
+    visible: state.getIn(['ui', 'modal']) === 'config',
+    config: state.get('config'),
+    ui: state.get('ui'),
+    repositories: state.get('repositories'),
+    domains: state.get('domains'),
+    account: state.get('account'),
+    users: state.get('users'),
   }
 }
 
@@ -41,15 +42,14 @@ const mapDispatchToProps = {
   impersonate,
   changeConfig,
   reload,
+  navigate,
 }
 
 
 export function Config(props) {
 
-  const wheel = e => {
-    e.preventDefault();
-    e.currentTarget.scrollTop += e.deltaY;
-  }
+  if (!props.visible)
+    return null;
 
   const usedNames = props.repositories.toArray().map(a => a.get('name'));
 
@@ -62,14 +62,14 @@ export function Config(props) {
     props.reload();
   }
 
-  const changeDomain = e => {
+  const changeDomain = async e => {
     let value = e.target.value === "None" ? '' : e.target.value;
-    props.changeConfig('domain', value)
-    props.reload();
+    await props.changeConfig('domain', value)
+    props.navigate('/');
   }
 
   return (
-    <div className="Config" onWheel={ wheel }>
+    <div className="Config">
 
       <h2>Codex Press Develepment Server</h2>
 
@@ -87,7 +87,7 @@ export function Config(props) {
       <label className="for-checkbox">
         <input
           type="checkbox"
-          checked={ props.config.get('disable_csp') }
+          checked={ !!props.config.get('disable_csp') }
           onChange={ changeCSP }
         />
         Disable the Content Security Policy {}

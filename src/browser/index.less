@@ -12,9 +12,16 @@
   font-family: @editorFont;
 }
 
+.open,
 a {
-  color: #777;
+  color: #ccc;
+  text-decoration: underline;
   text-decoration-skip: ink;
+  cursor: pointer;
+}
+.open:hover,
+a:hover {
+  color: #fff;
 }
 
 input {
@@ -82,31 +89,6 @@ button.loading {
 
 
 
-.modal,
-.modal-colors {
-  color: white;
-  border-radius: 4px;
-  box-shadow: inset 0 0 1px #555, 0 0 2px #000;
-  background: linear-gradient(rgba(30,30,30,0.95), rgba(0,0,0,0.9));
-  z-index: @maxZIndex;
-}
-
-.modal {
-  position: fixed;
-  width: 600px;
-  max-width: calc(100% - 2rem);
-  height: 600px;
-  max-height: calc(100% - 2rem);
-  top: 0;
-  right: 0;
-  bottom: 0;
-  left: 0;
-  margin: auto;
-  padding: 1em;
-  overflow: auto;
-}
-
-
 svg.invalid {
   color: hsl(0, 71%, 51%);
   transform: scale(1.5) translateY(-5%);
@@ -116,69 +98,4 @@ svg.valid {
   color: hsl(134, 70%, 43%);
   transform: scale(1.3) translateY(-10%);
 }
-
-
-.progress-bar {
-  height: 1.3rem;
-  background-color: #ddd;
-  border-radius: 0.2rem;
-}
-
-.progress-bar div {
-  min-width: 2.2em;
-  color: white;
-  font-weight: 500;
-  text-align: right;
-  padding: 0 0.3em;
-  transition: width 0.3s ease;
-  height: 100%;
-  border-radius: inherit;
-  position: relative;
-  background-color: hsl(206, 73%, 47%);
-  background-image: linear-gradient(
-    45deg,
-    rgba(255,255,255,.15) 25%,
-    transparent 25%,
-    transparent 50%,
-    rgba(255,255,255,.15) 50%,
-    rgba(255,255,255,.15) 75%,
-    transparent 75%,
-    transparent
-  );
-  background-size: 40px 40px;
-  animation: progress-bar-stripes 2s linear infinite;
-}
-
-.progress-bar div:before {
-  content: '';
-  opacity: 0;
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  transform: scale(0, 1);
-  transform-origin: 0;
-  background: #fff;
-  border-radius: inherit;
-  animation: progress-active 2s ease infinite;
-}
-
-
-@keyframes progress-bar-stripes {
-  from { background-position: 0 0; }
-  to   { background-position: 40px 0; }
-}
-
-@keyframes progress-active {
-  from {
-    opacity: 0.3;
-    transform: scale(0, 1);
-  }
-  to {
-    opacity: 0;
-    transform: scale(1);
-  }
-}
-
 

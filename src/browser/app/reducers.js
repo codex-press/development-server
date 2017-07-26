@@ -7,7 +7,7 @@ let initialUI = {
   token_status: null, // pending, rejected, changing, valid, invalid
   modal: null,
   focus: document.hasFocus(),
-  build_output_minimal: false,
+  build_output: 'minimal', // null,
   article_changed: true,
 };
 
@@ -26,14 +26,11 @@ export function ui(state = Map(initialUI), action) {
     case actions.ARTICLE_CHANGED:
       return state.set('article_changed', true);
 
-    case actions.SET_BUILD_OUTPUT_MINIMAL:
-      return state.set('build_output_minimal', action.value);
-    
-    case actions.COMMIT_BUILD_MESSAGE:
-      if (action.data.start)
-        return state.set('build_output_minimal', false);
-      else
-        return state;
+    case actions.RECEIVE_COMMIT:
+      return state.set('build_output', 'centered');
+
+    case actions.SET_BUILD_OUTPUT_STATE:
+      return state.set('build_output', action.value);
 
     case actions.TOGGLE_MODAL:
       if (state.get('modal') === action.value)

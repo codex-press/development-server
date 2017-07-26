@@ -1,9 +1,7 @@
 import ActionCable from 'actioncable';
 import { isLocalhost, api } from '../utility';
 import * as env from '../env';
-import renderArticle from '../article/render';
 import * as actions from '../actions';
-
 
 
 export const API_ERROR = 'API_ERROR';
@@ -46,55 +44,40 @@ export function apiError(error) {
 
 
 export function initialize() {
-  return async dispatch => {
+  return async (dispatch, getState) => {
 
-    let state = dispatch(restoreState());
+    try {
 
-    if (state) {
+      const restored = dispatch(restoreState());
 
-      if (state.article.url !== location.pathname) {
-        state.article = await dispatch(actions.fetchArticle(
-          location.pathname,
-          state.config.domain,
-          state.config.token,
-        ));
-      }
+      const fetchesArticle = (
+        !restored ||
+        !('article' in restored) ||
+        restored.article.url !== location.pathname
+      );
 
-      const repositories = Object.keys(state.repositories).map(k => {
-        return state.repositories[k]
-      });
+      // this has the domain name, which we need to fetchArticle. n.b. if
+      // not on localhost, the token will not be included
+      await dispatch(actions.fetchConfig());
 
-      renderArticle(state.article, repositories);
+      await Promise.all([
+        fetchesArticle ? dispatch(actions.fetchArticle()) : Promise.resolve(),
+        dispatch(actions.fetchRepositories()),
+      ]);
 
-      if (isLocalhost)
-        dispatch(createCable(state.config.token, state.account.id));
+      dispatch(actions.renderArticle());
 
       dispatch(actions.createSocket());
 
-      return;
-    }
-
-    let config = await dispatch(actions.fetchConfig());
-
-    let [ article, repositories ] = await Promise.all([
-      dispatch(actions.fetchArticle(location.pathname, config.domain, config.token)),
-      dispatch(actions.fetchRepositories()),
-    ]);
-
-    dispatch(actions.createSocket());
-
-    try {
-      if (config.token && isLocalhost) {
+      if (isLocalhost && getState().getIn(['config','token'])) {
         dispatch(actions.fetchDomains());
-        let account = await dispatch(actions.fetchAccount());
-        if (isLocalhost)
-          dispatch(createCable(config.token, account.id));
+        await dispatch(actions.fetchAccount());
+        dispatch(createCable());
       }
 
-      renderArticle(article, repositories);
     }
-    catch (e) {
-      console.error('Article render error:', e);
+    catch (error) {
+      console.error(error);
     }
 
   }
@@ -109,22 +92,25 @@ export function reload() {
   }
 }
 
+
 export function navigate(url) {
   return dispatch => {
-    if (url.endsWith('/'))
+    if (url.length > 1 && url.endsWith('/'))
       url = url.slice(0, -1);
     dispatch({ type: NAVIGATE, url });
-    dispatch(saveState());
+    dispatch(saveState(false));
     location = url;
   }
 }
 
 
-
-export function saveState() {
+export function saveState(includeArticle = true) {
   return (dispatch, getState) => {
     dispatch({ type: SAVE_STATE });
-    window.sessionStorage.reduxState = JSON.stringify(getState().toJS());
+    const keys = ['ui','alerts'];
+    if (includeArticle) keys.push('article')
+    const state = getState().filter((v, k) => keys.includes(k));
+    window.sessionStorage.reduxState = JSON.stringify(state.toJS());
   }
 }
 
@@ -150,11 +136,12 @@ export function restoreState(state) {
         });
 
         dispatch({ type: RESTORE_STATE, state });
+
         return state;
       }
-      catch (e) {
+      catch (error) {
+        console.error(error);
         window.sessionStorage.removeItem('reduxState');
-        console.log(e);
       }
     }
 
@@ -189,10 +176,13 @@ export function focus() {
 
 
 var cable;
-export function createCable(token, accountID) {
+export function createCable() {
   return async (dispatch, getState) => {
 
     dispatch({ type: CREATE_CABLE });
+    
+    const token = getState().getIn(['config','token']);
+    const accountID = getState().getIn(['account','id']);
 
     if (cable)
       cable.disconnect();
@@ -207,7 +197,11 @@ export function createCable(token, accountID) {
     
     cable.subscriptions.create(buildIdentifier, {
       received: data => {
+        const commit = getState().getIn(['commits', data.id]);
         dispatch({ type: COMMIT_BUILD_MESSAGE, data });
+        // fetch it if it's not already in the state
+        if (!commit)
+          dispatch(actions.fetchCommit(data.id));
       }
     });
 
@@ -221,17 +215,12 @@ export function createCable(token, accountID) {
       received: data => {
 
         if (data.id === getState().getIn(['article','id'])) {
+          const a = `<a href=${ location.href }>`;
           dispatch(actions.addAlert({
             id: 'article_change',
-            body: 'This article has changed',
-            dismissable: true,
-            buttons: {
-              Reload: () => {
-                dispatch(actions.removeAlert('article_change'));
-                dispatch(actions.clearArticle());
-                dispatch(reload());
-              }
-            },
+            body: `This article has changed. ${a}Reload</a>`,
+            dismissable: false,
+            timeout: false,
           }));
         }
 

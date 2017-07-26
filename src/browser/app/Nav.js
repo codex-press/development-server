@@ -34,7 +34,7 @@ export class Nav extends React.Component {
 
   render() {
     return (
-      <nav className={ 'Nav' + (this.props.focus ? ' focused' : '') } >
+      <nav className={ 'Nav top' + (this.props.focus ? ' focused' : '') } >
         <IconInfo onClick={ e => this.toggleModal(e, 'info') } />
         <IconEdit onClick={ e => this.openEdit() } />
         <IconSearch onClick={ e => this.toggleModal(e, 'search') } />

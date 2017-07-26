@@ -140,7 +140,6 @@ test('change to file is emitted', async done => {
 });
 
 
-
 test('change to ignored file is not emitted', async done => {
   expect.assertions(1);
   const repo = await makeRepository('repository-ignore', { watch: true });
@@ -166,6 +165,10 @@ test('emits change for package.json', async done => {
   touch(path.join(repo.dir, 'package.json'));
 });
 
+
+test.skip('change event lists paths for other affected assets', async done => {
+
+});
 
 
 test('emits add event', async done => {

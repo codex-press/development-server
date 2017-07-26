@@ -1,12 +1,13 @@
 
 .Alert {
+  display: table;
   position: relative;
   line-height: 1.3;
   font-size: 1.3em;
   font-weight: 500;
   padding: 0.6rem;
   padding-right: 1.7rem;
-  margin: 1rem;
+  margin: 1rem auto;
   border: 1px solid;
   border-radius: 0.2em;
   animation: 300ms cp-fade-in linear;
@@ -52,5 +53,12 @@
     color: black;
   }
 
+  a {
+    color: inherit;
+    font-weight: 800;
+  }
+  a:hover {
+    text-decoration: underline;
+  }
 }
 

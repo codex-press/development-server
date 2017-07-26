@@ -67,11 +67,10 @@ export function receiveToken(value) {
   return async dispatch => {
     dispatch({ type: RECEIVE_TOKEN, value });
     dispatch(setTokenStatus('valid'));
-    dispatch(saveConfig());
-    dispatch(fetchDomains());
-    let account = await dispatch(fetchAccount());
-    dispatch(actions.createCable(value, account.id));
-    dispatch(actions.clearCommits());
+    const [ config, account ] = await Promise.all([
+      dispatch(saveConfig()),
+      dispatch(fetchAccount())
+    ]);
     dispatch(actions.navigate(account.root_directory_url));
   }
 }
@@ -132,7 +131,10 @@ export function receiveConfig(data) {
       const valid = expiresAt.isAfter(moment().add(1, 'hour'));
       const stale = issuedAt.isBefore(moment().subtract(1, 'day'));
 
-      if (valid) {
+      if (!valid) {
+        dispatch(actions.setTokenStatus('invalid'));
+      }
+      else {
         dispatch(actions.setTokenStatus('valid'));
 
         if (stale) {
@@ -157,7 +159,7 @@ export function receiveConfig(data) {
 export function changeConfig(prop, value) {
   return async dispatch => {
     dispatch({ type: CHANGE_CONFIG, prop, value });
-    dispatch(saveConfig());
+    await dispatch(saveConfig());
   }
 }
 
@@ -226,13 +228,13 @@ export function fetchAccount() {
   }
 }
 
+
 export function receiveAccount(data) {
   return {
     type: RECEIVE_ACCOUNT,
     data,
   }
 }
-
 
 
 
@@ -251,11 +253,12 @@ export function fetchDomains() {
   }
 }
 
+
 export function receiveDomains(data) {
   return {
     type: RECEIVE_DOMAINS,
     data,
-  }
+  };
 }
 
 

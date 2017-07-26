@@ -203,7 +203,9 @@ export function sendHTML(req, res) {
   if (!config.disable_csp)
     res.setHeader('Content-Security-Policy', csp);
 
-  const data = { script, contentOrigin, codexOrigin, assetOrigin, environment };
+  const data = {
+    script, contentOrigin, codexOrigin, assetOrigin, environment
+  };
   res.render('index.pug', data);
 }
 
