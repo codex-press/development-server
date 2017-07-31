@@ -1,4 +1,5 @@
 
 build
 node_modules
+test/fixtures/repository-add
 
