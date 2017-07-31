@@ -1,6 +1,7 @@
 import path from 'path';
 import fsp from 'fs-promise';
 
+import * as log from './log';
 import less from 'less';
 import postcss from 'postcss';
 import autoprefixer from 'autoprefixer';
@@ -13,10 +14,25 @@ export default async function processCSS(args) {
 
   if (/\.css$/.test(filename)) {
 
-    const source = await fsp.readFile(fullPath, 'utf8')
-    const css = postcss([autoprefixer]).process(source);
+    try {
+      const source = await fsp.readFile(fullPath, 'utf8')
+      const { css } = postcss([autoprefixer]).process(source);
 
-    return css;
+      return { code: css };
+    }
+    catch (error) {
+      log.error(error);
+
+      throw {
+        filename,
+        type: 'CSS',
+        message: error.reason,
+        line: error.line, 
+        column: error.column,
+      }
+
+    }
+
   }
   else if (/\.less$/.test(filename)) {
 
@@ -41,16 +57,17 @@ export default async function processCSS(args) {
       return { deps, code: out.css };
     }
     catch (error) {
-      console.log(error);
+      log.error(error);
 
       throw {
         filename,
-        type: error.type,
+        type: 'CSS',
         message: error.message,
         line: error.line, 
         column: error.index,
         extract: error.extract ? error.extract.join('\n') : '',
-      };
+      }
+
     }
 
   }

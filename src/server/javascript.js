@@ -18,6 +18,7 @@ export default async function transpileJavascript(args) {
   let code = await fsp.readFile(fullPath, 'utf-8');
 
   try {
+
     let result = babel.transform(code, {
       moduleId: assetPath,
       sourceMaps: 'inline',
@@ -30,28 +31,19 @@ export default async function transpileJavascript(args) {
   }
   catch (error) {
 
-    if (error._babel) {
-      let message = `Error in file "${ fullPath }":\n  ${ error.message}`;
-      log.error(message);
+    let message = `Error in file "${ fullPath }":\n  ${ error.message}`;
+    log.error(message);
+    if (error.codeFrame)
       log.error(error.codeFrame);
 
-      throw {
-        type: 'JavaScript',
-        filename,
-        message: error.message,
-        line: error.loc.line, 
-        column: error.loc.column,
-        // removes ANSI color escapes
-        extract: error.codeFrame.replace(/[\u001b\u009b][[()#;?]*(?:[0-9]{1,4}(?:;[0-9]{0,4})*)?[0-9A-ORZcf-nqry=><]/g,''),
-      };
-    }
-    else {
-      console.error(error);
-      throw {
-        type: 'Syntax',
-        filename,
-        message: error.message,
-      };
+    throw {
+      type: 'JavaScript',
+      filename,
+      message: error.message,
+      line: error.loc && error.loc.line, 
+      column: error.loc && error.loc.column,
+      // removes ANSI color escapes
+      extract: error.codeFrame && error.codeFrame.replace(/[\u001b\u009b][[()#;?]*(?:[0-9]{1,4}(?:;[0-9]{0,4})*)?[0-9A-ORZcf-nqry=><]/g,''),
     }
 
   }

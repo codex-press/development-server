@@ -30,6 +30,7 @@ exports[`Renders a RepositoryEdit form 1`] = `
   >
     <button
       onClick={[Function]}
+      type="button"
     >
       Cancel
     </button>

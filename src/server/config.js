@@ -3,10 +3,12 @@ import os from 'os';
 import path from 'path';
 import mkdirp from 'mkdirp';
 
-var config = readConfig();
-export { config as default };
+import * as env from './env';
 
 const version = require('../../package.json').version;
+
+var config = readConfig();
+export { config as default };
 
 
 export function writeConfig(newConfig) {

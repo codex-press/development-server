@@ -12,6 +12,8 @@ const mapStateToProps = state => {
   return {
     visible: state.getIn(['ui', 'modal']) === 'search',
     token : state.getIn(['config','token']),
+    domains: state.get('domains'),
+    config: state.get('config'),
   }
 }
 
@@ -34,6 +36,8 @@ export class Search extends React.Component {
 
     if (!this.props.visible)
       return null;
+
+    const pathPrefix = this.pathPrefix()
 
     return (
       <div className="Search">
@@ -58,6 +62,7 @@ export class Search extends React.Component {
               navigate={ () => this.navigate(a.url) }
               select={ () => this.select(a) }
               key={a.id}
+              pathPrefix={ pathPrefix }
               {...a}
               selected={ this.selected() && this.selected().id === a.id } />)
           }
@@ -91,7 +96,7 @@ export class Search extends React.Component {
 
   navigate(url) {
     this.props.toggleModal(null);
-    this.props.navigate(url);
+    this.props.navigate(url.slice(this.pathPrefix().length));
   }
 
 
@@ -118,7 +123,7 @@ export class Search extends React.Component {
         return this.selectPrevious();
       case 'Enter':
         if (this.selected())
-          window.location.href = this.selected().url;
+          this.navigate(this.selected().url);
     }
 
     if (/Macintosh/.test(navigator.userAgent) && e.ctrlKey) {
@@ -165,13 +170,27 @@ export class Search extends React.Component {
   }
 
 
-  async search() {
+  pathPrefix() {
+    if (!this.props.domains)
+      return '';
 
+    const domain = this.props.domains.find(d => 
+      d.get('name') === this.props.config.get('domain')
+    );
+
+    return domain ? domain.get('path') : '';
+  }
+
+
+  async search() {
     const opts = { token: this.props.token };
+
     if (this.state.query)
       opts.query = { limit: 20, q: this.state.query };
     else 
       opts.query = { limit: 20, order: 'updated_at_desc' };
+
+    if (this.pathPrefix()) opts.query.path = this.pathPrefix()
 
     try {
       const articles = await api(env.apiOrigin + '/articles', opts);

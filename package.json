@@ -18,6 +18,9 @@
     "test-once": "jest"
   },
   "jest": {
+    "setupFiles": [
+      "./jest_setup.js"
+    ],
     "setupTestFrameworkScriptFile": "./node_modules/jest-enzyme/lib/index.js",
     "moduleNameMapper": {
       "\\.(css|less)$": "<rootDir>/test/__mocks__/styleMock.js"
@@ -71,6 +74,7 @@
     "babel-loader": "^7.0.0",
     "babel-preset-react": "^6.23.0",
     "babel-preset-stage-3": "^6.24.1",
+    "cheerio": "^1.0.0-rc.2",
     "css-loader": "^0.28.4",
     "enzyme": "^2.8.2",
     "immutable": "^3.8.1",
@@ -79,6 +83,7 @@
     "jest-immutable-matchers": "^1.5.0",
     "less-loader": "^4.0.4",
     "moment": "^2.18.1",
+    "nock": "^9.0.14",
     "postcss-loader": "^2.0.6",
     "prop-types": "^15.5.10",
     "react": "^15.5.4",
@@ -95,6 +100,7 @@
     "redux-immutable": "^4.0.0",
     "redux-thunk": "^2.2.0",
     "style-loader": "^0.18.2",
+    "supertest": "^3.0.0",
     "touch": "^3.1.0",
     "webpack": "^2.6.1",
     "webpack-dev-server": "^2.4.5"

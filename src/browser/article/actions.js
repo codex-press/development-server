@@ -27,30 +27,30 @@ var renderer;
 export function fetchArticle() {
   return async (dispatch, getState) => {
 
-    dispatch({ type: FETCH_ARTICLE });
-    
-    const domain = getState().getIn(['config','domain']);
+    dispatch({ type: FETCH_ARTICLE })
 
-    const query = { full: '' }
+    const domain = getState().getIn(['config','domain'])
+
+    const query = { }
     if (domain)
-      query.host = domain;
+      query.host = domain
 
-    const token = getState().getIn(['config','token']);
+    const token = getState().getIn(['config','token'])
 
-    let article;
+    let article
     try {
-      const url = env.codexOrigin + location.pathname + '.json';
-      article = await api(url, { query, token });
+      const url = env.codexOrigin + location.pathname + '.json'
+      article = await api(url, { query, token })
     }
     catch (error) {
       if (error.json)
-        article = error.json;
+        article = error.json
       else
-        return console.error(error);
+        return console.error(error)
     }
 
-    dispatch(receiveArticle(article));
-    return article;
+    dispatch(receiveArticle(article))
+    return article
   }
 }
 
@@ -72,25 +72,25 @@ export function clearArticle(data) {
 export function renderArticle() {
   return async (dispatch, getState) => {
 
-    dispatch({ type: RENDER_ARTICLE });
+    dispatch({ type: RENDER_ARTICLE })
 
-    const article = getState().get('article').toJS();
-    const repositories = getState().get('repositories').toJS();
+    const article = getState().get('article').toJS()
+    const repositories = getState().get('repositories').toJS()
 
-    addStylesheet('/app/index.css');
+    addStylesheet('/app/index.css')
 
-    const module = await CodexLoader.import('/render/src/client.js');
-    const { default: ClientRenderer } = module;
+    const module = await CodexLoader.import('/render/src/client.js')
+    const { default: ClientRenderer } = module
 
-    renderer = new ClientRenderer();
+    renderer = new ClientRenderer()
 
-    article.development_repositories = repositories;
-    article.content_origin = env.contentOrigin;
-    article.top_origin = location.origin;
+    article.development_repositories = repositories
+    article.content_origin = env.contentOrigin
+    article.top_origin = location.origin
 
-    await renderer.set(article);
+    await renderer.set(article)
 
-    dispatch(receiveResolvedAssets(renderer.resolvedAssets()));
+    dispatch(receiveResolvedAssets(renderer.resolvedAssets()))
   }
 }
 
@@ -107,9 +107,9 @@ export function receiveResolvedAssets(data) {
 
 export function fetchRepositories() {
   return async dispatch => {
-    dispatch({ type: FETCH_REPOSITORIES });
-    let repositories = await api('/api/repositories');
-    dispatch(receiveRepositories(repositories));
+    dispatch({ type: FETCH_REPOSITORIES })
+    let repositories = await api('/api/repositories')
+    dispatch(receiveRepositories(repositories))
     return repositories;
   }
 }
@@ -132,10 +132,10 @@ let socket;
 export function createSocket() {
   return (dispatch, getState) => {
 
-    dispatch({ type: CREATE_SOCKET });
+    dispatch({ type: CREATE_SOCKET })
 
     if (!socket)
-      socket = new Socket(socketEventHandler(dispatch, getState));
+      socket = new Socket(socketEventHandler(dispatch, getState))
 
   }
 }
@@ -151,13 +151,13 @@ export function socketEventHandler(dispatch, getState) {
         body: 'Lost Connection to Development Server',
         type: 'negative',
         timeout: false
-      }));
+      }))
     }
     else if (event.type === 'RECONNECT') {
       dispatch(addAlert({
         id: 'connect',
         body: 'Reconnected to Development Server',
-      }));
+      }))
     }
     else if (event.type === 'MESSAGE' && event.data.event === 'error') {
 

@@ -1,14 +1,14 @@
-import tableFactory from 'terminal-table-output';
-import pad from 'pad';
+import tableFactory from 'terminal-table-output'
+import pad from 'pad'
 
-import config from './config';
-import { broadcast } from './socket';
-import Repository from './repository';
-import * as log from './log';
+import config from './config'
+import { broadcast } from './socket'
+import Repository from './repository'
+import * as log from './log'
 
 
 var list = [];
-export {list as default};
+export { list as default };
 
 
 export function getRepo(assetPath) {
@@ -17,7 +17,7 @@ export function getRepo(assetPath) {
 }
 
 
-export async function updateRepositories() {
+export function updateRepositories() {
   let names = Object.keys(config.repositories);
 
   list = list.reduce((list, r) => {
@@ -42,7 +42,7 @@ export async function updateRepositories() {
 
     let directory = config.repositories[name].path;
     let repo = new Repository({ name, directory });
-    
+
     repo.on('message', e => broadcast(e));
 
     setTimeout(async () => {
@@ -70,10 +70,12 @@ function printFiles(repo) {
     .pushrow(['| Filename', 'Path'])
     .line()
 
+  const cols = process.stdout.columns / 2 - 3;
+
   repo.toJSON().files.forEach(f => {
     table.pushrow([
-      ('| ' + pad(f.filename, 35)).slice(0, 37),
-      pad(f.path || '', 37).slice(0, 37)
+      ('| ' + pad(f.filename, cols - 2)).slice(0, cols),
+      pad(f.path || '', cols).slice(0, cols)
     ])
   });
 

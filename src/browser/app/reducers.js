@@ -7,7 +7,7 @@ let initialUI = {
   token_status: null, // pending, rejected, changing, valid, invalid
   modal: null,
   focus: document.hasFocus(),
-  build_output: 'minimal', // null,
+  build_output: 'centered',
   article_changed: true,
 };
 

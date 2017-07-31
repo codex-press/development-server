@@ -6,7 +6,8 @@ export function info(...args) {
 }
 
 export function error(...args) {
-  console.error(...args);
+  if (process.env.NODE_ENV !== 'test')
+    console.error(...args);
 }
 
 export function magenta(...args) {

@@ -2,7 +2,7 @@
 
 exports[`Renders a Nav 1`] = `
 <nav
-  className="Nav"
+  className="Nav top"
 >
   <IconInfo
     onClick={[Function]}

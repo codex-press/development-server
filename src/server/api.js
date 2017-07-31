@@ -5,7 +5,7 @@ import bodyParser from 'body-parser';
 import open from 'open';
 
 import config, { writeConfig } from './config';
-import repos, { updateRepositories } from './repository_list';
+import repos, { updateRepositories } from './repository_collection';
 import { isLocalhost } from './utility';
 
 var router = express.Router();
@@ -42,10 +42,9 @@ router.post('/config', (req, res) => {
 });
 
 
-
-router.get('/path', async (req, res) => {
+router.post('/path', async (req, res) => {
   try {
-    let stats = await fsp.stat(`${req.query.path}/.git`)
+    let stats = await fsp.stat(`${ req.body.path }/.git`)
     res.send(stats.isDirectory() ? 'true' : 'false')
   }
   catch (error) {

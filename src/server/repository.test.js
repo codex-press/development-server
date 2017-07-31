@@ -2,19 +2,7 @@ import path from 'path';
 import fs from 'fs';
 import { sync as touch } from 'touch';
 
-import Repository from './repository.js';
-
-
-const makeRepository = async (name, opts) => {
-  const repo = new Repository({
-    name,
-    directory: path.resolve('./test/fixtures/' + name),
-    watch: false,
-    ...opts
-  });
-  await repo.ready;
-  return repo;
-}
+import { makeRepository } from '../../test/utility';
 
 
 
@@ -41,26 +29,34 @@ test('toJSON() returns name, path, assets and files', async () => {
 
   const repo = await makeRepository('repository');
   const expected = {
-    name: "repository",
-    path: path.join(__dirname, "../../test/fixtures/repository"),
+    name: 'test',
+    path: path.join(__dirname, '../../test/fixtures/repository'),
     assets: [
-      "/repository/base.css",
-      "/repository/font.ttf",
-      "/repository/font.woff",
-      "/repository/font.woff2",
-      "/repository/module.js",
-      "/repository/script.js",
-      "/repository/styles.css",
+      '/test/base.css',
+      '/test/error.css',
+      '/test/error.js',
+      '/test/font.ttf',
+      '/test/font.woff',
+      '/test/font.woff2',
+      '/test/less-error.css',
+      '/test/logo.svg',
+      '/test/script.js',
+      '/test/styles.css',
+      '/test/template.html',
     ],
     files: [
-      { filename: "bad-extension.txt" },
-      { filename: "base.less", path: "/repository/base.css" },
-      { filename: "font.ttf", path: "/repository/font.ttf" },
-      { filename: "font.woff", path: "/repository/font.woff" },
-      { filename: "font.woff2", path: "/repository/font.woff2" },
-      { filename: "module.js", path: "/repository/module.js" },
-      { filename: "script.js", path: "/repository/script.js" },
-      { filename: "styles.css", path: "/repository/styles.css" },
+      { filename: 'bad-extension.txt' },
+      { filename: 'base.less', path: '/test/base.css' },
+      { filename: 'error.css', path: '/test/error.css' },
+      { filename: 'error.js', path: '/test/error.js' },
+      { filename: 'font.ttf', path: '/test/font.ttf' },
+      { filename: 'font.woff', path: '/test/font.woff' },
+      { filename: 'font.woff2', path: '/test/font.woff2' },
+      { filename: 'less-error.less', path: '/test/less-error.css' },
+      { filename: 'logo.svg', path: '/test/logo.svg' },
+      { filename: 'script.js', path: '/test/script.js' },
+      { filename: 'styles.css', path: '/test/styles.css' },
+      { filename: 'template.html', path: '/test/template.html' },
     ]
   }
   expect(repo.toJSON()).toEqual(expected);
@@ -73,8 +69,8 @@ test('ignores node_modules', async () => {
   const repo = await makeRepository('repository-node-modules');
 
   const expected = [{
-    filename: "script.js",
-    path: "/repository-node-modules/script.js",
+    filename: 'script.js',
+    path: '/test/script.js',
   }];
 
   expect(repo.toJSON().files).toEqual(expected);
@@ -87,12 +83,12 @@ test('"ignore" section of package.json works', async () => {
   const repo = await makeRepository('repository-ignore');
 
   const expected = [
-    { filename: "dir/ignored.js" },
-    { filename: "dir2/not-ignored.js", path: "/repository-ignore/dir2/not-ignored.js" },
-    { filename: "dir2/subdir/ignored.js" },
-    { filename: "ignored.js" },
-    { filename: "not-ignored.js", path: "/repository-ignore/not-ignored.js" },
-    { filename: "package.json" },
+    { filename: 'dir/ignored.js' },
+    { filename: 'dir2/not-ignored.js', path: '/test/dir2/not-ignored.js' },
+    { filename: 'dir2/subdir/ignored.js' },
+    { filename: 'ignored.js' },
+    { filename: 'not-ignored.js', path: '/test/not-ignored.js' },
+    { filename: 'package.json' },
   ];
 
   expect(repo.toJSON().files).toEqual(expected);
@@ -100,9 +96,52 @@ test('"ignore" section of package.json works', async () => {
 
 
 
-test.skip('changing the "ignore" section of package.json updates file list', async () => {
+test('changing "ignore" option updates file list', async () => {
+  expect.assertions(2)
 
-});
+  const repo = await makeRepository(
+    'repository-change-ignore',
+    { watch: true }
+  )
+
+  let msg = new Promise(resolve => repo.on('message', m => resolve(m)))
+
+  const initial = { codex : { ignore : [ "ignored.js", ] } }
+
+  fs.writeFileSync(
+    path.join(repo.dir, 'package.json'),
+    JSON.stringify(initial, null, 2)
+  )
+
+  await msg
+
+  const expectedInitial = [
+    { filename: "going-to-be.js", path: "/test/going-to-be.js" },
+    { filename: "ignored.js" },
+    { filename: "package.json" },
+  ]
+
+  expect(repo.toJSON().files).toEqual(expectedInitial)
+
+  msg = new Promise(resolve => repo.on('message', m => resolve(m)))
+
+  const changed = { codex : { ignore : [ "going-to-be.js", ] } }
+
+  fs.writeFileSync(
+    path.join(repo.dir, 'package.json'),
+    JSON.stringify(changed, null, 2)
+  )
+
+  await msg
+
+  const expected = [
+    { filename: "going-to-be.js" },
+    { filename: "ignored.js", path: "/test/ignored.js" },
+    { filename: "package.json" },
+  ]
+
+  expect(repo.toJSON().files).toEqual(expected)
+})
 
 
 
@@ -112,7 +151,7 @@ test('"only" section of package.json works', async () => {
   const expected = [
     { filename: 'also-ignored.js' },
     { filename: 'ignored.js' },
-    { filename: 'only.js', path: '/repository-only/only.js' },
+    { filename: 'only.js', path: '/test/only.js' },
     { filename: 'package.json' },
   ];
   expect(repo.toJSON().files).toEqual(expected);
@@ -128,23 +167,27 @@ test('ignores dotfiles', async () => {
 
 
 
-test('change to file is emitted', async done => {
-  expect.assertions(1);
+test('change to file is emitted', async () => {
+  expect.assertions(2);
   const repo = await makeRepository('repository', { watch: true });
-  repo.on('message', e => {
-    expect(e.change).toEqual(['script.js']);
-    repo.close();
-    done();
-  });
-  touch(path.join(repo.dir, 'script.js'));
+  
+  let message = new Promise(resolve => repo.on('message', e => resolve(e)));
+
+  setTimeout(() => touch(path.join(repo.dir, 'script.js')));
+
+  message = await message
+  expect(message.event).toBe('change')
+  expect(message.filename).toBe('script.js')
+  repo.close()
 });
+
 
 
 test('change to ignored file is not emitted', async done => {
   expect.assertions(1);
   const repo = await makeRepository('repository-ignore', { watch: true });
   repo.on('message', e => {
-    expect(e.change).toEqual(['not-ignored.js']);
+    expect(e.filename).toBe('not-ignored.js');
     repo.close();
     done();
   });
@@ -154,45 +197,51 @@ test('change to ignored file is not emitted', async done => {
 
 
 
-test('emits change for package.json', async done => {
-  expect.assertions(1);
+test('emits change for package.json', async () => {
+  expect.assertions(2);
   const repo = await makeRepository('repository-only', { watch: true });
-  repo.on('message', e => {
-    expect(e.change).toEqual(['package.json']);
-    repo.close();
-    done();
-  });
+
+  let message = new Promise(resolve => repo.on('message', e => resolve(e)));
+
   touch(path.join(repo.dir, 'package.json'));
+
+  message = await message
+
+  expect(message.event).toBe('change');
+  expect(message.filename).toBe('package.json');
+  repo.close();
 });
 
 
-test.skip('change event lists paths for other affected assets', async done => {
 
-});
-
-
-test('emits add event', async done => {
-  expect.assertions(1);
+test('emits add event', async () => {
+  expect.assertions(2);
   const newFilename = (Math.random() + '').slice(2) + '.js';
   const repo = await makeRepository('repository-add', { watch: true });
-  repo.on('message', e => {
-    expect(e.add).toEqual([ newFilename ]);
-    repo.close();
-    done();
-    fs.unlinkSync(path.join(repo.dir, newFilename));
-  });
+
+  let message = new Promise(resolve => repo.on('message', e => resolve(e)));
+
   touch(path.join(repo.dir, newFilename));
+
+  message = await message
+
+  expect(message.event).toBe('add');
+  expect(message.filename).toBe(newFilename);
+  repo.close();
+
+  fs.unlinkSync(path.join(repo.dir, newFilename));
 });
 
 
 
 test('emits remove event', async done => {
-  expect.assertions(1);
+  expect.assertions(2);
   const newFilename = (Math.random() + '').slice(2) + '.js';
   const repo = await makeRepository('repository-remove', { watch: true });
   repo.on('message', e => {
-    if (!('remove' in e)) return;
-    expect(e.remove).toEqual([ newFilename ]);
+    if (e.event !== 'remove') return;
+    expect(e.event).toBe('remove');
+    expect(e.filename).toBe(newFilename);
     repo.close();
     done();
   });
@@ -202,65 +251,45 @@ test('emits remove event', async done => {
 
 
 
-test.skip('emits messages for a file when its dependencies change', async () => {
-
-});
-
-
-
 test('favors asset.css to asset.less', async () => {
   expect.assertions(1);
   const repo = await makeRepository('repository-dupes');
   const expected = [
     { filename: 'more.css' },
-    { filename: 'more.dev.css', path: '/repository-dupes/more.css' },
-    { filename: 'styles.css', path: '/repository-dupes/styles.css' },
+    { filename: 'more.dev.css', path: '/test/more.css' },
+    { filename: 'styles.css', path: '/test/styles.css' },
     { filename: 'styles.less' },
   ];
   expect(repo.toJSON().files).toEqual(expected);
+})
+
+
+
+test('change event lists paths for other affected assets', async () => {
+  expect.assertions(1);
+  const repo = await makeRepository('repository-change-deps', { watch: true });
+
+  repo.files = [
+    { filename: 'touched.less', path: '/test/touched.css' },
+    { filename: 'p.less', path: '/test/p.css', deps: [ 'touched.less' ] },
+    { filename: 'q.less', path: '/test/q.css', deps: [ 'touched.less' ] },
+  ]
+
+  let message = new Promise(resolve => repo.on('message', e => resolve(e)));
+
+  setTimeout(() => touch(path.join(repo.dir, 'touched.less')));
+
+  message = await message
+
+  expect(message.paths).toEqual([
+    '/test/p.css',
+    '/test/q.css',
+    '/test/touched.css',
+  ]);
+
+  repo.close()
 });
 
-
-
-test.skip('can build CSS', async () => {
-
-});
-
-
-
-test.skip('can build LESS', async () => {
-
-});
-
-
-
-test.skip('does not emit a change for a file thats ignored', async () => {
-
-});
-
-
-
-test.skip('can return JavaScript', async () => {
-
-});
-
-
-
-test.skip('can return JavaScript for modules', async () => {
-
-});
-
-
-
-test.skip('returns JavaScript with "script" option', async () => {
-
-});
-
-
-
-test.skip('emits error for bad JavaScript', async () => {
-
-});
 
 
 

@@ -9,9 +9,6 @@ exports[`Renders an alert 1`] = `
   >
     ×
   </div>
-  <h2>
-    heading
-  </h2>
   <div
     dangerouslySetInnerHTML={
       Object {

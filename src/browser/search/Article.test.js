@@ -58,7 +58,7 @@ test('Renders an article', () => {
 
 test('Renders a selected article', () => {
   expect(shallow(
-    <Article { ...article } selected={ true} />
+    <Article { ...article } selected={ true } />
   )).toHaveClassName('selected');
 });
 

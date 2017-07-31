@@ -56,7 +56,7 @@ export default class Repository extends EventEmitter {
     .on('error',  () => log.error('error', this.name))
     .on('add',    path => this.add(path))
     .on('change', path => this.change(path))
-    .on('delete', path => this.remove(path));
+    .on('delete', path => this.remove(path))
   }
 
 
@@ -160,7 +160,7 @@ export default class Repository extends EventEmitter {
     try {
       const json = fs.readFileSync(this.dir + '/package.json');
       const config = JSON.parse(json).codex || {};
-      
+
       const validStrArr = prop => {
         const valid = (
           !(prop in config) || (
@@ -208,11 +208,12 @@ export default class Repository extends EventEmitter {
       throw new Error('Not found: ' + assetPath);
 
     const cached = this.cache.get(assetPath);
-    if (cached)
+    if (cached && !useModules)
       return cached;
 
     try {
       if (/\.css$/.test(assetPath)) {
+
         let { deps, code } = await css({
           repositoryName: this.name,
           assetPath,
@@ -220,10 +221,8 @@ export default class Repository extends EventEmitter {
           directory: this.dir,
         });
 
-        // XXX cache
-
+        this.cache.set(assetPath, code);
         asset.deps = deps;
-
         return code;
       }
       else if (/\.js$/.test(assetPath)) {
@@ -231,7 +230,7 @@ export default class Repository extends EventEmitter {
         let script = this.config.script.includes(asset.filename);
 
         if (script || useModules) {
-          return fsp.readFile(path.join(this.dir, asset.filename));
+          return fsp.readFile(path.join(this.dir, asset.filename), 'utf-8');
         }
         else {
           let code = await js({
@@ -284,7 +283,11 @@ export default class Repository extends EventEmitter {
 
     if (filename === 'package.json') {
       this.loadConfig();
-      this.emit('message', { change: ['package.json'] });
+      this.emit('message', {
+        repositoryName: this.name,
+        event: 'change',
+        filename,
+      });
       return;
     }
 
@@ -312,7 +315,18 @@ export default class Repository extends EventEmitter {
     else
       this.files.push({ filename, path: this.assetPath(filename) });
 
-    this.dedupeFiles();
+    if (filename === 'package.json') {
+      this.loadConfig();
+      this.emit('message', {
+        repositoryName: this.name,
+        event: 'add',
+        filename,
+      });
+      return;
+    }
+    else {
+      this.dedupeFiles();
+    }
 
     if (!this.shouldIgnore(filename)) {
       this.emit('message', {

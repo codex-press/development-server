@@ -8,17 +8,19 @@ import open from 'open';
 import * as log from './log';
 import api from './api';
 import config from './config';
-import repos, { updateRepositories, printRepositories } from './repository_list';
+import { updateRepositories, printRepositories } from './repository_collection';
 import socket from './socket';
 import * as routes from './routes';
+import * as env from './env';
 
 updateRepositories();
 printRepositories();
 
 process.on('unhandledRejection', reason => console.log(reason));
 
-const app = express();
-app.set('views', path.join(__dirname, '../../src/views'));
+const app = express()
+export { app as default }
+app.set('views', path.join(__dirname, '../../src/views'))
 app.set('view engine', 'pug')
 
 const server = http.createServer(app);
@@ -31,20 +33,25 @@ app.get('*', routes.sendHTML);
 export var port;
 let basePort = (process.env.CP_PORT * 1) || 8000;
 portfinder.basePort = basePort;
-portfinder.getPort((err, foundPort) => {
-  port = foundPort;
 
-  server.listen(port, () => {
-    if (port !== basePort)
-      log.magenta(`Port ${ basePort } is not available, listening on ${ port }`);
-    else
-      log.magenta(`Listening on port ${ port }`);
-  });
+export var listening = new Promise(resolve => {
 
-  // this when run from command line as NPM package
-  if (process.env.CP_OPEN === 'true')
-    open(`http://localhost:${port}/`);
+  portfinder.getPort((err, foundPort) => {
+    port = foundPort
 
-});
+    server.listen(port, () => {
+      if (port !== basePort)
+        log.magenta(`Port ${ basePort } is not available, listening on ${ port }`)
+      else
+        log.magenta(`Listening on port ${ port }`)
+    })
 
+    // this when run from command line as NPM package
+    if (process.env.CP_OPEN === 'true')
+      open(`http://localhost:${port}/`)
+
+    resolve(port)
+  })
+
+})
 

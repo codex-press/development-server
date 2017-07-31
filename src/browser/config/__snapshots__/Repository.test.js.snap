@@ -11,9 +11,15 @@ exports[`Renders a Repository 1`] = `
   </h4>
   <div
     className="path"
-    onClick={[Function]}
   >
     /Users/omar/code/codex_press/app
+     
+    <span
+      className="open"
+      onClick={[Function]}
+    >
+      (open)
+    </span>
   </div>
   <div
     className="expand"

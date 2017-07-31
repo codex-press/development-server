@@ -11,7 +11,7 @@ exports[`Renders an article 1`] = `
     className="cover"
   >
     <img
-      srcSet="https://usercontent.codex.press//images/8c253631-6611-4158-b236-edd98495fc64/i200.jpg 200w,https://usercontent.codex.press//images/8c253631-6611-4158-b236-edd98495fc64/i500.jpg 500w"
+      srcSet="https://usercontent.codex.press/images/8c253631-6611-4158-b236-edd98495fc64/i200.jpg 200w,https://usercontent.codex.press/images/8c253631-6611-4158-b236-edd98495fc64/i500.jpg 500w"
     />
   </div>
   <div

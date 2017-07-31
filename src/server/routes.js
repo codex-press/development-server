@@ -1,5 +1,5 @@
 import path from 'path';
-import http from 'http';
+import https from 'https';
 import uaParser from 'ua-parser-js';
 import url from 'url';
 import NodeCache from 'node-cache';
@@ -8,19 +8,8 @@ import * as log from './log';
 import * as env from './env';
 import config from './config';
 import { port } from './app';
-import { getRepo } from './repository_list';
+import { getRepo } from './repository_collection';
 import { broadcast } from './socket';
-
-
-const contentTypes = {
-  css   : 'text/css',
-  js    : 'application/javascript',
-  svg   : 'image/svg+xml',
-  html  : 'text/html',
-  woff  : 'application/font-woff',
-  woff2 : 'font/woff2',
-  ttf   : 'application/x-font-ttf',
-};
 
 
 export async function sendAsset(req, res, next) {
@@ -49,8 +38,8 @@ export async function sendAsset(req, res, next) {
   log.info(`serving: /${ repo.name }/${ filename }`);
 
   let useModules = (
-    req.get('referrer') &&
-    'modules' in url.parse(req.get('referrer'), true).query
+    req.get('referer') &&
+    'modules' in url.parse(req.get('referer'), true).query
   );
 
   let requestText = (
@@ -65,8 +54,12 @@ export async function sendAsset(req, res, next) {
       res.setHeader('Content-Type', 'text/plain; charset=utf-8');
       res.sendFile(path.join(repo.dir, filename));
     }
-    else if (['css', 'js'].includes(ext)) {
-      res.setHeader('Content-Type', contentTypes[ext]);
+    else if (ext === 'css') {
+      res.setHeader('Content-Type', 'text/css');
+      res.send(await repo.code(req.path));
+    }
+    else if (ext === 'js') {
+      res.setHeader('Content-Type', 'application/javascript');
       res.send(await repo.code(req.path, { useModules }));
     }
     else {
@@ -94,11 +87,9 @@ export function proxyAsset(req, res) {
   }
 
   // console.log('proxy: ' + req.path);
- 
+
   const options = {
     host: url.parse(env.contentOrigin).host,
-    proto: url.parse(env.contentOrigin).protocol,
-    port: url.parse(env.contentOrigin).protocol === 'https' ? 443 : 80,
     path: req.path,
   };
 
@@ -125,6 +116,7 @@ export function proxyAsset(req, res) {
     let body = '';
     codexResponse.on('data', chunk => body += chunk);
 
+
     codexResponse.on('error', error => {
       res.status(500).send(error.message);
       log.error(error); 
@@ -136,6 +128,7 @@ export function proxyAsset(req, res) {
         cache.set(req.path, { body, headers });
 
       res.write(body);
+      res.end();
     });
   }
 
@@ -144,7 +137,7 @@ export function proxyAsset(req, res) {
       .send(`Cannot load asset "${ req.path }: ${ error.message }`)
   }
 
-  http.request(options, pipe).on('error', sendError).end();
+  https.request(options, pipe).on('error', sendError).end();
 }
 
 

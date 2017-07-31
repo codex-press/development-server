@@ -42,12 +42,12 @@ test('Renders Nav and Modals when on localhost', () => {
   utility.isLocalhost = true;
 
   let props = {
-    ui: Map({ token_status: 'valid' }),
+    ui: Map({ token_status: 'valid', modal: 'not sure' }),
     config: Map({})
   };
   const c = shallow(<App { ...props } />);
 
-  expect(c.find('Modal')).toBePresent();
+  expect(c.find('Connect(Info)')).toBePresent();
   expect(c.find('Connect(Nav)')).toBePresent();
 });
 

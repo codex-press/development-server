@@ -38,7 +38,9 @@ export default function(props) {
 
       <div className="chatter">
         <h2>{ props.title }</h2>
-        <div className="url">{ props.url }</div>
+        <div className="url">
+          { props.url.slice((props.pathPrefix || '').length) }
+        </div>
         { date && <div className="date">{ date }</div> }
         { byline && <div className="byline">{ byline }</div> }
         <p className="description">

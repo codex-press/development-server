@@ -13,7 +13,7 @@ test('Renders a Nav', () => {
 test('Clicking the Info icon toggles the modal', () => {
   const toggleModal = jest.fn();
   const c = shallow(<Nav toggleModal={ toggleModal } />);
-  c.find('IconInfo').simulate('click');
+  c.find('IconInfo').simulate('click', { preventDefault: () => { } });
   expect(toggleModal.mock.calls.length).toBe(1);
   expect(toggleModal.mock.calls[0][0]).toBe('info');
 });
@@ -22,7 +22,7 @@ test('Clicking the Info icon toggles the modal', () => {
 test('Clicking the Search icon toggles the modal', () => {
   const toggleModal = jest.fn();
   const c = shallow(<Nav toggleModal={ toggleModal } />);
-  c.find('IconSearch').simulate('click');
+  c.find('IconSearch').simulate('click', { preventDefault: () => { } });
   expect(toggleModal.mock.calls.length).toBe(1);
   expect(toggleModal.mock.calls[0][0]).toBe('search');
 });
@@ -31,7 +31,7 @@ test('Clicking the Search icon toggles the modal', () => {
 test('Clicking the Config icon toggles the modal', () => {
   const toggleModal = jest.fn();
   const c = shallow(<Nav toggleModal={ toggleModal } />);
-  c.find('IconConfig').simulate('click');
+  c.find('IconConfig').simulate('click', { preventDefault: () => { } })
   expect(toggleModal.mock.calls.length).toBe(1);
   expect(toggleModal.mock.calls[0][0]).toBe('config');
 });
@@ -46,7 +46,7 @@ test('Clicking the Edit icon opens editor with permission', () => {
       article={ Map({ account_id: 'me', url: '/newsy' }) }
     />
   );
-  c.find('IconEdit').simulate('click');
+  c.find('IconEdit').simulate('click', { preventDefault: () => { } });
   expect(global.open.mock.calls.length).toBe(1);
   let expected = 'https://codex.press/edit/article/newsy';
   expect(global.open.mock.calls[0][0]).toBe(expected);
@@ -59,20 +59,19 @@ test('Clicking the Edit icon opens editor without permssion', () => {
   const c = shallow(
     <Nav account={ Map({ id: 'me' }) } article={ Map({ account_id: 'you' }) } />
   );
-  c.find('IconEdit').simulate('click');
+  c.find('IconEdit').simulate('click', { preventDefault: () => { } });
   expect(global.open.mock.calls.length).toBe(1);
   expect(global.open.mock.calls[0][0]).toBe('https://codex.press/edit');
 });
 
 
-
 test('Clicking more than once does not toggle again', () => {
   const toggleModal = jest.fn();
   const c = shallow(<Nav toggleModal={ toggleModal } />);
-  c.find('IconInfo').simulate('click');
-  c.find('IconInfo').simulate('click');
-  c.find('IconInfo').simulate('click');
-  c.find('IconInfo').simulate('click');
+  c.find('IconInfo').simulate('click', { preventDefault: () => { } });
+  c.find('IconInfo').simulate('click', { preventDefault: () => { } });
+  c.find('IconInfo').simulate('click', { preventDefault: () => { } });
+  c.find('IconInfo').simulate('click', { preventDefault: () => { } });
   expect(toggleModal.mock.calls.length).toBe(1);
 });
 
