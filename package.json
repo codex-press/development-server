@@ -33,9 +33,7 @@
       "react"
     ]
   },
-  "bin": {
-    "codex": "main.js"
-  },
+  "bin": "./main.js",
   "author": "Codex Press <developers@codex.press>",
   "license": "MIT",
   "dependencies": {
