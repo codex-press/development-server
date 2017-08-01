@@ -115,8 +115,6 @@ export function saveState(includeArticle = true) {
 }
 
 
-
-
 export function restoreState(state) {
   return dispatch => {
 

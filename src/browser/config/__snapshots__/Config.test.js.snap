@@ -1,0 +1,72 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`renders Config 1`] = `
+<div
+  className="Config"
+>
+  <h2>
+    Codex Press Develepment Server
+  </h2>
+  <Impersonate
+    account={
+      Immutable.Map {
+      }
+    }
+    users={
+      Immutable.Map {
+      }
+    }
+  />
+  <AccountDetails
+    account={
+      Immutable.Map {
+      }
+    }
+    change={[Function]}
+  />
+  <label
+    className="for-checkbox"
+  >
+    <input
+      checked={false}
+      onChange={[Function]}
+      type="checkbox"
+    />
+    Disable the Content Security Policy 
+    <a
+      href="https://codex.press/docs/dev-server#csp"
+      target="_blank"
+    >
+      (help)
+    </a>
+  </label>
+  <h3>
+    Repositories
+  </h3>
+  <a
+    href="https://codex.press/edit/repos"
+    target="_blank"
+  >
+    View on production
+  </a>
+  <Repository
+    change={[Function]}
+    name="app"
+    path="/app"
+    remove={[Function]}
+    usedNames={
+      Array [
+        "app",
+      ]
+    }
+  />
+  <RepositoryAdd
+    submit={[Function]}
+    usedNames={
+      Array [
+        "app",
+      ]
+    }
+  />
+</div>
+`;

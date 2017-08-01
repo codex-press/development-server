@@ -1,0 +1,72 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`renders LoginPrompt 1`] = `
+<form
+  className="LoginPrompt"
+  onSubmit={[Function]}
+>
+  <h3>
+    Codex Press Development Server
+  </h3>
+  <label>
+    Email
+    <input
+      type="email"
+    />
+  </label>
+  <label>
+    Password
+    <input
+      type="password"
+    />
+  </label>
+  <div
+    className="button-container"
+  >
+     
+    <button
+      className="primary"
+    >
+      Login
+    </button>
+  </div>
+</form>
+`;
+
+exports[`shows cancel button when provided a cancel fn as prop 1`] = `
+<form
+  className="LoginPrompt"
+  onSubmit={[Function]}
+>
+  <h3>
+    Codex Press Development Server
+  </h3>
+  <label>
+    Email
+    <input
+      type="email"
+    />
+  </label>
+  <label>
+    Password
+    <input
+      type="password"
+    />
+  </label>
+  <div
+    className="button-container"
+  >
+    <button
+      onClick={[Function]}
+    >
+      Cancel
+    </button>
+     
+    <button
+      className="primary"
+    >
+      Login
+    </button>
+  </div>
+</form>
+`;

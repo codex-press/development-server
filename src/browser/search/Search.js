@@ -201,6 +201,7 @@ export class Search extends React.Component {
       this.setState({ articles, selected: null })
     }
     catch (error) {
+      console.error(error)
       this.props.apiError(error)
     }
   }

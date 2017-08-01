@@ -1,5 +1,5 @@
 import os from 'os';
-import fsp from 'fs-promise';
+import fs from 'mz/fs';
 import express from 'express';
 import bodyParser from 'body-parser';
 import open from 'open';
@@ -44,7 +44,7 @@ router.post('/config', (req, res) => {
 
 router.post('/path', async (req, res) => {
   try {
-    let stats = await fsp.stat(`${ req.body.path }/.git`)
+    let stats = await fs.stat(`${ req.body.path }/.git`)
     res.send(stats.isDirectory() ? 'true' : 'false')
   }
   catch (error) {

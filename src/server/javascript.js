@@ -1,5 +1,4 @@
-import fsp from 'fs-promise';
-import fs from 'fs';
+import fs from 'mz/fs';
 import path from 'path';
 
 import * as log from './log';
@@ -15,7 +14,7 @@ export default async function transpileJavascript(args) {
 
   let fullPath = path.join(directory, filename);
 
-  let code = await fsp.readFile(fullPath, 'utf-8');
+  let code = await fs.readFile(fullPath, 'utf-8');
 
   try {
 

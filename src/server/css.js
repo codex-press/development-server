@@ -1,5 +1,5 @@
 import path from 'path';
-import fsp from 'fs-promise';
+import fs from 'mz/fs';
 
 import * as log from './log';
 import less from 'less';
@@ -15,7 +15,7 @@ export default async function processCSS(args) {
   if (/\.css$/.test(filename)) {
 
     try {
-      const source = await fsp.readFile(fullPath, 'utf8')
+      const source = await fs.readFile(fullPath, 'utf8')
       const { css } = postcss([autoprefixer]).process(source);
 
       return { code: css };
@@ -38,7 +38,7 @@ export default async function processCSS(args) {
 
     try {
 
-      const source = await fsp.readFile(fullPath, 'utf8');
+      const source = await fs.readFile(fullPath, 'utf8');
 
       let out = await less.render(source, {
         filename: fullPath,

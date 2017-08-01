@@ -30,7 +30,9 @@ test('Renders RepositoryEdit', () => {
 });
 
 
-test.skip('Has a broken prop', () => {
-
+test('Renders RepositoryBroken', () => {
+  const c = shallow(<Repository broken={ true } />)
+  expect(c).toMatchSelector('RepositoryBroken');
 });
+
 

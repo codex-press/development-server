@@ -1,7 +1,6 @@
 import EventEmitter from 'events';
 import path from 'path';
-import fs from 'fs';
-import fsp from 'fs-promise';
+import fs from 'mz/fs';
 
 import NodeCache from 'node-cache';
 import glob from 'glob';
@@ -230,7 +229,7 @@ export default class Repository extends EventEmitter {
         let script = this.config.script.includes(asset.filename);
 
         if (script || useModules) {
-          return fsp.readFile(path.join(this.dir, asset.filename), 'utf-8');
+          return fs.readFile(path.join(this.dir, asset.filename), 'utf-8');
         }
         else {
           let code = await js({

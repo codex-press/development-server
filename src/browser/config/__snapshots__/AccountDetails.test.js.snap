@@ -1,0 +1,34 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`renders AccountDetails 1`] = `
+<div
+  className="AccountDetails"
+>
+  <div>
+    Logged in as 
+    Tim
+  </div>
+  <div>
+    twfarnam@gmail.com
+  </div>
+  <div>
+    <a
+      href="https://codex.press/twf/"
+      target="_blank"
+    >
+      https://codex.press/twf/
+    </a>
+  </div>
+  <button
+    className="small"
+  >
+    Change Account
+  </button>
+</div>
+`;
+
+exports[`renders loading message 1`] = `
+<div>
+  Loading account...
+</div>
+`;

@@ -1,0 +1,31 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`renders RepositoryBroken 1`] = `
+<div
+  className="Repository RepositoryBroken"
+>
+  <h4
+    className="name"
+  >
+    app 
+    <IconInvalid />
+  </h4>
+  <div
+    className="path"
+  >
+    Not found: 
+    /app
+  </div>
+  <button
+    onClick={[Function]}
+  >
+    Edit
+  </button>
+   
+  <button
+    onClick={[Function]}
+  >
+    Remove
+  </button>
+</div>
+`;

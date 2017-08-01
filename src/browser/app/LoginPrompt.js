@@ -26,7 +26,7 @@ export default function LoginPrompt(props) {
     buttonClass += ' loading';
 
   return (
-    <form className={ formClass } onSubmit ={ submit }>
+    <form className={ formClass } onSubmit={ submit }>
 
       <h3>Codex Press Development Server</h3>
 

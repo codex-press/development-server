@@ -99,8 +99,7 @@ export default class RepositoryEdit extends React.Component {
 
   pathUpdate(e) {
     let path = e.target.value;
-    this.setState({path, validPath: null});
-    this.checkPath(path);
+    this.setState({ path, validPath: null }, () => this.checkPath(path));
   }
 
 

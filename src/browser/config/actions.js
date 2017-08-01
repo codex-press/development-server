@@ -110,8 +110,8 @@ export function fetchConfig() {
 export function saveConfig() {
   return async (dispatch, getState) => {
     dispatch({ type: SAVE_CONFIG });
-    let body = getState().getIn(['config']);
-    return await api('/api/config', {method: 'post', body })
+    let body = getState().get('config');
+    return api('/api/config', { method: 'post', body })
   }
 }
 

@@ -8,7 +8,7 @@ import './Article.less';
 
 let dateFormat = 'MMM D, YYYY'
 
-export default function(props) {
+export default function Article(props) {
   let media = props.cover && props.cover.media;
 
   let srcset = media && media.srcset;

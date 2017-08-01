@@ -1,0 +1,105 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`renders Info modal 1`] = `
+<div
+  className="Info"
+>
+  <h2>
+    Codex Press | Multimedia Storytelling
+  </h2>
+  <div
+    className="url-line"
+  >
+    <span
+      className="url"
+    >
+      https://codex.press/meh
+    </span>
+    <a
+      href="https://codex.press/meh"
+      target="_blank"
+    >
+      (live)
+    </a>
+    <a
+      href="https://codex.press/edit/article/meh"
+      target="_blank"
+    >
+      (edit)
+    </a>
+  </div>
+  <div
+    className="puplished"
+  >
+    Published 
+    Jan 4, 2016, 11:00 PM
+  </div>
+  <div
+    className="byline"
+  >
+    Katerina Patin
+  </div>
+  <div
+    className="description"
+  >
+    Codex Press, making the Web read better.
+  </div>
+  <h3>
+    Assets
+  </h3>
+  <b>
+    External
+  </b>
+  <div
+    className="asset-name"
+  >
+    /codex/home
+    <div>
+      <div
+        className="asset"
+      >
+        /codex/home.js 
+        <span>
+          <span
+            className="open"
+            onClick={[Function]}
+          >
+            (source: 
+            codex/home.js
+            )
+          </span>
+           
+          <a
+            href="/codex/home.js"
+            target="_blank"
+          >
+            (compiled)
+          </a>
+        </span>
+      </div>
+      <div
+        className="asset"
+      >
+        /codex/home.css 
+        <span>
+          <span
+            className="open"
+            onClick={[Function]}
+          >
+            (source: 
+            codex/home.less
+            )
+          </span>
+           
+          <a
+            href="/codex/home.css"
+            target="_blank"
+          >
+            (compiled)
+          </a>
+        </span>
+      </div>
+    </div>
+  </div>
+</div>
+`;

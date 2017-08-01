@@ -1,37 +1,86 @@
 import React from 'react';
 import { shallow } from 'enzyme';
+import nock from 'nock';
 
 import RepositoryEdit from './RepositoryEdit';
 
+
+
 test('Renders a RepositoryEdit form', () => {
-  expect(shallow(<RepositoryEdit name="meh" path="/code" />)).toMatchSnapshot();
+  expect(shallow(<RepositoryEdit name="foo" path="/bar" />)).toMatchSnapshot();
 });
 
 
+
 test('Shows an invalid name', () => {
-  const c = shallow(<RepositoryEdit name="dude" />);
+  const c = shallow(<RepositoryEdit />);
   c.find('input[name="name"]').simulate('change', { target: { value: 'm' } });
   expect(c.find('IconInvalid')).toBePresent();
 });
 
 
-test('Shows an invalid path', () => {
-  //expect(shallow(<RepositoryEdit />)).toMatchSnapshot();
+
+test('Shows a name that\'s used as invalid', () => {
+  const c = shallow(<RepositoryEdit usedNames={ [ 'foo' ] } />);
+  c.find('input[name="name"]').simulate('change', { target: { value: 'foo' } });
+  expect(c.find('IconInvalid')).toBePresent();
 });
+
+
+
+test('Shows an invalid path', done => {
+  expect.assertions(1);
+
+  jest.useFakeTimers()
+
+  const value = "/some/path"
+  const c = shallow(<RepositoryEdit name="foo" />);
+
+  const request = nock('http://0.0.0.0')
+  .get(`/api/path?path=${ encodeURIComponent(value) }`)
+  .reply(200, 'false')
+
+  c.find('input[name="path"]').simulate('change', { target: { value } });
+
+  jest.runAllTimers()
+  jest.useRealTimers()
+
+  setTimeout(() => {
+    expect(c.find('IconInvalid')).toBePresent()
+    done()
+  }, 10)
+
+})
+
 
 
 test('Submits changes', () => {
-  //expect(shallow(<RepositoryEdit />)).toMatchSnapshot();
+  const submit = jest.fn()
+  const c = shallow(
+    <RepositoryEdit 
+      name="foo"
+      path="/bar"
+      submit={ submit } 
+    />
+  );
+  c.find('form').simulate('submit', { preventDefault: () => {} });
+  expect(submit.mock.calls).toHaveLength(1)
+  expect(submit.mock.calls[0]).toEqual([ 'foo', '/bar' ])
 });
 
 
-test('Does not submit invalid change', () => {
-  //expect(shallow(<RepositoryEdit />)).toMatchSnapshot();
-});
 
-
-test('Pasting a path adds its name', () => {
-  //  expect(shallow(<RepositoryEdit />)).toMatchSnapshot();
+test('Does not submit invalid props', () => {
+  const submit = jest.fn()
+  const c = shallow(
+    <RepositoryEdit 
+      name="s"
+      path="/bar"
+      submit={ submit } 
+    />
+  );
+  c.find('form').simulate('submit', { preventDefault: () => {} });
+  expect(submit.mock.calls).toHaveLength(0)
 });
 
 

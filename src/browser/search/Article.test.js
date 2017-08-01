@@ -44,6 +44,7 @@ const article = {
 }
 
 
+
 test('Renders an article', () => {
   expect(shallow(
     <Article
@@ -56,11 +57,13 @@ test('Renders an article', () => {
 });
 
 
+
 test('Renders a selected article', () => {
   expect(shallow(
     <Article { ...article } selected={ true } />
   )).toHaveClassName('selected');
 });
+
 
 
 test('Clicking an article triggers navigate', () => {
@@ -71,11 +74,19 @@ test('Clicking an article triggers navigate', () => {
 })
 
 
+
 test('Wheel on an article selects it', () => {
   const select = jest.fn();
   const c = shallow(<Article { ...article } select={ select } />)
   c.simulate('wheel');
   expect(select.mock.calls.length).toBe(1);
+});
+
+
+
+test('Removes path prefix from url', () => {
+  const c = shallow(<Article { ...article } pathPrefix="/ricd" />)
+  expect(c.find('.url').text()).toBe('/asimov-steez');
 });
 
 

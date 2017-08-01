@@ -25,7 +25,6 @@ const mapStateToProps = state => {
   return {
     visible: state.getIn(['ui', 'modal']) === 'config',
     config: state.get('config'),
-    ui: state.get('ui'),
     repositories: state.get('repositories'),
     domains: state.get('domains'),
     account: state.get('account'),

@@ -12,7 +12,7 @@ exports[`Renders a RepositoryEdit form 1`] = `
       name="name"
       onChange={[Function]}
       placeholder="new"
-      value="meh"
+      value="foo"
     />
   </label>
   <label>
@@ -22,7 +22,7 @@ exports[`Renders a RepositoryEdit form 1`] = `
       onChange={[Function]}
       onPaste={[Function]}
       placeholder="/Users/you/code/your-repository"
-      value="/code"
+      value="/bar"
     />
   </label>
   <div

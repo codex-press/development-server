@@ -1,0 +1,60 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`renders Commit 1`] = `
+<div
+  className="Commit"
+>
+  <div
+    className="message"
+  >
+    <a
+      className="repository-name"
+      href="https://codex.press/edit/repos/lib"
+      target="_blank"
+    >
+      lib
+      :
+    </a>
+     
+    <a
+      className="commit-link"
+      href="https://codex.press/edit/repos/lib/16ad6335d2facd9a0f3e600cca9c77bf61017cb5"
+      target="_blank"
+    >
+      changing this all around. open_iconic now just SVG
+    </a>
+     
+  </div>
+  <div
+    className="progress-bar"
+  >
+    <div
+      className="bar"
+      style={
+        Object {
+          "width": "55%",
+        }
+      }
+    >
+      <div
+        className="stripes"
+      />
+      <div
+        className="indicator"
+      />
+      <div
+        className="text"
+      >
+        55%
+      </div>
+    </div>
+  </div>
+  <pre
+    onWheel={[Function]}
+  >
+    first line
+    second line
+    
+  </pre>
+</div>
+`;

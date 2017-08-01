@@ -13,7 +13,6 @@ const mapStateToProps = state => {
   return {
     visible: state.getIn(['ui', 'modal']) === 'info',
     article: state.get('article'),
-    repositories: state.get('repositories'),
     resolvedAssets: state.get('resolvedAssets'),
   }
 }
@@ -28,7 +27,7 @@ export function Info(props) {
   if (!props.visible)
     return null;
 
-  let article = props.article.toJS();
+  const article = props.article.toJS();
 
   if (!article.title) {
     return (
@@ -38,11 +37,11 @@ export function Info(props) {
     );
   }
 
-  let editURL = env.codexOrigin + '/edit/article' + article.url;
+  const editURL = env.codexOrigin + '/edit/article' + article.url;
 
-  let classed_content = article.classed_content || {};
+  const classed_content = article.classed_content || {};
 
-  let dateFormat = 'MMM D, YYYY, h:mm A';
+  const dateFormat = 'MMM D, YYYY, h:mm A';
 
   return (
     <div className="Info">
