@@ -77,6 +77,7 @@ export function renderArticle() {
     const article = getState().get('article').toJS()
     const repositories = getState().get('repositories').toJS()
 
+    document.title = article.title
     addStylesheet('/app/index.css')
 
     const module = await CodexLoader.import('/render/src/client.js')

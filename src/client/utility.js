@@ -1,12 +1,15 @@
 
-
 export const isLocalhost = ['localhost','127.0.0.1'].includes(location.hostname);
+
 
 export async function api(path, { method, query, body, token } = {}) {
 
   let request = {
     method: (method || 'GET').toUpperCase(),
-    headers: { Accept: 'application/json' }
+    headers: {
+      'accept' : 'application/json',
+      'x-requested-by' : 'codex',
+    }
   };
 
   if (token)

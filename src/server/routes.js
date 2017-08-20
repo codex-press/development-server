@@ -15,14 +15,14 @@ import { broadcast } from './socket';
 export async function sendAsset(req, res, next) {
 
   if (req.path === '/dev-server.js')
-    return res.sendFile(path.join(__dirname, '../browser.js'));
+    return res.sendFile(path.join(__dirname, '../client.js'))
 
-  let repo = getRepo(req.path);
+  let repo = getRepo(req.path)
 
   // required for using this to serve assets for Codex server in development
   if (process.env.NODE_ENV === 'development') {
-    res.setHeader('Access-Control-Allow-Methods', 'GET');
-    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Methods', 'GET')
+    res.setHeader('Access-Control-Allow-Origin', '*')
   }
 
   if (!repo)
@@ -38,36 +38,39 @@ export async function sendAsset(req, res, next) {
   log.info(`serving: /${ repo.name }/${ filename }`);
 
   let useModules = (
+    // karma test runner gets raw (not transpiled) files. see config in 
+    // codex-press/parent repository
+    req.get('origin') === 'http://localhost:9876' ||
     req.get('referer') &&
     'modules' in url.parse(req.get('referer'), true).query
-  );
+  )
 
   let requestText = (
     req.get('Accept') &&
     req.get('Accept').indexOf('text/plain') >= 0
-  );
+  )
 
-  let ext = path.extname(req.path).slice(1);
+  let ext = path.extname(req.path).slice(1)
 
   try {
     if (requestText) {
-      res.setHeader('Content-Type', 'text/plain; charset=utf-8');
-      res.sendFile(path.join(repo.dir, filename));
+      res.setHeader('Content-Type', 'text/plain; charset=utf-8')
+      res.sendFile(path.join(repo.dir, filename))
     }
     else if (ext === 'css') {
-      res.setHeader('Content-Type', 'text/css');
-      res.send(await repo.code(req.path));
+      res.setHeader('Content-Type', 'text/css')
+      res.send(await repo.code(req.path))
     }
     else if (ext === 'js') {
-      res.setHeader('Content-Type', 'application/javascript');
-      res.send(await repo.code(req.path, { useModules }));
+      res.setHeader('Content-Type', 'application/javascript')
+      res.send(await repo.code(req.path, { useModules }))
     }
     else {
-      res.sendFile(path.join(repo.dir, filename));
+      res.sendFile(path.join(repo.dir, filename))
     }
   }
   catch (error) {
-    res.status(500).send(error.message);
+    res.status(500).send(error.message)
   }
 
 }

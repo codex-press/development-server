@@ -106,7 +106,7 @@ export default class RepositoryEdit extends React.Component {
   // checks if it's a valid path on this computer
   checkPath() {
     let path = this.state.path;
-    api(`/api/path?path=${ encodeURIComponent(path) }`)
+    api('/api/path', { method: 'post', body: { path } })
     .then(validPath => {
       // already changed because they continued typing
       if (path !== this.state.path) return;

@@ -9,7 +9,7 @@ module.exports = {
     'react-hot-loader/patch',
     'webpack-dev-server/client?http://localhost:8001',
     'webpack/hot/only-dev-server',
-    './src/browser/index.js',
+    './src/client/index.js',
   ],
 
   output: {
@@ -29,7 +29,7 @@ module.exports = {
   devServer: {
     port: 8001,
     hot: true,
-    contentBase: __dirname + '/src/browser',
+    contentBase: __dirname + '/src/client',
     publicPath: '/',
     headers: {
       'Access-Control-Allow-Origin': '*',

@@ -36,8 +36,8 @@ test('Shows an invalid path', done => {
   const value = "/some/path"
   const c = shallow(<RepositoryEdit name="foo" />);
 
-  const request = nock('http://0.0.0.0')
-  .get(`/api/path?path=${ encodeURIComponent(value) }`)
+  nock('http://0.0.0.0')
+  .post('/api/path')
   .reply(200, 'false')
 
   c.find('input[name="path"]').simulate('change', { target: { value } });

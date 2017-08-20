@@ -11,9 +11,9 @@
     "webpack": "webpack-dev-server",
     "watch": "babel src/server -w -d build/server --ignore **/*.test.js",
     "clean": "rm -rf build/*",
-    "build": "npm-run-all clean build-server build-browser",
+    "build": "npm-run-all clean build-server build-client",
     "build-server": "babel src/server -d build/server --ignore **/*.test.js",
-    "build-browser": "webpack -p --config webpack.config.production.js",
+    "build-client": "webpack -p --config webpack.config.production.js",
     "test": "jest --watch",
     "test-once": "jest"
   },
@@ -40,6 +40,7 @@
   "license": "MIT",
   "dependencies": {
     "autoprefixer": "^6.5.0",
+    "babel-plugin-syntax-dynamic-import": "^6.18.0",
     "babel-plugin-transform-es2015-modules-systemjs": "^6.24.1",
     "babel-preset-env": "^1.6.0",
     "body-parser": "^1.15.1",

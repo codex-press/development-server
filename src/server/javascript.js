@@ -23,7 +23,10 @@ export default async function transpileJavascript(args) {
       sourceMaps: 'inline',
       sourceFileName: fullPath,
       presets: [[ require.resolve('babel-preset-env'), { modules: false }]],
-      plugins: [ require.resolve('babel-plugin-transform-es2015-modules-systemjs') ]
+      plugins: [
+        require.resolve('babel-plugin-transform-es2015-modules-systemjs'),
+        require.resolve('babel-plugin-syntax-dynamic-import'),
+      ]
     });
 
     return result.code;

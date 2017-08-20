@@ -88,7 +88,7 @@ export function impersonate(id) {
   return async (dispatch, getState) => {
     dispatch({ type: IMPERSONATE, id });
     let opts = { method: 'post', token: getState().getIn(['config','token']) };
-    let endpoint = env.apiOrigin + `/admin/accounts/${ id }/impersonate`;
+    let endpoint = env.apiOrigin + `/admin/accounts/${ id }/impersonate-token`;
     let { token } = await api(endpoint, opts);
     dispatch(receiveToken(token));
   }

@@ -4,10 +4,10 @@ const webpack = require('webpack');
 module.exports = {
   context: __dirname,
 
-  entry: './src/browser/index.js',
+  entry: './src/client/index.js',
 
   output: {
-    filename: 'browser.js',
+    filename: 'client.js',
     path: __dirname + '/build',
     publicPath: '/',
   },

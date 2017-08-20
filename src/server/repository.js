@@ -149,7 +149,7 @@ export default class Repository extends EventEmitter {
 
   loadConfig() {
 
-    this.ignoreMatchers = [ '**/_*' ];
+    this.ignoreMatchers = [ '**/_*', '**/*.test.js' ]
 
     this.config = {
       script: [],
@@ -157,8 +157,8 @@ export default class Repository extends EventEmitter {
     }
 
     try {
-      const json = fs.readFileSync(this.dir + '/package.json');
-      const config = JSON.parse(json).codex || {};
+      const json = fs.readFileSync(this.dir + '/package.json')
+      const config = JSON.parse(json).codex || {}
 
       const validStrArr = prop => {
         const valid = (
@@ -169,33 +169,33 @@ export default class Repository extends EventEmitter {
         );
 
         if (valid)
-          return config[prop];
+          return config[prop]
         else
           log.error(
             `"${ prop }" section of Codex configuration must be an array of strings`
           );
       }
 
-      this.config.script = validStrArr('script') || [];
-      this.config.ignore = validStrArr('ignore') || [];
+      this.config.script = validStrArr('script') || []
+      this.config.ignore = validStrArr('ignore') || []
       if (validStrArr('only'))
-        this.config.only = config.only;
+        this.config.only = config.only
     }
     catch (e) {
       if (e.code !== 'ENOENT')
-        log.error(e);
+        log.error(e)
 
-      return;
+      return
     }
 
     this.ignoreMatchers = this.config.ignore.reduce((ignore, i) => {
-      ignore.push(i);
+      ignore.push(i)
       // recursively ignore by default
-      ignore.push(i.endsWith('/') ? i + '**/*' : i + '/**/*');
-      return ignore;
-    }, this.ignoreMatchers);
+      ignore.push(i.endsWith('/') ? i + '**/*' : i + '/**/*')
+      return ignore
+    }, this.ignoreMatchers)
 
-    this.dedupeFiles();
+    this.dedupeFiles()
   }
 
 
@@ -207,6 +207,7 @@ export default class Repository extends EventEmitter {
       throw new Error('Not found: ' + assetPath);
 
     const cached = this.cache.get(assetPath);
+
     if (cached && !useModules)
       return cached;
 
@@ -293,12 +294,13 @@ export default class Repository extends EventEmitter {
     let file = this.files.find(f => f.filename === filename);
 
     if (file.path) {
-      this.cache.del(file.path);
+      const paths = this.findAffectedAssetPaths(filename)
+      paths.forEach(p => this.cache.del(p))
       this.emit('message', {
         repositoryName: this.name,
         event: 'change',
         filename,
-        paths: this.findAffectedAssetPaths(filename),
+        paths,
       });
     }
 

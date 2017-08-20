@@ -19,7 +19,7 @@ test('can load a page', async () => {
   const $ = cheerio.load(res.text);
 
   expect(res.status).toBe(200);
-  expect($('meta[name="codex:client-render"]').prop('content')).toBeDefined();
+  expect($('meta[name="codex:client_render"]').prop('content')).toBeDefined();
   expect($('meta[name="codex:content_origin"]').prop('content')).toBeDefined();
   expect($('meta[name="codex:codex_origin"]').prop('content')).toBeDefined();
   expect($('meta[name="codex:asset_origin"]').prop('content')).toBeDefined();
