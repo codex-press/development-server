@@ -4,7 +4,7 @@ export var codexHost = 'staging.codex.press';
 export var codexOrigin = 'https://' + codexHost;
 
 if (process.env.NODE_ENV === 'development') {
-  contentOrigin = 'http://localhost';
+  // contentOrigin = 'http://localhost';
   codexHost = 'localhost';
   codexOrigin = 'http://' + codexHost;
 }

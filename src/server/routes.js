@@ -25,8 +25,7 @@ export async function sendAsset(req, res, next) {
     res.setHeader('Access-Control-Allow-Origin', '*')
   }
 
-  if (!repo)
-    return proxyAsset(req, res);
+  if (!repo) return proxyAsset(req, res);
 
   let filename = repo.findFilename(req.path);
 
@@ -96,8 +95,7 @@ export function proxyAsset(req, res) {
     path: req.path,
   };
 
-  if (req.get('referer'))
-    options.headers = { 'Referer' : req.get('referer') };
+  if (req.get('referer')) options.headers = { 'Referer' : req.get('referer') }
 
   const pipe = codexResponse => {
 
@@ -110,34 +108,31 @@ export function proxyAsset(req, res) {
     ];
 
     const headers = Object.keys(codexResponse.headers).reduce((headers, h) => {
-      if (headerNames.includes(h)) headers[h] = codexResponse.headers[h];
-      return headers;
-    }, {});
+      if (headerNames.includes(h)) headers[h] = codexResponse.headers[h]
+      return headers
+    }, {})
 
-    res.writeHeader(codexResponse.statusCode, headers);
+    res.writeHeader(codexResponse.statusCode, headers)
 
-    let body = '';
-    codexResponse.on('data', chunk => body += chunk);
-
+    let body = ''
+    codexResponse.on('data', chunk => body += chunk)
 
     codexResponse.on('error', error => {
-      res.status(500).send(error.message);
-      log.error(error); 
-    });
+      res.status(500).send(error.message)
+      log.error(error)
+    })
 
     codexResponse.on('end', () => {
-
       if (codexResponse.statusCode === 200)
-        cache.set(req.path, { body, headers });
-
+        cache.set(req.path, { body, headers })
       res.write(body);
       res.end();
-    });
+    })
+
   }
 
   const sendError = error => {
-    res.status(500)
-      .send(`Cannot load asset "${ req.path }: ${ error.message }`)
+    res.status(500).send(`Cannot load asset "${ req.path }: ${ error.message }`)
   }
 
   https.request(options, pipe).on('error', sendError).end();
