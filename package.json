@@ -1,6 +1,6 @@
 {
   "name": "codex-server",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "description": "View articles on the Codex Press publishing platform with assets like Javascript, CSS and SVG files served from localhost.",
   "homepage": "https://codex.press/docs",
   "repository": "codex-press/development-server",
