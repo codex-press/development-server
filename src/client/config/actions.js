@@ -1,5 +1,5 @@
 import moment from 'moment';
-import { api } from '../utility';
+import { api, camelize } from '../utility';
 import * as env from '../env';
 
 import * as actions  from '../actions';
@@ -65,13 +65,12 @@ export function clearToken() {
 
 export function receiveToken(value) {
   return async dispatch => {
-    dispatch({ type: RECEIVE_TOKEN, value });
-    dispatch(setTokenStatus('valid'));
+    dispatch({ type: RECEIVE_TOKEN, value })
+    dispatch(setTokenStatus('valid'))
     const [ config, account ] = await Promise.all([
       dispatch(saveConfig()),
       dispatch(fetchAccount())
-    ]);
-    dispatch(actions.navigate(account.root_directory_url));
+    ])
   }
 }
 
@@ -232,7 +231,7 @@ export function fetchAccount() {
 export function receiveAccount(data) {
   return {
     type: RECEIVE_ACCOUNT,
-    data,
+    data: camelize(data),
   }
 }
 

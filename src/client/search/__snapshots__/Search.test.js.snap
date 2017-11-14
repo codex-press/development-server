@@ -4,7 +4,7 @@ exports[`Performs a search 1`] = `
 "<div className=\\"Search\\">
   <input autoFocus={true} value=\\"greenberg\\" onChange={[Function]} onKeyDown={[Function]} />
   <div className=\\"articles-container\\" onWheel={[Function]}>
-    <Article navigate={[Function]} select={[Function]} pathPrefix=\\"\\" id=\\"9079fe60-4a1a-492d-945d-18b0fcad6c76\\" title=\\"Russia's Dangerous New Vigilantism\\" slug=\\"subcontracting-political-violence\\" url=\\"/coda/lgbt-crisis/subcontracting-political-violence\\" published={true} metadata={{...}} classed_content={{...}} cover={{...}} selected={true} />
+    <Article navigate={[Function]} select={[Function]} pathPrefix=\\"\\" id=\\"9079fe60-4a1a-492d-945d-18b0fcad6c76\\" title=\\"Russia's Dangerous New Vigilantism\\" slug=\\"subcontracting-political-violence\\" url=\\"/coda/lgbt-crisis/subcontracting-political-violence\\" published={true} metadata={{...}} classedContent={{...}} cover={{...}} selected={true} />
   </div>
 </div>"
 `;
@@ -30,7 +30,7 @@ exports[`Uses domain to query results and display them 1`] = `
 "<div className=\\"Search\\">
   <input autoFocus={true} value=\\"greenberg\\" onChange={[Function]} onKeyDown={[Function]} />
   <div className=\\"articles-container\\" onWheel={[Function]}>
-    <Article navigate={[Function]} select={[Function]} pathPrefix=\\"/foo\\" id=\\"9079fe60-4a1a-492d-945d-18b0fcad6c76\\" title=\\"Russia's Dangerous New Vigilantism\\" slug=\\"subcontracting-political-violence\\" url=\\"/coda/lgbt-crisis/subcontracting-political-violence\\" published={true} metadata={{...}} classed_content={{...}} cover={{...}} selected={true} />
+    <Article navigate={[Function]} select={[Function]} pathPrefix=\\"/foo\\" id=\\"9079fe60-4a1a-492d-945d-18b0fcad6c76\\" title=\\"Russia's Dangerous New Vigilantism\\" slug=\\"subcontracting-political-violence\\" url=\\"/coda/lgbt-crisis/subcontracting-political-violence\\" published={true} metadata={{...}} classedContent={{...}} cover={{...}} selected={true} />
   </div>
 </div>"
 `;

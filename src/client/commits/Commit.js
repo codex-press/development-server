@@ -7,10 +7,10 @@ export default function Commit(props) {
 
   // This is likely because we got a message but have not fetched corresponding
   // data from the server yet
-  if (!props.repository_name)
+  if (!props.repositoryName)
     return null;
 
-  const repoLink = env.codexOrigin + '/edit/repos/' + props.repository_name
+  const repoLink = env.codexOrigin + '/edit/repos/' + props.repositoryName
   const commitLink = repoLink + '/' + props.sha
 
   const wheel = e => {
@@ -20,7 +20,7 @@ export default function Commit(props) {
 
   const scrollBottom = el => el && (el.scrollTop = el.scrollHeight)
 
-  const pct = Math.round(props.build_progress * 100) + '%'
+  const pct = Math.round(props.buildProgress * 100) + '%'
 
   return (
     <div className="Commit">
@@ -28,21 +28,21 @@ export default function Commit(props) {
       <div className="message">
 
         <a className="repository-name" href={ repoLink } target="_blank">
-          { props.repository_name }:
+          { props.repositoryName }:
         </a>
         {' '}
         <a className="commit-link" href={ commitLink } target="_blank">
           { props.message.trim() }
         </a>
         {' '}
-        { props.build_progress == 1 &&
+        { props.buildProgress == 1 &&
           <button className="small" onClick={ props.clear }>
             Clear
           </button>
         }
       </div>
 
-      { props.build_progress < 1 &&
+      { props.buildProgress < 1 &&
         <div className="progress-bar">
           <div className="bar" style={ { width: pct } }>
             <div className="stripes" />
@@ -53,9 +53,9 @@ export default function Commit(props) {
       }
 
       <pre onWheel={ wheel } ref={ scrollBottom }>
-        { props.build_output instanceof Array ? 
-          props.build_output.join('') :
-          props.build_output
+        { props.buildOutput instanceof Array ? 
+          props.buildOutput.join('') :
+          props.buildOutput
         }
       </pre>
 

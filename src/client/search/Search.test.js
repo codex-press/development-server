@@ -23,9 +23,9 @@ const articles = [
     "url": "/coda/lgbt-crisis/subcontracting-political-violence",
     "published": true,
     "metadata": {
-      "publication_date": "2016-01-18T05:00:00.000Z"
+      "publicationDate": "2016-01-18T05:00:00.000Z"
     },
-    "classed_content": {
+    "classedContent": {
       "byline": "Ilan Greenberg",
     },
     "cover": {

@@ -15,7 +15,7 @@ test('Renders nothing when it is loading', () => {
 test('Renders only alert container when not on localhost', () => {
   utility.isLocalhost = false;
   let props = {
-    ui: Map({ token_status: 'valid' }),
+    ui: Map({ tokenStatus: 'valid' }),
     config: Map({})
   };
   const c = shallow(<App { ...props } />);
@@ -30,7 +30,7 @@ test('Renders login when access token is invalid', () => {
   utility.isLocalhost = true;
 
   let props = {
-    ui: Map({ token_status: 'invalid' }),
+    ui: Map({ tokenStatus: 'invalid' }),
     config: Map({})
   };
   const c = shallow(<App { ...props } />);
@@ -42,7 +42,7 @@ test('Renders Nav and Modals when on localhost', () => {
   utility.isLocalhost = true;
 
   let props = {
-    ui: Map({ token_status: 'valid', modal: 'not sure' }),
+    ui: Map({ tokenStatus: 'valid', modal: 'not sure' }),
     config: Map({})
   };
   const c = shallow(<App { ...props } />);

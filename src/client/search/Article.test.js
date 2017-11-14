@@ -5,20 +5,20 @@ import Article from './Article';
 
 const article = {
   id: "18eb08bf-f921-4aa7-9624-5f03a4f0e3ca",
-  parent_id: "572773cc-00cb-4173-a0df-23c43f018e2f",
+  parentID: "572773cc-00cb-4173-a0df-23c43f018e2f",
   title: "Issac Asimov Say Some Sheez",
   slug: "asimov-steez",
   url: "/ricd/asimov-steez",
   published: false,
   metadata: {
     description: "Old white dude talkin bout da moon. Word.",
-    publication_date: ""
+    publicationDate: ""
   },
-  classed_content: {
+  classedContent: {
   },
-  updated_at: "2017-05-28T17:49:51.000Z",
-  created_at: "2016-12-12T22:44:16.276Z",
-  deleted_at: null,
+  updatedAt: "2017-05-28T17:49:51.000Z",
+  createdAt: "2016-12-12T22:44:16.276Z",
+  deletedAt: null,
   type: "Article",
   cover: {
     media: {

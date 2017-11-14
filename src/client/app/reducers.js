@@ -4,11 +4,11 @@ import * as actions from '../actions';
 
 
 let initialUI = {
-  token_status: null, // pending, rejected, changing, valid, invalid
+  tokenStatus: null, // pending, rejected, changing, valid, invalid
   modal: null,
   focus: document.hasFocus(),
-  build_output: 'centered',
-  article_changed: true,
+  buildOutput: 'centered',
+  articleChanged: true,
 };
 
 
@@ -24,13 +24,13 @@ export function ui(state = Map(initialUI), action) {
       return state.set('focus', false);
 
     case actions.ARTICLE_CHANGED:
-      return state.set('article_changed', true);
+      return state.set('articleChanged', true);
 
     case actions.RECEIVE_COMMIT:
-      return state.set('build_output', 'centered');
+      return state.set('buildOutput', 'centered');
 
     case actions.SET_BUILD_OUTPUT_STATE:
-      return state.set('build_output', action.value);
+      return state.set('buildOutput', action.value);
 
     case actions.TOGGLE_MODAL:
       if (state.get('modal') === action.value)
@@ -39,9 +39,8 @@ export function ui(state = Map(initialUI), action) {
         return state.set('modal', action.value)
 
     case actions.SET_TOKEN_STATUS:
-      // XXX
       // pending, rejected, changing, valid, invalid
-      return state.set('token_status', action.value);
+      return state.set('tokenStatus', action.value);
 
     default:
       return state;

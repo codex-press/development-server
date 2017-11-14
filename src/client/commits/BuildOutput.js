@@ -10,7 +10,7 @@ import Commit from './Commit'
 const mapStateToProps = state => {
   return {
     commits : state.get('commits'),
-    state: state.getIn(['ui','build_output']),
+    state: state.getIn(['ui','buildOutput']),
     modal: state.getIn(['ui','modal']),
   }
 }
@@ -39,6 +39,8 @@ export function BuildOutput(props) {
       props.setBuildOutputState('centered');
   }
 
+  console.log(commits)
+
   return (
     <div>
       <div className={ 'BuildOutput ' + state } onClick={ center }>
@@ -47,9 +49,9 @@ export function BuildOutput(props) {
           <div className="minimize" onClick={ minimize }>&times;</div>
         }
    
-        { commits.map(c =>
+        { commits.map((c, i) =>
           <Commit
-            key={ c.id }
+            key={ c.id || i }
             { ...c }
             clear={ () => props.clearCommit(c.id) }
           />)

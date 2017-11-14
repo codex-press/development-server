@@ -16,7 +16,7 @@ export function config(state = Map({}), action) {
     case actions.RECEIVE_CONFIG:
       let config = {
         domain: '',
-        disable_csp: false,
+        disableCSP: false,
         token: null,
         ...action.data
       }

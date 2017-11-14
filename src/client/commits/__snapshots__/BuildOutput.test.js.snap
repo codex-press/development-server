@@ -13,18 +13,18 @@ exports[`renders BuildOutput centered 1`] = `
       ×
     </div>
     <Commit
-      author_email="twfarnam@gmail.com"
-      author_name="Tim Farnam"
+      authorEmail="twfarnam@gmail.com"
+      authorName="Tim Farnam"
       branch="master"
-      build_output={null}
-      build_status="pending"
+      buildOutput={null}
+      buildStatus="pending"
       clear={[Function]}
-      created_at="2017-07-01T22:47:58.810Z"
+      createdAt="2017-07-01T22:47:58.810Z"
       id="004b6ed6-4106-42be-a975-89f7cb2ddfa6"
       message="changing this all around. open_iconic now just SVG
     "
       permission={true}
-      repository_id="f2e8b08a-aceb-415a-9ff8-3efe1bc5757f"
+      repositoryID="f2e8b08a-aceb-415a-9ff8-3efe1bc5757f"
       sha="16ad6335d2facd9a0f3e600cca9c77bf61017cb5"
     />
   </div>
@@ -41,18 +41,18 @@ exports[`renders BuildOutput minimal 1`] = `
     onClick={[Function]}
   >
     <Commit
-      author_email="twfarnam@gmail.com"
-      author_name="Tim Farnam"
+      authorEmail="twfarnam@gmail.com"
+      authorName="Tim Farnam"
       branch="master"
-      build_output={null}
-      build_status="pending"
+      buildOutput={null}
+      buildStatus="pending"
       clear={[Function]}
-      created_at="2017-07-01T22:47:58.810Z"
+      createdAt="2017-07-01T22:47:58.810Z"
       id="004b6ed6-4106-42be-a975-89f7cb2ddfa6"
       message="changing this all around. open_iconic now just SVG
     "
       permission={true}
-      repository_id="f2e8b08a-aceb-415a-9ff8-3efe1bc5757f"
+      repositoryID="f2e8b08a-aceb-415a-9ff8-3efe1bc5757f"
       sha="16ad6335d2facd9a0f3e600cca9c77bf61017cb5"
     />
   </div>

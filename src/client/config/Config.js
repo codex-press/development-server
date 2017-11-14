@@ -57,7 +57,7 @@ export function Config(props) {
   }
 
   const changeCSP = e => {
-    props.changeConfig('disable_csp', e.target.checked)
+    props.changeConfig('disableCSP', e.target.checked)
     props.reload();
   }
 
@@ -86,7 +86,7 @@ export function Config(props) {
       <label className="for-checkbox">
         <input
           type="checkbox"
-          checked={ !!props.config.get('disable_csp') }
+          checked={ !!props.config.get('disableCSP') }
           onChange={ changeCSP }
         />
         Disable the Content Security Policy {}

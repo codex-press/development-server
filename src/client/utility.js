@@ -115,3 +115,33 @@ export function domPath(el) {
 }
 
 
+export function camelize(obj) {
+
+  const isScalar = (
+    !obj ||
+    typeof obj !== 'object' ||
+    '[object RegExp]' == Object.prototype.toString.call(obj) ||
+    '[object Date]' == Object.prototype.toString.call(obj)
+  )
+
+  if (isScalar)
+    return obj
+  else if (Array.isArray(obj))
+    return obj.map(camelize)
+  else
+    return Object.keys(obj).reduce((acc, key) => {
+      acc[ camelCase(key) ] = camelize(obj[key])
+      return acc
+    }, { })
+}
+
+
+export function camelCase(string) {
+  return string
+    .replace(/[_.-](\w|$)/g, (_, x) => x.toUpperCase())
+    .replace('Url','URL')
+    .replace('Id','ID')
+    .replace('Html','HTML')
+}
+
+

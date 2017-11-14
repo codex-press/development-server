@@ -17,13 +17,13 @@ export default function Article(props) {
   srcset = srcset && srcset.filter(s => s.width <= 600);
   srcset = srcset && srcset.map(s => `${contentOrigin}${s.url} ${s.width}w`).join();
 
-  let cover = srcset && <img src={ media.base64_thumb } srcSet={ srcset } />
+  let cover = srcset && <img src={ media.base64Thumb } srcSet={ srcset } />
 
   let date;
-  if (props.metadata.publication_date)
-    date = moment(props.metadata.publication_date).format(dateFormat);
+  if (props.metadata.publicationDate)
+    date = moment(props.metadata.publicationDate).format(dateFormat);
 
-  let byline = props.classed_content.byline;
+  let byline = props.classedContent.byline;
 
   return (
     <div

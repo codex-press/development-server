@@ -191,7 +191,7 @@ export function sendHTML(req, res) {
     media-src    blob: ${ contentOrigin };
   `).replace(/\s+/g,' ');
 
-  if (!config.disable_csp)
+  if (!config.disableCSP)
     res.setHeader('Content-Security-Policy', csp);
 
   const data = {

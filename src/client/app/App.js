@@ -32,7 +32,7 @@ const mapDispatchToProps = {
 
 export function App(props) {
 
-  if (!props.ui.get('token_status'))
+  if (!props.ui.get('tokenStatus'))
     return null;
 
   if (!isLocalhost) {
@@ -43,13 +43,13 @@ export function App(props) {
     );
   }
 
-  if (props.ui.get('token_status') !== 'valid') {
+  if (props.ui.get('tokenStatus') !== 'valid') {
     return (
       <div className="App">
         <AlertContainer />
         <ModalContainer>
           <LoginPrompt
-            status={ props.ui.get('token_status') }
+            status={ props.ui.get('tokenStatus') }
             requestToken={ props.requestToken }
             cancel={ props.token ? () => props.setTokenStatus('valid') : null }
           />

@@ -17,7 +17,7 @@ export function writeConfig(newConfig) {
     version,
     token: newConfig.token,
     repositories: newConfig.repositories || {},
-    disable_csp: newConfig.disable_csp || false,
+    disableCSP: newConfig.disableCSP || false,
     domain: newConfig.domain || '',
   };
 
@@ -35,7 +35,7 @@ function readConfig() {
       version,
       token: null,
       repositories: {},
-      disable_csp: false,
+      disableCSP: false,
       domain: '',
     };
   }

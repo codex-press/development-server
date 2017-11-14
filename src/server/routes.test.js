@@ -36,12 +36,12 @@ test('can disable / enable Content-Security-Policy', async () => {
   let res = await request(app).get('/anything')
   expect(res.get('content-security-policy')).toBeDefined();
 
-  config.disable_csp = true;
+  config.disableCSP = true;
 
   res = await request(app).get('/anything')
   expect(res.get('content-security-policy')).toBeUndefined();
 
-  config.disable_csp = false;
+  config.disableCSP = false;
 });
 
 

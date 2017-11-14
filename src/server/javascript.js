@@ -18,7 +18,10 @@ export default async function transpileJavascript(args) {
 
   try {
 
-    let result = babel.transform(code, {
+    const env = process.env.NODE_ENV
+    process.env.NODE_ENV = 'development'
+
+    const result = babel.transform(code, {
       moduleId: assetPath,
       sourceMaps: 'inline',
       sourceFileName: fullPath,
@@ -26,8 +29,11 @@ export default async function transpileJavascript(args) {
       plugins: [
         require.resolve('babel-plugin-transform-es2015-modules-systemjs'),
         require.resolve('babel-plugin-syntax-dynamic-import'),
+        require.resolve('babel-plugin-transform-node-env-inline'),
       ]
     });
+
+    process.env.NODE_ENV = env
 
     return result.code;
   }
