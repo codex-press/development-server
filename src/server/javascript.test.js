@@ -29,14 +29,17 @@ test('can return JavaScript for modules', async () => {
 
 
 
-test('returns JavaScript with "script" option', async () => {
+test('transpiles JavaScript with "script" option', async () => {
   expect.assertions(1);
 
   const repo = await makeRepository('repository-script')
 
   const code = await repo.code('/test/script.js')
 
-  const expected = 'console.log(`I\'m not transpiled`);\n'
+  const expected = `(function () {
+  return console.log('transpiled');
+})();
+\/\/# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbIi9Vc2Vycy9vbWFyL2NvZGUvY29kZXhfcHJlc3MvZGV2ZWxvcG1lbnQtc2VydmVyL3Rlc3QvZml4dHVyZXMvcmVwb3NpdG9yeS1zY3JpcHQvc2NyaXB0LmpzIl0sIm5hbWVzIjpbImNvbnNvbGUiLCJsb2ciXSwibWFwcGluZ3MiOiJBQUFBLENBQUM7QUFBQSxTQUFNQSxRQUFRQyxHQUFSLENBQVksWUFBWixDQUFOO0FBQUEsQ0FBRCIsImZpbGUiOiJ1bmtub3duIiwic291cmNlc0NvbnRlbnQiOlsiKCgpID0+IGNvbnNvbGUubG9nKCd0cmFuc3BpbGVkJykpKClcbiJdfQ==`
 
   expect(code).toBe(expected);
 });

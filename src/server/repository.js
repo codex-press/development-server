@@ -8,7 +8,7 @@ import sane from 'sane';
 import micromatch from 'micromatch';
 
 import * as log from './log';
-import js from './javascript';
+import { transpileScript, transpileModule } from './javascript';
 import css from './css';
 
 
@@ -229,11 +229,20 @@ export default class Repository extends EventEmitter {
 
         let script = this.config.script.includes(asset.filename);
 
-        if (script || useModules) {
+        if (useModules) {
           return fs.readFile(path.join(this.dir, asset.filename), 'utf-8');
         }
+        else if (script) {
+          let code = await transpileScript({
+            assetPath,
+            filename: asset.filename,
+            directory: this.dir,
+          });
+          this.cache.set(assetPath, code);
+          return code;
+        }
         else {
-          let code = await js({
+          let code = await transpileModule({
             assetPath,
             filename: asset.filename,
             directory: this.dir,

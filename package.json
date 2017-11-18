@@ -42,6 +42,7 @@
     "autoprefixer": "^6.5.0",
     "babel-plugin-syntax-dynamic-import": "^6.18.0",
     "babel-plugin-transform-es2015-modules-systemjs": "^6.24.1",
+    "babel-plugin-transform-new-target": "^7.0.0-alpha.14",
     "babel-plugin-transform-node-env-inline": "^0.2.0",
     "babel-preset-env": "^1.6.0",
     "body-parser": "^1.15.1",

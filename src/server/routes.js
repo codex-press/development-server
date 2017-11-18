@@ -182,12 +182,14 @@ export function sendHTML(req, res) {
                  ws://${ req.get('Host') } ${ actionCableOrigin } 
                  https://performance.typekit.net;
     script-src   'unsafe-eval' 'self' ${ webpack }
-                 ${ codexOrigin } ${ contentOrigin } https://use.typekit.net;
+                 ${ codexOrigin } ${ contentOrigin } https://use.typekit.net
+                 https://connect.facebook.net;
     style-src    'unsafe-inline' 'self' ${ codexOrigin } ${ contentOrigin }
                  https://use.typekit.net https://fonts.googleapis.com;
     font-src     data: 'self' ${ contentOrigin } 
                  https://use.typekit.net https://fonts.gstatic.com;
-    img-src      blob: data: 'self' ${ contentOrigin } https://p.typekit.net;
+    img-src      blob: data: 'self' ${ contentOrigin } https://p.typekit.net
+                 https://www.facebook.com;
     media-src    blob: ${ contentOrigin };
   `).replace(/\s+/g,' ');
 
