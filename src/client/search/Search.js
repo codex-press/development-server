@@ -2,7 +2,7 @@ import React from 'react';
 import { connect } from 'react-redux';
 
 import Article from './Article';
-import { debounce, api } from '../utility';
+import { debounce, api, camelize } from '../utility';
 import * as env from '../env';
 import { apiError, toggleModal, navigate } from '../actions';
 
@@ -193,7 +193,8 @@ export class Search extends React.Component {
     if (this.pathPrefix()) opts.query.path = this.pathPrefix()
 
     try {
-      const articles = await api(env.apiOrigin + '/articles', opts);
+      let articles = await api(env.apiOrigin + '/articles', opts);
+      articles = camelize(articles)
 
       if (this.articlesContainer)
         this.articlesContainer.scrollTop = 0;
