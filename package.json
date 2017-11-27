@@ -11,9 +11,9 @@
     "webpack": "webpack-dev-server",
     "watch": "babel src/server -w -d build/server --ignore **/*.test.js",
     "clean": "rm -rf build/*",
-    "build": "npm-run-all clean build-server build-client",
-    "build-server": "babel src/server -d build/server --ignore **/*.test.js",
-    "build-client": "webpack -p --config webpack.config.production.js",
+    "build": "npm-run-all clean build:server build:client",
+    "build:server": "babel src/server -d build/server --ignore **/*.test.js",
+    "build:client": "webpack -p --config webpack.config.production.js",
     "test": "jest --watch",
     "test-once": "jest"
   },
