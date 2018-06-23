@@ -203,12 +203,12 @@ export function createCable() {
       }
     });
 
-    
+
     const changeIdentifier = {
       channel: 'ChangesChannel',
-      account: accountID,
+      accountID,
     }
-    
+
     cable.subscriptions.create(changeIdentifier, {
       received: data => {
 

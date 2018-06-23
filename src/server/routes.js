@@ -170,7 +170,7 @@ export function sendHTML(req, res) {
 
   if (process.env.NODE_ENV === 'development') {
     environment = 'development';
-    actionCableOrigin = 'ws://' + env.codexHost;
+    actionCableOrigin = 'ws://' + env.codexHost + ' wss://' + env.codexHost;
     script = 'http://localhost:8001/main.js';
     webpack = 'http://localhost:8001/';
     webpackWS = 'ws://localhost:8001/';
@@ -178,9 +178,9 @@ export function sendHTML(req, res) {
 
   let csp = (`
     default-src  'none';
-    connect-src  'self' ${ webpack } ${ webpackWS } ${ codexOrigin }
-                 ws://${ req.get('Host') } ${ actionCableOrigin } 
-                 https://performance.typekit.net;
+    connect-src  'self' ${ webpack } ${ webpackWS } ${ codexOrigin } 
+                 ${ contentOrigin } ws://${ req.get('Host') }
+                 ${ actionCableOrigin } https://performance.typekit.net;
     script-src   'unsafe-eval' 'self' ${ webpack }
                  ${ codexOrigin } ${ contentOrigin } https://use.typekit.net
                  https://connect.facebook.net;

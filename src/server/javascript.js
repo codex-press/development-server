@@ -27,6 +27,8 @@ export async function transpileScript(args) {
       sourceFileName: fullPath,
       presets: [[ require.resolve('babel-preset-env'), { modules: false }]],
       plugins: [
+        require.resolve('babel-plugin-transform-custom-element-classes'),
+        require.resolve('babel-plugin-transform-react-jsx'),
         require.resolve('babel-plugin-syntax-dynamic-import'),
         require.resolve('babel-plugin-transform-new-target'),
         require.resolve('babel-plugin-transform-node-env-inline'),
@@ -80,7 +82,9 @@ export async function transpileModule(args) {
       sourceFileName: fullPath,
       presets: [[ require.resolve('babel-preset-env'), { modules: false }]],
       plugins: [
+        require.resolve('babel-plugin-transform-custom-element-classes'),
         require.resolve('babel-plugin-transform-es2015-modules-systemjs'),
+        require.resolve('babel-plugin-transform-react-jsx'),
         require.resolve('babel-plugin-syntax-dynamic-import'),
         require.resolve('babel-plugin-transform-new-target'),
         require.resolve('babel-plugin-transform-node-env-inline'),
