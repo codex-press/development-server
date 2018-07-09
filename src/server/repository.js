@@ -52,10 +52,10 @@ export default class Repository extends EventEmitter {
 
   watch() {
     this.watcher = sane(this.dir, { ignored: /node_modules/ })
-    .on('error',  () => log.error('error', this.name))
-    .on('add',    path => this.add(path))
-    .on('change', path => this.change(path))
-    .on('delete', path => this.remove(path))
+      .on('error',  () => log.error('error', this.name))
+      .on('add',    path => this.add(path.replace(/\\/g, '/')))
+      .on('change', path => this.change(path.replace(/\\/g, '/')))
+      .on('delete', path => this.remove(path.replace(/\\/g, '/')))
   }
 
 

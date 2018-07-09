@@ -1,6 +1,6 @@
 {
   "name": "codex-server",
-  "version": "0.0.9",
+  "version": "0.0.10",
   "description": "View articles on the Codex Press publishing platform with assets like Javascript, CSS and SVG files served from localhost.",
   "homepage": "https://codex.press/docs",
   "repository": "codex-press/development-server",
@@ -72,6 +72,9 @@
     "yargs": "^8.0.2"
   },
   "devDependencies": {
+    "@fortawesome/fontawesome-svg-core": "^1.2.0-14",
+    "@fortawesome/free-solid-svg-icons": "^5.1.0-11",
+    "@fortawesome/react-fontawesome": "0.1.0-11",
     "actioncable": "^5.0.2",
     "babel-cli": "^6.24.1",
     "babel-jest": "^20.0.3",
@@ -94,7 +97,6 @@
     "react": "^15.5.4",
     "react-dom": "^15.5.4",
     "react-hot-loader": "^3.0.0-beta.7",
-    "react-icons": "^2.2.5",
     "react-redux": "^5.0.5",
     "react-select": "^1.0.0-rc.5",
     "react-test-renderer": "^15.5.4",
