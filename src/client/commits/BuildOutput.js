@@ -39,8 +39,6 @@ export function BuildOutput(props) {
       props.setBuildOutputState('centered');
   }
 
-  console.log(commits)
-
   return (
     <div>
       <div className={ 'BuildOutput ' + state } onClick={ center }>

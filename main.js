@@ -1,37 +1,46 @@
 #! /usr/bin/env node
 
-const cluster = require('cluster');
-const path = require('path');
-const selfupdate = require('selfupdate');
-const yargs = require('yargs-parser');
-const chalk = require('chalk');
+var cluster = require('cluster')
+var selfupdate = require('selfupdate')
+var yargs = require('yargs-parser')
+var chalk = require('chalk')
 
-const package = require('./package.json');
-const argv = require('yargs').argv
+var package = require('./package.json')
+var argv = require('yargs').argv
+
+var log = function(text) { console.log(chalk.magenta(text)) }
 
 if (cluster.isMaster) {
-  cluster.fork();
 
-  selfupdate.update(package, (error, version) => {
-    if (version === undefined)
-      console.log(chalk.magenta('Server up to date with version: ' + package.version));
-    else if (error)
-      console.log(chalk.magenta('Error updating package: ' + error.message));
-    else if (version !== undefined)
-      console.log(chalk.magenta('The package was updated to version: ' + version));
-  });
+  selfupdate.isUpdated(package, (error, isUpdated) => {
+    if (isUpdated)
+      cluster.fork()
+    else {
+      log('Updating to the latest version...')
+      selfupdate.update(package, (error, version) => {
+        if (error)
+          log('Error updating package: ' + error.message)
+        else if (version !== undefined)
+          log('The package was updated to version: ' + version)
+        cluster.fork()
+      })
+    }
+  })
 
   cluster.on('exit', function(worker, code, signal) {
-    cluster.fork();
-  });
+    cluster.fork()
+  })
+
 }
 
+
 if (cluster.isWorker) {
-  process.chdir(path.dirname(require.main.filename) + '/..')
-  process.env.NODE_ENV = 'production';
-  process.env.CP_PORT = argv.port;
-  process.env.CP_OPEN = (argv.open != false);
-  require('./build/server/app.js');
+  var path = require('path')
+  process.chdir(path.dirname(require.main.filename))
+  process.env.NODE_ENV = 'production'
+  process.env.CP_PORT = argv.port
+  process.env.CP_OPEN = (argv.open != false)
+  require('./build/server/app.js')
 }
 
 
