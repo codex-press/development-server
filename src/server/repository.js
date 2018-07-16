@@ -149,7 +149,7 @@ export default class Repository extends EventEmitter {
 
   loadConfig() {
 
-    this.ignoreMatchers = [ '**/_*', '**/*.test.js' ]
+    this.ignoreMatchers = [ '**/_*' ]
 
     this.config = {
       script: [],

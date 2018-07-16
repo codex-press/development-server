@@ -24,7 +24,8 @@ const render = () => ReactDOM.render(
   root,
   // styles must be added to shadow dom once this is mounted
   () => {
-    document.querySelectorAll('.webpack-styles').forEach(style => {
+    const styles = Array.from(document.querySelectorAll('.webpack-styles'))
+    styles.forEach(style => {
       root.querySelector('#styles-container').appendChild(style)
     });
   }

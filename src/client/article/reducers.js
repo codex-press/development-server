@@ -1,4 +1,4 @@
-import { Map, fromJS } from 'immutable';
+import { Map, List, fromJS } from 'immutable';
 
 import * as actions from '../actions';
 
@@ -34,7 +34,7 @@ export function repositories(state = Map({}), action) {
 }
 
 
-export function resolvedAssets(state = Map({}), action) {
+export function resolvedAssets(state = List([]), action) {
   switch (action.type) {
 
     case actions.RECEIVE_RESOLVED_ASSETS:

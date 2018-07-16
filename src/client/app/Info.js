@@ -4,7 +4,7 @@ import { connect } from 'react-redux';
 import moment from 'moment';
 import { openFileSystem } from '../utility';
 
-import * as env from '../env';
+import { codexOrigin, contentOrigin } from '../env';
 
 import './Info.less';
 
@@ -36,8 +36,8 @@ export function Info(props) {
       </div>
     );
   }
-
-  const editURL = env.codexOrigin + '/edit/article' + article.url;
+  
+  const editURL = codexOrigin + '/edit/article' + article.url;
 
   const classed_content = article.classed_content || {};
 
@@ -86,7 +86,7 @@ export function Info(props) {
           <b>Footer</b> { article.footer_path }
         </div>
       }
-    
+
       <b>External</b>
       { props.resolvedAssets.toJS().map(([ basePath, matched ]) => 
         <div className="asset-name" key={ basePath }>
@@ -113,7 +113,7 @@ export function Info(props) {
                         (github)
                       </a>
                       {' '}
-                      <a target="_blank" href={ env.contentOrigin + a.path }>
+                      <a target="_blank" href={ contentOrigin + a.path }>
                         (compiled)
                       </a>
                     </span>

@@ -7,7 +7,7 @@
   "main": "./main.js",
   "scripts": {
     "start": "npm-run-all --parallel watch webpack serve",
-    "serve": "sleep 10 && NODE_ENV=development nodemon build/server/app.js --watch ./build/server",
+    "serve": "NODE_ENV=development nodemon build/server/app.js --watch ./build/server",
     "webpack": "webpack-dev-server",
     "watch": "babel src/server -w -d build/server --ignore **/*.test.js",
     "clean": "rm -rf build/*",
