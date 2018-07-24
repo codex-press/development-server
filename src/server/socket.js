@@ -17,6 +17,10 @@ export default function start(server) {
 export function broadcast(message) {
   if (!ws) return;
   message = JSON.stringify(message);
-  ws.clients.map(client => client.send(message));
+  ws.clients.map(client => {
+    if (client.readyState === WebSocket.OPEN)
+      client.send(message)
+  })
 }
+
 

@@ -90,7 +90,7 @@ export function Config(props) {
           onChange={ changeCSP }
         />
         Disable the Content Security Policy {}
-        <a target="_blank" href="https://codex.press/docs/dev-server#csp">
+        <a target="_blank" href="https://codex.press/docs/development-server#csp">
           (help)
         </a>
       </label>

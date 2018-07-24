@@ -37,9 +37,6 @@ export async function sendAsset(req, res, next) {
   log.info(`serving: /${ repo.name }/${ filename }`);
 
   let useModules = (
-    // karma test runner gets raw (not transpiled) files. see config in 
-    // codex-press/parent repository
-    req.get('origin') === 'http://localhost:9876' ||
     req.get('referer') &&
     'modules' in url.parse(req.get('referer'), true).query
   )
